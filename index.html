@@ -1,161 +1,515 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Geometry-Driven Conceptual Processing — Whitepaper</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Whitepaper by Margaret Stokes describing a geometric, dual-mode language architecture for efficient and scalable AI reasoning." />
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #0b0c10;
-      color: #e5e7eb;
-      line-height: 1.6;
-    }
-    .wrapper {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 3rem 1.25rem 4rem;
-    }
-    h1 {
-      font-size: 1.9rem;
-      margin-bottom: 0.5rem;
-    }
-    h2 {
-      font-size: 1.1rem;
-      margin-top: 2.25rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #9ca3af;
-    }
-    p {
-      margin: 0.65rem 0;
-    }
-    .tagline {
-      color: #9ca3af;
-      margin-bottom: 1.5rem;
-    }
-    .box {
-      border: 1px solid #374151;
-      border-radius: 0.75rem;
-      padding: 1.25rem 1.4rem;
-      background: radial-gradient(circle at top left, #111827, #020617);
-      margin: 1.75rem 0;
-    }
-    .box strong {
-      display: block;
-      margin-bottom: 0.4rem;
-    }
-    .btn {
-      display: inline-block;
-      margin-top: 1rem;
-      padding: 0.9rem 1.6rem;
-      border-radius: 999px;
-      text-decoration: none;
-      font-weight: 600;
-      border: 1px solid #4b5563;
-      background: linear-gradient(135deg, #111827, #020617);
-      color: #e5e7eb;
-      transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
-      box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.15);
-    }
-    .btn:hover {
-      background: linear-gradient(135deg, #1f2937, #020617);
-      transform: translateY(-1px);
-      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.45);
-    }
-    .meta {
-      font-size: 0.9rem;
-      color: #9ca3af;
-      margin-top: 0.75rem;
-    }
-    .list {
-      margin: 0.4rem 0 0.4rem 1.2rem;
-      padding: 0;
-    }
-    .list li {
-      margin: 0.1rem 0;
-    }
-    .footer {
-      margin-top: 3rem;
-      font-size: 0.85rem;
-      color: #6b7280;
-      border-top: 1px solid #1f2933;
-      padding-top: 1.5rem;
-    }
-    a {
-      color: #93c5fd;
-    }
-    a:hover {
-      color: #bfdbfe;
-    }
-    @media (min-width: 768px) {
-      h1 {
-        font-size: 2.1rem;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Margaret Stokes — Epistemic Governance Infrastructure for LLMs</title>
+    <meta name="description" content="Deterministic admissibility control and audit-layer governance for regulated AI deployment. Research by Margaret Stokes.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #1a1a2e;
+            --ink-light: #3d3d5c;
+            --ink-muted: #6b6b8a;
+            --paper: #f8f7f4;
+            --paper-warm: #f0efe8;
+            --accent: #8b4513;
+            --accent-light: #a0522d;
+            --accent-glow: rgba(139, 69, 19, 0.08);
+            --rule: #d4d0c8;
+            --rule-light: #e8e5dd;
+            --serif: 'Crimson Pro', Georgia, serif;
+            --sans: 'DM Sans', system-ui, sans-serif;
+            --mono: 'JetBrains Mono', 'Consolas', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--serif);
+            background: var(--paper);
+            color: var(--ink);
+            line-height: 1.7;
+            font-size: 18px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .page {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 4rem 2rem 6rem;
+        }
+
+        /* Header */
+        header {
+            margin-bottom: 3.5rem;
+            padding-bottom: 2.5rem;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .author-name {
+            font-family: var(--sans);
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1.2rem;
+        }
+
+        h1 {
+            font-family: var(--serif);
+            font-size: 2.2rem;
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--ink);
+            margin-bottom: 0.8rem;
+        }
+
+        .subtitle {
+            font-family: var(--serif);
+            font-size: 1.1rem;
+            font-weight: 300;
+            font-style: italic;
+            color: var(--ink-muted);
+            line-height: 1.5;
+        }
+
+        /* Preprint block */
+        .preprint-block {
+            background: var(--paper-warm);
+            border-left: 3px solid var(--accent);
+            padding: 1.5rem 1.8rem;
+            margin-bottom: 3rem;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .preprint-block .label {
+            font-family: var(--sans);
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.6rem;
+        }
+
+        .preprint-block .title {
+            font-family: var(--serif);
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 0.3rem;
+            line-height: 1.4;
+        }
+
+        .preprint-block .citation {
+            font-size: 0.92rem;
+            color: var(--ink-muted);
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+
+        .preprint-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem 1.2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .preprint-links a {
+            font-family: var(--sans);
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .preprint-links a:hover {
+            color: var(--ink);
+        }
+
+        .preprint-links .pending {
+            font-family: var(--sans);
+            font-size: 0.82rem;
+            color: var(--ink-muted);
+        }
+
+        .preprint-meta {
+            font-family: var(--sans);
+            font-size: 0.78rem;
+            color: var(--ink-muted);
+        }
+
+        .preprint-meta a {
+            color: var(--ink-muted);
+            text-decoration: none;
+            border-bottom: 1px dotted var(--rule);
+            transition: color 0.2s;
+        }
+
+        .preprint-meta a:hover {
+            color: var(--accent);
+        }
+
+        /* Sections */
+        section {
+            margin-bottom: 2.8rem;
+        }
+
+        h2 {
+            font-family: var(--sans);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--rule-light);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--ink-light);
+        }
+
+        p strong {
+            color: var(--ink);
+            font-weight: 600;
+        }
+
+        /* Architecture diagram */
+        .architecture {
+            background: var(--ink);
+            color: #c8c8d4;
+            font-family: var(--mono);
+            font-size: 0.82rem;
+            line-height: 1.8;
+            padding: 1.8rem 2rem;
+            border-radius: 6px;
+            margin: 1.5rem 0;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .architecture .node {
+            color: #e8e8f0;
+            font-weight: 500;
+        }
+
+        .architecture .arrow {
+            color: #6b6b8a;
+        }
+
+        .architecture .highlight {
+            color: #d4956a;
+        }
+
+        /* Properties list */
+        .properties {
+            list-style: none;
+            margin: 1.5rem 0;
+        }
+
+        .properties li {
+            padding: 0.6rem 0;
+            padding-left: 1.4rem;
+            position: relative;
+            color: var(--ink-light);
+            font-size: 0.98rem;
+        }
+
+        .properties li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 1.05rem;
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .properties li strong {
+            font-family: var(--sans);
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--ink);
+        }
+
+        .governance-statement {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-top: 1.5rem;
+            font-style: italic;
+        }
+
+        /* Capabilities */
+        .capabilities {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .capabilities li {
+            padding: 0.45rem 0 0.45rem 1.4rem;
+            position: relative;
+            color: var(--ink-light);
+            font-size: 0.98rem;
+        }
+
+        .capabilities li::before {
+            content: '—';
+            position: absolute;
+            left: 0;
+            color: var(--rule);
+            font-weight: 300;
+        }
+
+        /* Domain tags */
+        .domains {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.2rem;
+        }
+
+        .domain-tag {
+            font-family: var(--sans);
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.35rem 0.85rem;
+            border: 1px solid var(--rule);
+            border-radius: 20px;
+            color: var(--ink-muted);
+            background: transparent;
+            transition: all 0.2s;
+        }
+
+        .domain-tag:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        /* Foundational research */
+        .foundational {
+            background: var(--paper-warm);
+            padding: 1.5rem 1.8rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+        }
+
+        .foundational .title {
+            font-family: var(--serif);
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--ink);
+            line-height: 1.4;
+            margin-bottom: 0.3rem;
+        }
+
+        .foundational .meta {
+            font-family: var(--sans);
+            font-size: 0.8rem;
+            color: var(--ink-muted);
+            margin-bottom: 0.8rem;
+        }
+
+        .foundational p {
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        /* Demo notice */
+        .demo-notice {
+            font-style: italic;
+            color: var(--ink-muted);
+            padding: 1rem 0;
+        }
+
+        /* Contact */
+        .contact-block {
+            border-top: 1px solid var(--rule);
+            padding-top: 2rem;
+            margin-top: 3rem;
+        }
+
+        .contact-name {
+            font-family: var(--serif);
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 0.2rem;
+        }
+
+        .contact-role {
+            font-family: var(--sans);
+            font-size: 0.85rem;
+            color: var(--ink-muted);
+            margin-bottom: 1rem;
+        }
+
+        .contact-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .contact-links a {
+            font-family: var(--sans);
+            font-size: 0.85rem;
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .contact-links a:hover {
+            color: var(--ink);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 3.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--rule-light);
+        }
+
+        footer p {
+            font-family: var(--sans);
+            font-size: 0.78rem;
+            color: var(--ink-muted);
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .page {
+                padding: 2.5rem 1.2rem 4rem;
+            }
+
+            h1 {
+                font-size: 1.7rem;
+            }
+
+            .preprint-block,
+            .foundational {
+                padding: 1.2rem 1.3rem;
+            }
+
+            .architecture {
+                padding: 1.2rem 1rem;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="wrapper">
-    <h1>Geometry-Driven Conceptual Processing</h1>
-    <p class="tagline">
-      A dual-mode language architecture for efficient, scalable, and semantically stable AI reasoning.
-    </p>
+    <div class="page">
+        <header>
+            <div class="author-name">Margaret Stokes</div>
+            <h1>Epistemic Governance Infrastructure for Large Language Models</h1>
+            <p class="subtitle">Deterministic admissibility control and audit-layer governance for regulated AI deployment.</p>
+        </header>
 
-    <div class="box">
-      <strong>Whitepaper by: Margaret Stokes</strong>
-      <p>Provisional patent filed. Licensing and acquisition inquiries welcome.</p>
-      <a class="btn" href="genesis_whitepaper.pdf" target="_blank" rel="noopener">
-        Download the Whitepaper (PDF)
-      </a>
-      <p class="meta">
-        Title: <em>Geometry-Driven Conceptual Processing: A Dual-Mode Language Architecture for Efficient and Scalable AI Reasoning</em><br />
-        Date: November 2025
-      </p>
+        <div class="preprint-block">
+            <div class="label">Preprint — 2026</div>
+            <div class="title">Epistemic Legitimacy as a Governance Layer for Large Language Models: Architecture and Implementation</div>
+            <div class="citation">Stokes, M. (2026). Preprint.</div>
+            <div class="preprint-links">
+                <a href="https://doi.org/10.5281/zenodo.18653120">📄 Zenodo (DOI)</a>
+                <span class="pending">📄 SSRN — forthcoming</span>
+                <span class="pending">📄 OSF — forthcoming</span>
+            </div>
+            <div class="preprint-meta">
+                Published February 2026 · ORCID: <a href="https://orcid.org/0009-0004-6422-4174">0009-0004-6422-4174</a>
+            </div>
+        </div>
+
+        <section>
+            <h2>Overview</h2>
+            <p>Large language models are increasingly deployed in medicine, finance, law, and government. In these domains, the critical failure is not fluency or intelligence — it is <strong>epistemic illegitimacy</strong>: the inability to determine whether a conclusion is permitted by the available evidence structure.</p>
+            <p>Current LLM systems default to collapsing ambiguity into a single answer, even when multiple interpretations remain structurally admissible. In regulated environments, this creates liability exposure.</p>
+            <p>Aurora-Lens introduces a governance layer that operates at the transport boundary between applications and LLM providers. It preserves parallel admissible interpretations, enforces constraint-based collapse, and produces a tamper-evident forensic audit trail suitable for regulatory scrutiny.</p>
+        </section>
+
+        <section>
+            <h2>Architecture</h2>
+            <div class="architecture">
+                <span class="node">Application</span><br>
+                <span class="arrow">↓</span><br>
+                <span class="highlight">Aurora-Lens (Governance Proxy)</span><br>
+                <span class="arrow">↓</span><br>
+                <span class="node">LLM Provider (OpenAI / Anthropic / Other)</span><br>
+                <span class="arrow">↓</span><br>
+                <span class="node">Tamper-Evident Audit Ledger</span>
+            </div>
+
+            <p><strong>Core properties:</strong></p>
+            <ul class="properties">
+                <li><strong>Parallel Epistemic Field (PEF)</strong> — Maintains multiple admissible interpretations simultaneously</li>
+                <li><strong>Admissibility Gating</strong> — Interpretive commitments must pass structural constraints</li>
+                <li><strong>Constraint-Forced Collapse Only</strong> — No heuristic or probabilistic resolution</li>
+                <li><strong>Refusal as a Correct Outcome</strong> — Suspended judgment is legitimate</li>
+                <li><strong>Deterministic Governance</strong> — Every decision is reproducible and auditable</li>
+            </ul>
+
+            <p class="governance-statement">Aurora-Lens does not replace large language models. It governs them.</p>
+        </section>
+
+        <section>
+            <h2>Governance Capabilities</h2>
+            <ul class="capabilities">
+                <li>Prevents premature diagnostic or advisory collapse</li>
+                <li>Preserves ambiguity where evidence does not eliminate alternatives</li>
+                <li>Enforces domain-specific admissibility policies</li>
+                <li>Produces hash-chained forensic audit records (AFL-JSONL-1 format)</li>
+                <li>Supports regulated AI deployment in high-liability environments</li>
+            </ul>
+
+            <div class="domains">
+                <span class="domain-tag">Healthcare</span>
+                <span class="domain-tag">Financial Services</span>
+                <span class="domain-tag">Legal Research</span>
+                <span class="domain-tag">Government & Defence</span>
+                <span class="domain-tag">GRC Platforms</span>
+            </div>
+        </section>
+
+        <section>
+            <h2>Foundational Research (2025)</h2>
+            <div class="foundational">
+                <div class="title">Geometry-Driven Conceptual Processing: A Dual-Mode Language Architecture for Efficient and Scalable AI Reasoning</div>
+                <div class="meta">Whitepaper · November 2025</div>
+                <p>This earlier work explores geometric semantic topology and structured conceptual processing as foundations for deterministic reasoning architectures.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Demonstration</h2>
+            <p class="demo-notice">A live demonstration of the Aurora-Lens governance proxy, including admissibility enforcement and forensic audit output, is available on request.</p>
+        </section>
+
+        <div class="contact-block">
+            <div class="contact-name">Margaret Stokes</div>
+            <div class="contact-role">Independent Researcher — AI Governance & Cognitive Architecture</div>
+            <div class="contact-links">
+                <a href="mailto:margaret.stokes.ai@gmail.com">📧 margaret.stokes.ai@gmail.com</a>
+                <a href="https://orcid.org/0009-0004-6422-4174">🔗 ORCID: 0009-0004-6422-4174</a>
+            </div>
+        </div>
+
+        <footer>
+            <p>This site provides a public access point to research on deterministic epistemic governance for large language model deployment in regulated environments.</p>
+        </footer>
     </div>
-
-    <h2>Overview</h2>
-    <p>
-      This whitepaper introduces a geometric, dual-mode language architecture that separates structural parsing from
-      semantic representation and replaces glyph-based tokenization with non-lexical conceptual units. Concepts are
-      organized within a layered semantic topology, allowing models to reason over meaning directly rather than over
-      surface-form sequences.
-    </p>
-
-    <p>
-      The result is a system that has the potential to deliver:
-    </p>
-    <ul class="list">
-      <li>Significant reductions in compute cost and inference latency</li>
-      <li>Improved containment of hallucination drift</li>
-      <li>Scalability that tracks conceptual density rather than token length</li>
-      <li>Smaller models with large-model reasoning capabilities</li>
-      <li>More robust multilingual and domain-general behavior</li>
-    </ul>
-
-    <h2>Intended Audience</h2>
-    <p>
-      This work is intended for researchers, architects, and decision-makers working on large language models,
-      inference optimization, and next-generation AI systems, particularly where GPU cost, scalability, and semantic
-      stability are critical constraints.
-    </p>
-
-    <h2>Contact</h2>
-    <p>
-      For licensing, acquisition, or technical discussion:
-      <br />
-      <strong>Email:</strong> <em>[your email address here]</em>
-    </p>
-
-    <div class="footer">
-      <p>
-        This page presents a summary and access point for the full whitepaper. For full technical and conceptual details,
-        please refer to the PDF.
-      </p>
-    </div>
-  </div>
 </body>
 </html>
