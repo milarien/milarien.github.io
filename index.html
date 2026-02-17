@@ -682,10 +682,8 @@
     <div class="container reveal">
         <div class="section-label">The Architecture</div>
         <h2 class="section-heading">Aurora-Lens sits between your application and the LLM. It governs what gets through.</h2>
-        <p class="section-body">
-        It does not replace the language model. It removes decision authority from the model.
-        The LLM generates candidate language; Aurora-Lens evaluates admissibility against persistent state and domain constraints, then enforces whether that output is permitted to commit.
-</p>
+        <p class="section-body">Aurora-Lens is a <em>deterministic admissibility layer</em> that sits outside the model. The LLM generates language; Aurora-Lens decides whether that language is permitted to reach the user. It evaluates outputs against persistent state and domain constraints, then enforces exactly one outcome: <strong>ADMIT</strong>, <strong>STOP</strong>, or <strong>REFUSE</strong> — with a tamper-evident audit record of the decision path.</p>
+
 
 
         <div class="arch-diagram">
