@@ -682,7 +682,11 @@
     <div class="container reveal">
         <div class="section-label">The Architecture</div>
         <h2 class="section-heading">Aurora-Lens sits between your application and the LLM. It governs what gets through.</h2>
-        <p class="section-body">It does not replace the language model. It determines whether the model's output is <em>permitted</em> — whether the conclusion is warranted by the evidence structure, or whether commitment should be refused.</p>
+        <p class="section-body">
+        It does not replace the language model. It removes decision authority from the model.
+        The LLM generates candidate language; Aurora-Lens evaluates admissibility against persistent state and domain constraints, then enforces whether that output is permitted to commit.
+</p>
+
 
         <div class="arch-diagram">
             <div class="arch-row">Your Application</div>
