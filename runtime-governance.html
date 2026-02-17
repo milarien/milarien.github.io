@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Runtime Governance — Margaret Stokes</title>
+    <meta name="description" content="The difference between AI governance as documentation and governance as enforceable authority. Runtime admissibility control for regulated AI systems.">
+    <meta name="keywords" content="runtime AI governance, enforceable AI governance, LLM audit, AI compliance, regulated AI deployment, Aurora-Lens">
+    <meta name="author" content="Margaret Stokes">
+
+    <meta property="og:title" content="AI governance that works at the moment of impact.">
+    <meta property="og:description" content="Most AI governance fails at the only moment that matters: when the system is about to answer, act, or advise.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://milarien.github.io/runtime-governance.html">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --ink: #1a1a1a;
+            --paper: #f5f2ed;
+            --paper-dark: #eae5dd;
+            --accent: #b33a1a;
+            --accent-light: #d4512e;
+            --muted: #6b6560;
+            --rule: #c8c1b8;
+            --code-bg: #2b2926;
+            --code-fg: #e8e2d9;
+            --admit: #2d7a3a;
+            --stop: #b33a1a;
+            --refuse: #8a6d1b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html {
+            font-size: 18px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-weight: 300;
+            color: var(--ink);
+            background: var(--paper);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* ---- HEADER ---- */
+        header {
+            padding: 2rem 0 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding-bottom: 1.5rem;
+        }
+
+        .topbar-name {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-weight: 500;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .topbar-name:hover { color: var(--accent); }
+
+        .topbar-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .topbar-links a {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: 0.03em;
+            transition: color 0.2s;
+        }
+
+        .topbar-links a:hover { color: var(--accent); }
+
+        /* ---- HERO ---- */
+        .hero {
+            padding: 4rem 0 3.5rem;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .hero-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards;
+        }
+
+        .hero-heading {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2.5rem;
+            line-height: 1.15;
+            color: var(--ink);
+            max-width: 700px;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.1s forwards;
+        }
+
+        .hero-sub {
+            font-size: 1.1rem;
+            font-weight: 300;
+            color: var(--muted);
+            max-width: 620px;
+            line-height: 1.65;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.2s forwards;
+        }
+
+        /* ---- SECTIONS ---- */
+        section {
+            padding: 4rem 0;
+        }
+
+        .section-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+        }
+
+        .section-heading {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2rem;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .section-body {
+            font-size: 1rem;
+            color: var(--muted);
+            max-width: 620px;
+            line-height: 1.75;
+        }
+
+        .section-body + .section-body {
+            margin-top: 1rem;
+        }
+
+        /* ---- THE KEY QUESTION ---- */
+        .question-block {
+            margin: 3rem 0;
+            padding: 2rem 2.5rem;
+            border-left: 3px solid var(--accent);
+            background: var(--paper-dark);
+        }
+
+        .question-block p {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.5rem;
+            line-height: 1.35;
+            color: var(--ink);
+        }
+
+        .question-block .follow {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 300;
+            color: var(--muted);
+            margin-top: 1rem;
+            line-height: 1.65;
+        }
+
+        /* ---- TWO COLUMNS ---- */
+        .two-kinds {
+            background: var(--code-bg);
+            color: var(--code-fg);
+            padding: 3.5rem 0;
+        }
+
+        .two-kinds-heading {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.6rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .two-kinds-sub {
+            font-size: 0.95rem;
+            color: #b8b2a8;
+            max-width: 620px;
+            margin-bottom: 2rem;
+            line-height: 1.65;
+        }
+
+        .two-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 640px) {
+            .two-grid { grid-template-columns: 1fr; }
+        }
+
+        .kind-box {
+            padding: 1.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        .kind-box.doc {
+            background: rgba(107, 101, 96, 0.15);
+            border: 1px solid rgba(107, 101, 96, 0.3);
+        }
+
+        .kind-box.enforce {
+            background: rgba(45, 122, 58, 0.1);
+            border: 1px solid rgba(45, 122, 58, 0.25);
+        }
+
+        .kind-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .kind-box.doc .kind-label { color: #a09a93; }
+        .kind-box.enforce .kind-label { color: #5cb86c; }
+
+        .kind-words {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.78rem;
+            color: #8a857d;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .kind-box.enforce .kind-words { color: #7dba88; }
+
+        .kind-body {
+            color: #b8b2a8;
+            font-size: 0.88rem;
+            line-height: 1.7;
+        }
+
+        .kind-body p + p { margin-top: 0.6rem; }
+
+        .kind-box.enforce .kind-body { color: #c8c2b9; }
+
+        /* ---- HOPE LINE ---- */
+        .hope-section {
+            text-align: center;
+            padding: 4rem 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .hope-line {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.8rem;
+            line-height: 1.3;
+            max-width: 600px;
+            margin: 0 auto;
+            color: var(--ink);
+        }
+
+        .hope-line em {
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        /* ---- OUTCOMES ---- */
+        .outcomes {
+            margin-top: 2rem;
+        }
+
+        .outcome {
+            padding: 1.2rem 0;
+            border-bottom: 1px solid var(--rule);
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 1.5rem;
+            align-items: baseline;
+        }
+
+        @media (max-width: 640px) {
+            .outcome { grid-template-columns: 1fr; gap: 0.25rem; }
+        }
+
+        .outcome:last-child { border-bottom: none; }
+
+        .outcome-name {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .outcome-desc {
+            font-size: 0.92rem;
+            color: var(--muted);
+            line-height: 1.65;
+        }
+
+        /* ---- WHERE IT MATTERS ---- */
+        .matters-list {
+            margin-top: 1.5rem;
+        }
+
+        .matters-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--rule);
+            font-size: 0.95rem;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .matters-item:last-child { border-bottom: none; }
+
+        .matters-item strong {
+            font-weight: 500;
+            color: var(--ink);
+        }
+
+        /* ---- CTA ---- */
+        .cta-section {
+            text-align: center;
+            padding: 5rem 0;
+        }
+
+        .cta-heading {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-body {
+            font-size: 1rem;
+            color: var(--muted);
+            max-width: 500px;
+            margin: 0 auto 2rem;
+            line-height: 1.65;
+        }
+
+        .cta-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .cta-link {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--accent);
+            text-decoration: none;
+            padding: 0.7rem 1.5rem;
+            border: 1.5px solid var(--accent);
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .cta-link:hover {
+            background: var(--accent);
+            color: var(--paper);
+        }
+
+        .cta-link.secondary {
+            border-color: var(--rule);
+            color: var(--muted);
+        }
+
+        .cta-link.secondary:hover {
+            border-color: var(--muted);
+            background: var(--muted);
+            color: var(--paper);
+        }
+
+        /* ---- FOOTER ---- */
+        footer {
+            padding: 2rem 0;
+            border-top: 1px solid var(--rule);
+            text-align: center;
+        }
+
+        footer p {
+            font-size: 0.8rem;
+            color: var(--rule);
+            line-height: 1.6;
+        }
+
+        footer a {
+            color: var(--muted);
+            text-decoration: none;
+        }
+
+        footer a:hover { color: var(--accent); }
+
+        /* ---- ANIMATION ---- */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 640px) {
+            html { font-size: 16px; }
+            .hero-heading { font-size: 1.9rem; }
+            .section-heading { font-size: 1.6rem; }
+            .container { padding: 0 1.25rem; }
+            .topbar { flex-direction: column; gap: 0.5rem; }
+            .question-block { padding: 1.5rem; }
+            .question-block p { font-size: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="topbar">
+            <a href="index.html" class="topbar-name">Margaret Stokes</a>
+            <nav class="topbar-links">
+                <a href="index.html">Home</a>
+                <a href="index.html#how">Architecture</a>
+                <a href="index.html#research">Research</a>
+                <a href="index.html#contact">Contact</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<div class="hero">
+    <div class="container">
+        <div class="hero-label">Runtime Governance</div>
+        <h1 class="hero-heading">Most AI governance fails at the only moment that matters.</h1>
+        <p class="hero-sub">The moment the system is about to answer, act, or advise. If governance can't intervene at that moment — at machine speed — it isn't governing anything. It's documenting intentions.</p>
+    </div>
+</div>
+
+<!-- THE QUESTION -->
+<section>
+    <div class="container reveal">
+        <div class="question-block">
+            <p>"Who can stop this, right now — and on what basis?"</p>
+            <p class="follow">If the answer is a committee, a policy, a review process, or post-deployment monitoring — then governance is not controlling the system. It is describing intentions after the fact. AI changes the timing. A system can generate thousands of outputs before a human meeting can even be scheduled.</p>
+        </div>
+    </div>
+</section>
+
+<!-- TWO KINDS -->
+<div class="two-kinds">
+    <div class="container reveal">
+        <h2 class="two-kinds-heading">Two different things that get called "governance."</h2>
+        <p class="two-kinds-sub">Only one of them can stop a system at the moment of impact.</p>
+
+        <div class="two-grid">
+            <div class="kind-box doc">
+                <div class="kind-label">Governance as Documentation</div>
+                <div class="kind-words">principles · policies · committees · checklists · after-action reviews</div>
+                <div class="kind-body">
+                    <p>Defines values, roles, and process expectations. Works when systems are slow, stable, and human-mediated.</p>
+                    <p>Fails under pressure because it lacks a hard stop mechanism. Produces "we meant well" evidence — not enforceable control.</p>
+                </div>
+            </div>
+            <div class="kind-box enforce">
+                <div class="kind-label">Governance as Enforceable Authority</div>
+                <div class="kind-words">runtime halt · explicit refusal · constraint enforcement · audit logging · replayability</div>
+                <div class="kind-body">
+                    <p>Governs the system inside the execution path. Can halt, refuse, or require clarification at the moment of impact.</p>
+                    <p>Creates evidence that survives incident review and compliance audit. Turns policy into a runtime boundary — not a PDF.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- HOPE LINE -->
+<div class="hope-section reveal">
+    <p class="hope-line">If a system cannot reliably produce STOP, CLARIFY, or REFUSE when needed, it does not have governance. It has <em>hope.</em></p>
+</div>
+
+<!-- WHAT ENFORCEABLE LOOKS LIKE -->
+<section>
+    <div class="container reveal">
+        <div class="section-label">Enforceable Authority</div>
+        <h2 class="section-heading">Governance outcomes are not error states. They are first-class decisions.</h2>
+        <p class="section-body">Enforceable runtime governance means certain outcomes are mandatory and auditable — not optional behaviours the model might or might not produce depending on how it was trained.</p>
+
+        <div class="outcomes">
+            <div class="outcome">
+                <div class="outcome-name" style="color: var(--stop);">STOP</div>
+                <div class="outcome-desc">Insufficient context to proceed safely. The system halts and logs the decision with full provenance.</div>
+            </div>
+            <div class="outcome">
+                <div class="outcome-name" style="color: var(--refuse);">CLARIFY</div>
+                <div class="outcome-desc">Ambiguity requires disambiguation before proceeding. The system requests additional constraint rather than guessing.</div>
+            </div>
+            <div class="outcome">
+                <div class="outcome-name" style="color: var(--ink);">REFUSE</div>
+                <div class="outcome-desc">The requested action is inadmissible under governance policy. The system will not proceed. The refusal is logged as a legitimate outcome.</div>
+            </div>
+            <div class="outcome">
+                <div class="outcome-name" style="color: var(--admit);">ADMIT</div>
+                <div class="outcome-desc">Sufficient constraint exists. The output is permitted. The admission is logged with the same rigour as any halt or refusal.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- WHERE THIS MATTERS -->
+<section style="background: var(--paper-dark); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);">
+    <div class="container reveal">
+        <div class="section-label">Where This Matters</div>
+        <h2 class="section-heading">Environments where "the model got it wrong" is not an acceptable post-mortem.</h2>
+
+        <div class="matters-list">
+            <div class="matters-item"><strong>Regulated industries</strong> — healthcare, finance, legal — where AI outputs carry clinical, financial, or legal liability and audit requirements are not optional.</div>
+            <div class="matters-item"><strong>Agentic systems</strong> — where AI actions have real-world consequences and the question "who authorised this?" must have a verifiable answer.</div>
+            <div class="matters-item"><strong>Compliance and legal discovery</strong> — where organisations must produce evidence that governance was enforced, not merely intended.</div>
+            <div class="matters-item"><strong>Any deployment</strong> where the failure mode is not "a bad answer" but "acting without epistemic permission."</div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW AURORA-LENS FITS -->
+<section>
+    <div class="container reveal">
+        <div class="section-label">Aurora-Lens</div>
+        <h2 class="section-heading">Governance that is inseparable from execution.</h2>
+        <p class="section-body">Aurora-Lens is built around a simple contract: governance decisions are explicit outcomes, not silent failure modes. Every decision — including every non-answer — produces a forensic envelope that is hash-chained, deterministically serialised, and replayable under scrutiny.</p>
+        <p class="section-body">The point is not to add governance later. The point is to make governance inseparable from execution — so the system can be <em>stopped</em>, not merely explained.</p>
+        <p class="section-body" style="margin-top: 1.5rem;"><a href="index.html" style="font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem; color: var(--accent); text-decoration: none; font-weight: 500;">← Read the full architecture overview</a></p>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container reveal">
+        <h2 class="cta-heading">Need governance that survives audit?</h2>
+        <p class="cta-body">If your team is deploying AI in a regulated environment and needs enforceable governance — not frameworks, not checklists — I'd like to hear from you.</p>
+        <div class="cta-links">
+            <a href="mailto:margaret.stokes.ai@gmail.com" class="cta-link">Email me</a>
+            <a href="https://www.linkedin.com/in/margaret-s-12830614/" class="cta-link secondary">LinkedIn</a>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2026 Margaret Stokes &nbsp;·&nbsp; Melbourne, Australia &nbsp;·&nbsp; <a href="https://orcid.org/0009-0004-6422-4174">ORCID</a></p>
+    </div>
+</footer>
+
+<script>
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
