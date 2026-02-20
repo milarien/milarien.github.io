@@ -77,6 +77,8 @@ Independent Researcher – Melbourne, Australia
 
 *Live governance demonstration available on request.*
 
+<a href="https://doi.org/10.5281/zenodo.18705897"><img src="https://zenodo.org/badge/1159947200.svg" alt="DOI"></a>
+
 ---
 
 *This repository acts as an index to current research and implementation work.*
