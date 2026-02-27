@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writing — Margaret Stokes</title>
+    <meta name="description" content="Poetry by Margaret Stokes. Love, loss, longing. Written across several decades.">
+    <meta name="author" content="Margaret Stokes">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --ink: #1a1a1a;
+            --paper: #f5f2ed;
+            --paper-dark: #eae5dd;
+            --accent: #b33a1a;
+            --muted: #6b6560;
+            --rule: #c8c1b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { font-size: 18px; scroll-behavior: smooth; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-weight: 300;
+            color: var(--ink);
+            background: var(--paper);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* ---- HEADER ---- */
+        header {
+            padding: 2rem 0 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding-bottom: 1.5rem;
+        }
+
+        .topbar-name {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-weight: 500;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+        }
+
+        .topbar-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .topbar-links a {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: 0.03em;
+            transition: color 0.2s;
+        }
+
+        .topbar-links a:hover { color: var(--accent); }
+        .topbar-links a.active { color: var(--ink); }
+
+        /* ---- HERO ---- */
+        .hero {
+            padding: 4rem 0 3rem;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .hero-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            font-weight: 400;
+            line-height: 1.2;
+            color: var(--ink);
+            margin-bottom: 1.25rem;
+        }
+
+        .hero-note {
+            max-width: 540px;
+            font-size: 0.95rem;
+            color: var(--muted);
+            line-height: 1.8;
+        }
+
+        /* ---- POEMS ---- */
+        .poem-collection {
+            padding: 3.5rem 0 5rem;
+        }
+
+        .collection-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 3rem;
+        }
+
+        .poem {
+            max-width: 500px;
+            padding: 2.5rem 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .poem:last-child {
+            border-bottom: none;
+        }
+
+        .poem-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 1.25rem;
+        }
+
+        .poem-dedication {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-style: italic;
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 1.25rem;
+        }
+
+        .poem-text {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.05rem;
+            line-height: 2;
+            color: var(--ink);
+        }
+
+        .poem-note {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-style: italic;
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 1.5rem;
+            line-height: 1.8;
+            border-left: 2px solid var(--rule);
+            padding-left: 1rem;
+        }
+
+        /* ---- FOOTER ---- */
+        footer {
+            border-top: 1px solid var(--rule);
+            padding: 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        footer p {
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        footer a {
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer a:hover { color: var(--accent); }
+
+        @media (max-width: 600px) {
+            .topbar { flex-direction: column; gap: 1rem; }
+            footer { flex-direction: column; gap: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="topbar">
+            <a href="/" class="topbar-name">Margaret Stokes</a>
+            <nav class="topbar-links">
+                <a href="/governance/">Governance</a>
+                <a href="/writing/" class="active">Writing</a>
+                <a href="/australia/">Australia</a>
+                <a href="/about/">About</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="container">
+
+        <section class="hero">
+            <p class="hero-label">Writing</p>
+            <h1>Poetry.</h1>
+            <p class="hero-note">
+                Written across several decades. Love, loss, longing,
+                and the distance between what we feel and what we can say.
+            </p>
+        </section>
+
+        <div class="poem-collection">
+            <p class="collection-label">Poems</p>
+
+            <div class="poem">
+                <p class="poem-text">
+                    So many levels<br>
+                    of communication<br>
+                    weaving through<br>
+                    our conversation<br>
+                    Did I hear<br>
+                    the right ones<br>
+                    did you hear<br>
+                    what I<br>
+                    didn't say<br>
+                    are we any closer<br>
+                    now<br>
+                    or are the words<br>
+                    taking us<br>
+                    further apart
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    You and I<br>
+                    touching through<br>
+                    a barbed wire fence<br>
+                    skirting round<br>
+                    the danger zone<br>
+                    of future days<br>
+                    and present loves<br>
+                    Will we ever<br>
+                    find a way through<br>
+                    to us?
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    I am<br>
+                    an intelligent<br>
+                    warm<br>
+                    caring woman.<br>
+                    I can move with ease<br>
+                    amongst paupers<br>
+                    and kings<br>
+                    comfortable<br>
+                    in either world<br>
+                    and all those<br>
+                    in between<br>
+                    Yet with you<br>
+                    I am gauche,<br>
+                    na&iuml;ve<br>
+                    unsure<br>
+                    of what to do<br>
+                    what to say<br>
+                    how to move<br>
+                    how to be.<br>
+                    Scared that<br>
+                    just me<br>
+                    won't be enough<br>
+                    for you,<br>
+                    and yet<br>
+                    just me<br>
+                    is all I have<br>
+                    to give.
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    When it's time<br>
+                    for you<br>
+                    to leave<br>
+                    please<br>
+                    remember<br>
+                    to tell me<br>
+                    before you go<br>
+                    Give me the chance<br>
+                    to hold you<br>
+                    to love you<br>
+                    to smile<br>
+                    with you<br>
+                    for you<br>
+                    one last time
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Little tiny sparrows<br>
+                    chittering near our feet<br>
+                    picking up the chips<br>
+                    you scatter round.<br>
+                    <br>
+                    Whenever there are sparrows<br>
+                    I will always think of you<br>
+                    and be thankful<br>
+                    for the love<br>
+                    that we have found
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    I can feel<br>
+                    the ice anger<br>
+                    building<br>
+                    deep within me.<br>
+                    I know its danger<br>
+                    the destruction<br>
+                    I can wield<br>
+                    with its unleashing<br>
+                    Is the fire<br>
+                    of my love<br>
+                    strong enough<br>
+                    to melt my anger<br>
+                    before it's bitter cold<br>
+                    touches you?
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    A small, cold<br>
+                    uncertainty<br>
+                    creeps in<br>
+                    under my blanket<br>
+                    of calm acceptance.<br>
+                    Perhaps your<br>
+                    long silence<br>
+                    really means<br>
+                    you're gone.<br>
+                    But no!<br>
+                    You wouldn't leave<br>
+                    without saying<br>
+                    goodbye&hellip;<br>
+                    Would you?
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Sometimes &mdash;<br>
+                    in the middle<br>
+                    of the night &mdash;<br>
+                    I lie awake<br>
+                    and wonder<br>
+                    if I'm ever<br>
+                    going to see you<br>
+                    again.<br>
+                    I try to catch<br>
+                    your image<br>
+                    but you have become<br>
+                    strangely unreal &mdash;<br>
+                    like the ghost<br>
+                    of Christmas past.
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    How can you say<br>
+                    'I love you'<br>
+                    then turn to the arms<br>
+                    of someone else<br>
+                    Is love a game<br>
+                    a word to be offered<br>
+                    like a sweet bribe<br>
+                    to a child<br>
+                    or a reward<br>
+                    to a pet<br>
+                    for a trick well-done<br>
+                    Does loving me<br>
+                    mean nothing<br>
+                    to you?
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Never stay<br>
+                    for fear<br>
+                    of leaving<br>
+                    or causing pain.<br>
+                    Goodbyes<br>
+                    always hurt<br>
+                    but they heal<br>
+                    cleanly.<br>
+                    The prison built<br>
+                    by dishonest love<br>
+                    inflicts a jagged<br>
+                    wound<br>
+                    that poisons<br>
+                    all the good<br>
+                    and scars<br>
+                    the heart<br>
+                    for life.
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Are you going<br>
+                    to leave me<br>
+                    take my heart<br>
+                    and go?<br>
+                    Are you like<br>
+                    too many others<br>
+                    I have known?<br>
+                    I pray<br>
+                    that you're not<br>
+                    that you,<br>
+                    who are most<br>
+                    precious of all<br>
+                    to me,<br>
+                    have the courage<br>
+                    to step out &mdash;<br>
+                    take the chance<br>
+                    on my<br>
+                    strange loving
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Now the distance<br>
+                    between us<br>
+                    is physical<br>
+                    I am no longer<br>
+                    tormented<br>
+                    by your absent<br>
+                    nearness<br>
+                    I can listen<br>
+                    for other sounds<br>
+                    besides your returning<br>
+                    hear other things<br>
+                    than your silence<br>
+                    see things<br>
+                    other than<br>
+                    the lack of you<br>
+                    The missing<br>
+                    is easier<br>
+                    a hundred miles<br>
+                    away
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    'How are you?' they all ask<br>
+                    'Fine, very well' I reply<br>
+                    and they nod their heads<br>
+                    and smile, accepting my words<br>
+                    at face value &mdash; never looking<br>
+                    to see if they're mirrored<br>
+                    in my eyes &mdash; not hearing<br>
+                    the echoing emptiness of my voice<br>
+                    But what else is there now<br>
+                    except the social lie of 'fine'<br>
+                    How can you answer<br>
+                    'There is a brick in my stomach<br>
+                    My heart seems to have forgotten<br>
+                    how to beat, my spirit has fallen<br>
+                    to the bottom of a bottomless pit<br>
+                    and the sun can't shine<br>
+                    on me anymore since you took<br>
+                    your smile away'<br>
+                    So I keep saying 'Fine'<br>
+                    'Very well' from behind the painted<br>
+                    mask that looks just like me
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    I wanted to write<br>
+                    a poem<br>
+                    one perfect poem,<br>
+                    that could say<br>
+                    all that I feel.<br>
+                    The love,<br>
+                    the pain,<br>
+                    the joy<br>
+                    and the loss.<br>
+                    One that would gather<br>
+                    all the memories together<br>
+                    and hold them<br>
+                    always.<br>
+                    One perfect poem<br>
+                    that would speak gently<br>
+                    of camellias and sparrows,<br>
+                    of dreams lost and found,<br>
+                    of love.<br>
+                    But the words are broken,<br>
+                    shattered and empty<br>
+                    like my heart,<br>
+                    and how can I write<br>
+                    a perfect poem<br>
+                    with broken words<br>
+                    and lost love.
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Battle worn<br>
+                    and weary<br>
+                    I sit here<br>
+                    resigned<br>
+                    to its ending<br>
+                    emptied of feeling<br>
+                    as one always is<br>
+                    when the fight<br>
+                    is over<br>
+                    and the pain<br>
+                    is just beginning.<br>
+                    Waiting is useless<br>
+                    activity futile<br>
+                    nothing has meaning<br>
+                    beyond the tiredness<br>
+                    So I sit here<br>
+                    resigned<br>
+                    to whatever<br>
+                    comes next
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    I took the long road<br>
+                    into the mountains tonight<br>
+                    Their lonely splendour<br>
+                    eased my pain<br>
+                    The cool, quiet darkness<br>
+                    embraced my emptiness,<br>
+                    welcomed my cold sorrow<br>
+                    making it its own<br>
+                    encompassing me and<br>
+                    replenishing my desolate heart<br>
+                    with its deep, dark peace.<br>
+                    I said goodbye to you<br>
+                    in the solitude of the mountains<br>
+                    then, gentled and soothed<br>
+                    I turned for home<br>
+                    and met a fairyland of lights<br>
+                    welcoming me back
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Everything ends.<br>
+                    Time always comes<br>
+                    when you reach<br>
+                    the limit<br>
+                    and have to say<br>
+                    goodbye.<br>
+                    Did you know<br>
+                    when that time comes<br>
+                    even swings<br>
+                    cry
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    We had us a good time<br>
+                    &mdash; almost the best<br>
+                    We loved us a lifetime<br>
+                    lived it with zest<br>
+                    We had us a summer<br>
+                    a spring and a fall<br>
+                    and now it's the winter<br>
+                    &mdash; it comes to us all.<br>
+                    We rode on a rainbow<br>
+                    swang on a smile<br>
+                    shared a forever<br>
+                    in such a short while<br>
+                    And now it's all over<br>
+                    I'll lay it to rest<br>
+                    but we had us a good time<br>
+                    &mdash; almost the best.
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Ah, life is cold<br>
+                    now I've given up<br>
+                    my dream<br>
+                    and the sun<br>
+                    seems to have lost<br>
+                    its will to shine<br>
+                    The shimmering<br>
+                    silver starlight<br>
+                    has turned its back<br>
+                    on me<br>
+                    and moonlight<br>
+                    has become<br>
+                    a mockery<br>
+                    It seems that light<br>
+                    is only<br>
+                    for those who dare<br>
+                    to dream<br>
+                    so here I stand<br>
+                    in cold and empty<br>
+                    dark
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Sleeping<br>
+                    is a good activity<br>
+                    for me right now.<br>
+                    I might even<br>
+                    be tempted to say<br>
+                    the best.<br>
+                    It's not that I'm tired<br>
+                    it's just that<br>
+                    I miss you<br>
+                    &mdash; your absence<br>
+                    wearies me<br>
+                    and drains my life<br>
+                    of colour<br>
+                    and energy.<br>
+                    When I sleep<br>
+                    you can be with me<br>
+                    in my dreams<br>
+                    and if you're not really there<br>
+                    it's okay<br>
+                    because you see<br>
+                    I'm not awake to notice.
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    The day will dawn<br>
+                    when I will wake<br>
+                    and you<br>
+                    won't be on my mind<br>
+                    The night will come<br>
+                    when I'll lay down to sleep<br>
+                    without aching<br>
+                    for your arms around me<br>
+                    There will be a day<br>
+                    when your memory<br>
+                    won't torment me<br>
+                    when I won't<br>
+                    watch for you<br>
+                    wait for you<br>
+                    hope for you to come<br>
+                    Till then<br>
+                    I'll smile on outside<br>
+                    (just like you asked)<br>
+                    and live for the day<br>
+                    that is not full<br>
+                    of the absence of you
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Strange place this.<br>
+                    Not the end,<br>
+                    that's been and gone.<br>
+                    Not the beginning,<br>
+                    that's yet to come.<br>
+                    Somewhere<br>
+                    in between instead<br>
+                    &mdash; a vacuum<br>
+                    of waiting
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    I am a dream keeper<br>
+                    finding dreams<br>
+                    deep within the drifters<br>
+                    that enter my life<br>
+                    and holding them<br>
+                    within me.<br>
+                    Safely I keep them<br>
+                    and slowly<br>
+                    gently<br>
+                    bring them to light<br>
+                    adding strength<br>
+                    and encouragement,<br>
+                    until they find the dream,<br>
+                    reclaim it,<br>
+                    and leave.<br>
+                    <br>
+                    I am a dream keeper<br>
+                    for others<br>
+                    Is there no-one<br>
+                    who will keep my dream<br>
+                    for me?
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    I'm tired of people<br>
+                    that enter my life<br>
+                    staying only long enough<br>
+                    for me to love them<br>
+                    then leaving.<br>
+                    I want someone<br>
+                    who will come and stay<br>
+                    long enough<br>
+                    for me to love them<br>
+                    and then keep on<br>
+                    staying.
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Walking<br>
+                    on the beach today<br>
+                    I found<br>
+                    a shell<br>
+                    and a cuttlefish<br>
+                    Not the biggest<br>
+                    perhaps not the best<br>
+                    but just right<br>
+                    for me.
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    One day<br>
+                    you'll come<br>
+                    I wonder<br>
+                    will I know you<br>
+                    when you do<br>
+                    or will you be<br>
+                    a stranger<br>
+                    wearing the mask<br>
+                    of the man<br>
+                    I love
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Looking<br>
+                    at the blossom today<br>
+                    I noticed<br>
+                    that petals don't fall<br>
+                    They drift<br>
+                    and glide<br>
+                    flowing from the tree<br>
+                    to softly, gently<br>
+                    meet the earth
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    I wonder<br>
+                    if you understood<br>
+                    the frantic gaiety<br>
+                    in my voice<br>
+                    for what<br>
+                    it really was<br>
+                    Did you see<br>
+                    behind it<br>
+                    the desperate longing<br>
+                    for your touch,<br>
+                    the urgent desire<br>
+                    for your presence<br>
+                    all overwhelmed<br>
+                    by the compelling need<br>
+                    not to inflict<br>
+                    my pain<br>
+                    on you
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Midnight chimed<br>
+                    and my borrowed magic<br>
+                    had to be given back<br>
+                    All is now<br>
+                    as it was before.<br>
+                    You are with her<br>
+                    and I am alone<br>
+                    But in my heart<br>
+                    the magic still lives<br>
+                    we are together<br>
+                    and midnight<br>
+                    never comes
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Who are you<br>
+                    to disturb<br>
+                    my balance<br>
+                    throw my heart<br>
+                    off centre<br>
+                    turn my desire<br>
+                    to the thought<br>
+                    of you<br>
+                    your kiss<br>
+                    your touch<br>
+                    Who are you<br>
+                    to walk into<br>
+                    my life<br>
+                    when you have<br>
+                    no room in yours
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    See me!<br>
+                    Shatter the mirror<br>
+                    of your illusion<br>
+                    break through<br>
+                    the image<br>
+                    of your fear<br>
+                    See me!<br>
+                    Woman<br>
+                    in all my glory<br>
+                    Woman<br>
+                    in all my<br>
+                    despair
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    I went to the beach today<br>
+                    It was quiet and peaceful<br>
+                    There was nobody there.<br>
+                    I thought of you<br>
+                    and how nice it would be<br>
+                    if you were here too.<br>
+                    Today<br>
+                    I really missed you.
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    I love you<br>
+                    You are<br>
+                    the sun<br>
+                    the moon<br>
+                    the stars<br>
+                    of my being.<br>
+                    I love you<br>
+                    can't you taste it<br>
+                    in my words<br>
+                    sense it<br>
+                    in my touch<br>
+                    feel it<br>
+                    in my voice.
+                </p>
+                <p class="poem-note">For me, love and memory are never only thoughts or feelings. They are color, taste, sound, and touch &mdash; sometimes all at once. When I write of tasting a voice or feeling the color of longing, it's not metaphor. It's just the truth of how I live.</p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Sadness<br>
+                    has coloured<br>
+                    your eyes<br>
+                    a sorrowful<br>
+                    shade<br>
+                    of brown<br>
+                    and painted<br>
+                    your face<br>
+                    a mask<br>
+                    of grey.<br>
+                    How I wish<br>
+                    the colours<br>
+                    of my heart<br>
+                    could fill<br>
+                    your life's palette<br>
+                    and paint you<br>
+                    happy again
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Standing here<br>
+                    before you<br>
+                    laughing<br>
+                    joking<br>
+                    praying<br>
+                    you don't see<br>
+                    the blood<br>
+                    trickling<br>
+                    from my pierced<br>
+                    heart<br>
+                    yet hoping<br>
+                    that you care<br>
+                    enough<br>
+                    to notice
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    You walked<br>
+                    through my life<br>
+                    smashing barriers<br>
+                    opening doors<br>
+                    pulling feelings<br>
+                    and dreams<br>
+                    from my heart<br>
+                    that had been<br>
+                    locked away<br>
+                    behind hurt and pain<br>
+                    for a lifetime<br>
+                    You made me feel<br>
+                    love<br>
+                    just by being you<br>
+                    I only wish<br>
+                    that you<br>
+                    had stopped walking<br>
+                    long enough<br>
+                    to close the doors<br>
+                    behind you
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    I'm spinning at the edge<br>
+                    of the darkness<br>
+                    waiting for the end<br>
+                    of my dream<br>
+                    I'm holding on tight<br>
+                    to the music and light<br>
+                    and the dancers<br>
+                    who don't even know my name<br>
+                    There's a shadow in my heart<br>
+                    that won't release me<br>
+                    it's a blackness<br>
+                    that is just the shape of you<br>
+                    and it's dragging me down<br>
+                    and twisting me round<br>
+                    and it knows that you'll be<br>
+                    gone from tonight<br>
+                    So I'll keep holding on<br>
+                    let the music be strong<br>
+                    let the dancers come and spin me away<br>
+                    to a place in the night<br>
+                    filled with music and light<br>
+                    and dancers<br>
+                    that are dancing my pain
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    I thought<br>
+                    that when I<br>
+                    knew<br>
+                    you didn't<br>
+                    want me<br>
+                    my heart<br>
+                    would be<br>
+                    broken<br>
+                    I'm happy<br>
+                    to say<br>
+                    that it's not.<br>
+                    It is merely<br>
+                    destroyed
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    You called me to you<br>
+                    with a song of love<br>
+                    A siren song<br>
+                    luring me away<br>
+                    from my peaceful world<br>
+                    with promises of sharing<br>
+                    happiness and caring<br>
+                    of future days<br>
+                    with you<br>
+                    I danced to the rhythm<br>
+                    of your music<br>
+                    and my heart was caught<br>
+                    by the beauty of your song<br>
+                    I came to you<br>
+                    answering your siren call<br>
+                    only to find<br>
+                    the music had died<br>
+                    the song was over<br>
+                    and you<br>
+                    were gone.
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    You move in my mind<br>
+                    like a half remembered<br>
+                    fairy tale<br>
+                    a dream<br>
+                    that was never quite caught<br>
+                    on waking<br>
+                    You slip in and out<br>
+                    of my thoughts<br>
+                    weaving your essence<br>
+                    through the strands<br>
+                    of my mind.<br>
+                    Never leaving<br>
+                    never staying<br>
+                    always there<br>
+                    forever gone<br>
+                    My heart moves<br>
+                    eternally with you.
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Guess it was<br>
+                    just one of<br>
+                    those days<br>
+                    when the blues<br>
+                    hit<br>
+                    and life seems<br>
+                    like it'll never<br>
+                    be straight again<br>
+                    Just one of<br>
+                    those days<br>
+                    when the grey<br>
+                    closes in<br>
+                    and losing you<br>
+                    seems to<br>
+                    hurt
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    words<br>
+                    fall as bricks<br>
+                    tones<br>
+                    become cement<br>
+                    eyes<br>
+                    avoid contact<br>
+                    and so the wall<br>
+                    rises<br>
+                    higher and higher<br>
+                    trapping<br>
+                    murdering<br>
+                    the love<br>
+                    that gave so much<br>
+                    leaving only<br>
+                    two walled in strangers<br>
+                    running<br>
+                    from the twilight zone<br>
+                    into the safety<br>
+                    of the past
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    A puppy died<br>
+                    last night<br>
+                    brutally<br>
+                    thoughtlessly<br>
+                    struck down<br>
+                    by a demon<br>
+                    named<br>
+                    'man'
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Watching you<br>
+                    washing nappies<br>
+                    collecting toys<br>
+                    listening to your conversation<br>
+                    on childhood diseases<br>
+                    and door to door makeup<br>
+                    I see no likeness<br>
+                    no similarity<br>
+                    to my friend.
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-dedication">For Bobbi, who always laughed loudest</p>
+                <p class="poem-text">
+                    Laughing lady<br>
+                    strutting<br>
+                    on the stage<br>
+                    of life.<br>
+                    I wonder<br>
+                    how many understand<br>
+                    the depth<br>
+                    that is<br>
+                    buried<br>
+                    beneath<br>
+                    your mask.
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    In all honesty<br>
+                    I have to say<br>
+                    I'm not sure what<br>
+                    I feel for you<br>
+                    I care for you<br>
+                    I hurt for you<br>
+                    but I present myself<br>
+                    with all barriers closed<br>
+                    each time I see you,<br>
+                    or talk to you<br>
+                    I'm afraid of you<br>
+                    and I don't know why<br>
+                    Something that I sense in you<br>
+                    could hurt me badly.<br>
+                    I fear you.
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Do me a kindness<br>
+                    love of my life<br>
+                    let my heart<br>
+                    go free<br>
+                    say you don't<br>
+                    want me<br>
+                    say you never will<br>
+                    break my heart<br>
+                    shatter my dreams<br>
+                    in one painful moment<br>
+                    and let me hurt<br>
+                    so that I can<br>
+                    live again
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    I write<br>
+                    to remember<br>
+                    I write<br>
+                    to forget<br>
+                    I write<br>
+                    so that the words<br>
+                    stop screaming<br>
+                    in my head<br>
+                    so the feelings<br>
+                    can escape<br>
+                    before I reach<br>
+                    overload<br>
+                    My writing<br>
+                    is my floodgate<br>
+                    my release<br>
+                    my freedom
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Throw coins<br>
+                    Read &#8216;I Ching&#8217;<br>
+                    Is it any answer<br>
+                    or just a straw<br>
+                    to clutch<br>
+                    in the face<br>
+                    of this tearing<br>
+                    uncertainty.<br>
+                    Hexagram 61
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    You and I<br>
+                    separated<br>
+                    by oceans<br>
+                    of words<br>
+                    aimed<br>
+                    so carefully<br>
+                    at each other<br>
+                    and cutting<br>
+                    only ourselves
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Looking at you<br>
+                    tonight<br>
+                    a million miles away<br>
+                    across the table<br>
+                    How I yearned<br>
+                    to hold you<br>
+                    caress you<br>
+                    love you<br>
+                    but the table<br>
+                    was too wide<br>
+                    for me to cross<br>
+                    and all I had left<br>
+                    was looking at you<br>
+                    a million miles away
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Life is nothing<br>
+                    but a passing moment<br>
+                    and mankind<br>
+                    its greatest mockery<br>
+                    The ultimate joke
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    I gave her<br>
+                    my dreams<br>
+                    She threw them<br>
+                    aside<br>
+                    crushed and<br>
+                    broken<br>
+                    You picked them up<br>
+                    and gave them<br>
+                    back to me<br>
+                    whole<br>
+                    and complete<br>
+                    held together<br>
+                    with the essence<br>
+                    of you
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    It's okay now<br>
+                    I've flipped<br>
+                    into overload<br>
+                    Nothing<br>
+                    can touch me<br>
+                    where I am now<br>
+                    all feeling is<br>
+                    locked in stasis<br>
+                    trapped forever<br>
+                    awaiting your touch
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    My last glimpse of you was<br>
+                    through the darkened window of a bus<br>
+                    A blurred image my final memory<br>
+                    As you went out of my life.<br>
+                    What was on your mind<br>
+                    As I faded from your view<br>
+                    Was it memories of me?<br>
+                    My mind was filled with you.
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Token woman.<br>
+                    Toy.<br>
+                    Accepted<br>
+                    allowed room<br>
+                    in your life<br>
+                    only as long as I<br>
+                    feel nothing<br>
+                    be nothing<br>
+                    stay in my place<br>
+                    live only as much<br>
+                    as you allow<br>
+                    Shut out<br>
+                    cast aside<br>
+                    when I show you<br>
+                    me
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Pressure<br>
+                    bearing down<br>
+                    burying me.<br>
+                    Is this how<br>
+                    Atlas felt<br>
+                    when all<br>
+                    the world<br>
+                    refused<br>
+                    to believe<br>
+                    in him?
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Strange pain this<br>
+                    not like others<br>
+                    I have felt<br>
+                    I don't know<br>
+                    whether<br>
+                    to count it good<br>
+                    or bad<br>
+                    you see<br>
+                    it only hurts<br>
+                    when I smile
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Every poet<br>
+                    needs<br>
+                    inspiration,<br>
+                    like wood<br>
+                    as fuel<br>
+                    for a fire,<br>
+                    wind<br>
+                    to lift wings<br>
+                    in flight.<br>
+                    You<br>
+                    are my inspiration<br>
+                    Without you<br>
+                    my words<br>
+                    dry up<br>
+                    crumble to dust<br>
+                    and vanish
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Today is not a good day<br>
+                    My heart forgot<br>
+                    to read the news<br>
+                    and so waited<br>
+                    for your arrival<br>
+                    I tried to tell it<br>
+                    you weren't coming<br>
+                    that you'd left<br>
+                    forever<br>
+                    but it wouldn't believe me<br>
+                    and so broke again<br>
+                    waiting for you.<br>
+                    I hate it<br>
+                    when my heart<br>
+                    won't listen to me
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Too much to say<br>
+                    Too few words<br>
+                    Want you in my arms<br>
+                    But your armour<br>
+                    Is cold steel<br>
+                    jagged edged<br>
+                    Can't close off<br>
+                    You go too deep<br>
+                    Don't really want to<br>
+                    Near you<br>
+                    Is wholeness<br>
+                    Away from you<br>
+                    Is the dark night sky<br>
+                    Devoid of stars
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-title">Colors</p>
+                <p class="poem-text">
+                    I am with you now<br>
+                    Do you feel me?<br>
+                    Go deep inside<br>
+                    To my bright pink love<br>
+                    And a lilac rose<br>
+                    That is me<br>
+                    Deep inside you<br>
+                    Blending with<br>
+                    Your cool blue<br>
+                    Earth brown<br>
+                    Core of fire red<br>
+                    Colors dancing<br>
+                    Through me<br>
+                    Through you<br>
+                    Flowing between us<br>
+                    Silver coated<br>
+                    Color links<br>
+                    Always together<br>
+                    In love
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    There's magic in you<br>
+                    and treasure<br>
+                    hidden deep<br>
+                    Don't throw it away<br>
+                    on just anyone<br>
+                    Wait for the person<br>
+                    who'll take the time<br>
+                    to look<br>
+                    and bring it<br>
+                    slowly<br>
+                    and gently<br>
+                    to the surface<br>
+                    Ties built quickly<br>
+                    break quickly<br>
+                    There's a lot<br>
+                    to be said<br>
+                    for slow and gentle<br>
+                    easy does it<br>
+                    loving
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    &#8216;Is there anybody there?&#8217; she cried<br>
+                    Knocking on the silent door<br>
+                    &#8216;Anyone at all inside<br>
+                    To help me end this bitter war?&#8217;<br>
+                    <br>
+                    An answer came from deep within<br>
+                    &#8216;We&#8217;re here, if you can find the key<br>
+                    It&#8217;s hidden where no one has been<br>
+                    For many silent centuries.&#8217;<br>
+                    <br>
+                    &#8216;And who can find it?&#8217; she begged them tell<br>
+                    &#8216;Hidden in this ancient place?&#8217;<br>
+                    &#8216;Only you,&#8217; the answer fell<br>
+                    Echoing through empty space.<br>
+                    <br>
+                    &#8216;And is it far or is it near<br>
+                    the key that will unlock this door?&#8217;<br>
+                    &#8216;It&#8217;s neither and it&#8217;s both we fear.&#8217;<br>
+                    And then they answered her no more.
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Singer on the stage<br>
+                    your voice is tearing at my heart<br>
+                    and your music<br>
+                    beats a pathway to my soul<br>
+                    every note you sing burns deeper<br>
+                    till I'm lost inside the sound<br>
+                    and your voice is all<br>
+                    that holds me to the ground<br>
+                    <br>
+                    And it hurts to know you're leaving<br>
+                    and you won't be back again<br>
+                    you've got somewhere waiting for you<br>
+                    somewhere else<br>
+                    and there's nothing I can do<br>
+                    but keep drowning in your music<br>
+                    dancing to the rhythm<br>
+                    of the ache of loving you<br>
+                    <br>
+                    So singer on the stage<br>
+                    keep on tearing at my heart<br>
+                    hold me tightly<br>
+                    with the magic of your voice<br>
+                    let me lose myself inside it<br>
+                    like I'm lost in loving you<br>
+                    deep inside the rhythm<br>
+                    that is burning in my soul<br>
+                    <br>
+                    And it hurts to know you're leaving<br>
+                    and I won't see you again<br>
+                    there's a lady waiting for you<br>
+                    back at home<br>
+                    and there's nothing I can do<br>
+                    but keep drowning in your music<br>
+                    dancing to the rhythm<br>
+                    of the ache of loving you
+                </p>
+            </div>
+
+            <div class="poem">
+                <p class="poem-text">
+                    Why is it the memory<br>
+                    of your body close to mine<br>
+                    lives on inside my heart<br>
+                    when you are gone<br>
+                    <br>
+                    Why is it that the sunlight<br>
+                    throws a shadow shaped like you<br>
+                    beside me<br>
+                    when I'm walking on my own<br>
+                    <br>
+                    Why is it that this love is growing deeper<br>
+                    Why is it that my heart won't set me free<br>
+                    I'm living with a love that's gone forever<br>
+                    and the memory still keeps on haunting me<br>
+                    <br>
+                    Why is it the crashing<br>
+                    of the waves upon the beach<br>
+                    remind me<br>
+                    of the living in your eyes<br>
+                    <br>
+                    Why is it that your image<br>
+                    the face I loved so true<br>
+                    still lingers in my dreams<br>
+                    night after night<br>
+                    <br>
+                    Why is it that this love is growing deeper<br>
+                    Why is it that my heart won't set me free<br>
+                    I'm living with a love that's gone forever<br>
+                    and the memory still keeps on hurting me.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<footer>
+    <div class="container">
+        <p>Margaret Stokes &mdash; <a href="mailto:margaret.stokes.ai@gmail.com">margaret.stokes.ai@gmail.com</a></p>
+        <p><a href="/">milamba.com</a> &mdash; online since 1997</p>
+    </div>
+</footer>
+
+</body>
+</html>
