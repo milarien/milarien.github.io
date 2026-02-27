@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About — Margaret Stokes</title>
+    <meta name="description" content="Margaret Stokes. Philosopher, poet, systems analyst, AI governance researcher. Working with computers since 1978.">
+    <meta name="author" content="Margaret Stokes">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --ink: #1a1a1a;
+            --paper: #f5f2ed;
+            --paper-dark: #eae5dd;
+            --accent: #b33a1a;
+            --muted: #6b6560;
+            --rule: #c8c1b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { font-size: 18px; scroll-behavior: smooth; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-weight: 300;
+            color: var(--ink);
+            background: var(--paper);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* ---- HEADER ---- */
+        header {
+            padding: 2rem 0 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding-bottom: 1.5rem;
+        }
+
+        .topbar-name {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-weight: 500;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+        }
+
+        .topbar-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .topbar-links a {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: 0.03em;
+            transition: color 0.2s;
+        }
+
+        .topbar-links a:hover { color: var(--accent); }
+        .topbar-links a.active { color: var(--ink); }
+
+        /* ---- HERO ---- */
+        .hero {
+            padding: 4rem 0 3rem;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .hero-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            font-weight: 400;
+            line-height: 1.2;
+            color: var(--ink);
+            margin-bottom: 0;
+        }
+
+        /* ---- BODY ---- */
+        .body-text {
+            padding: 3rem 0;
+            max-width: 640px;
+        }
+
+        .body-text p {
+            font-size: 1rem;
+            line-height: 1.85;
+            color: var(--ink);
+            margin-bottom: 1.5rem;
+        }
+
+        .body-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ---- TIMELINE ---- */
+        .timeline {
+            padding: 0 0 3.5rem;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .timeline-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 2rem;
+        }
+
+        .timeline-items {
+            display: grid;
+            grid-template-columns: 7rem 1fr;
+            gap: 0;
+        }
+
+        .timeline-year {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--accent);
+            padding: 0.6rem 0;
+            align-self: start;
+        }
+
+        .timeline-entry {
+            font-size: 0.9rem;
+            color: var(--ink);
+            padding: 0.6rem 0;
+            border-top: 1px solid var(--rule);
+            line-height: 1.6;
+        }
+
+        .timeline-entry:first-of-type {
+            border-top: none;
+        }
+
+        .timeline-year + .timeline-entry {
+            border-top: none;
+        }
+
+        /* fix alternating borders */
+        .timeline-items > * {
+            border-top: 1px solid var(--rule);
+        }
+
+        .timeline-items > *:first-child,
+        .timeline-items > *:nth-child(2) {
+            border-top: none;
+        }
+
+        .timeline-entry .note {
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        /* ---- CONTACT ---- */
+        .contact {
+            padding: 3rem 0;
+        }
+
+        .contact-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 1rem;
+        }
+
+        .contact p {
+            font-size: 0.95rem;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .contact a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .contact a:hover { opacity: 0.7; }
+
+        /* ---- FOOTER ---- */
+        footer {
+            border-top: 1px solid var(--rule);
+            padding: 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        footer p {
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        footer a {
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer a:hover { color: var(--accent); }
+
+        @media (max-width: 600px) {
+            .topbar { flex-direction: column; gap: 1rem; }
+            .timeline-items { grid-template-columns: 5rem 1fr; }
+            footer { flex-direction: column; gap: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="topbar">
+            <a href="/" class="topbar-name">Margaret Stokes</a>
+            <nav class="topbar-links">
+                <a href="/governance/">Governance</a>
+                <a href="/writing/">Writing</a>
+                <a href="/australia/">Australia</a>
+                <a href="/about/" class="active">About</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="container">
+
+        <section class="hero">
+            <p class="hero-label">About</p>
+            <h1>Philosopher. Poet.<br>Computer nerd since 1978.</h1>
+        </section>
+
+        <div class="body-text">
+            <p>
+                I am a philosopher, a poet, a 2e autist, a single mother, and a computer
+                nerd. I have been working with computers since 1978 — before the internet
+                was public, before the web existed, before most of the people currently
+                writing about AI were born.
+            </p>
+            <p>
+                I ran a BBS called Dark Queen before the web. I put this site online in 1997.
+                I worked as a systems analyst for CSC through the late nineties, doing serious
+                enterprise work at the moment networked computing was becoming infrastructure.
+                I have written eight volumes of poetry. I worked in philosophy for children
+                through the late eighties and early nineties — teaching logic, ethics, and
+                epistemology to kids at the age when it matters most.
+            </p>
+            <p>
+                I am also a gamer, in the way that people who found computers in the
+                seventies tend to be gamers: not as recreation, but as a second language.
+            </p>
+            <p>
+                The AI governance work is not something I arrived at recently. It is what
+                happens when someone who has been thinking about systems, ethics, and
+                epistemology for five decades watches a technology become dangerous faster
+                than the people building it can think. I love AI. I also think it is out of
+                control. Those two things are not in contradiction.
+            </p>
+            <p>
+                Aurora-lens is my attempt to do something about it — deterministic,
+                auditable, inference-time governance for LLMs. Five provisional patents.
+                A working implementation. Published research. Available now:
+                <a href="https://pypi.org/project/aurora-lens/" style="color: var(--accent); text-decoration: none;">pip install aurora-lens</a>.
+            </p>
+        </div>
+
+        <section class="timeline">
+            <p class="timeline-label">A partial record</p>
+            <div class="timeline-items">
+                <div class="timeline-year">1978</div>
+                <div class="timeline-entry">First contact with computers.</div>
+
+                <div class="timeline-year">pre-web</div>
+                <div class="timeline-entry">Ran a BBS called Dark Queen. <span class="note">Networked community before the web had a name.</span></div>
+
+                <div class="timeline-year">late '80s–'90s</div>
+                <div class="timeline-entry">Philosophy for children — teaching logic, ethics, and epistemology. <span class="note">The work of Matthew Lipman's programme, applied.</span></div>
+
+                <div class="timeline-year">1997</div>
+                <div class="timeline-entry">This site goes online. <span class="note">milamba.com — still here.</span></div>
+
+                <div class="timeline-year">late '90s</div>
+                <div class="timeline-entry">Systems analyst, CSC. <span class="note">Enterprise IT at the moment networked computing became infrastructure. CSC is now DXC Technology.</span></div>
+
+                <div class="timeline-year">1997–2024</div>
+                <div class="timeline-entry">Australia — twenty-seven years of writing about a place. <span class="note">Photography, people, politics, landscape.</span></div>
+
+                <div class="timeline-year">ongoing</div>
+                <div class="timeline-entry">Eight volumes of poetry. Essays. Writing that refuses to stay in one lane.</div>
+
+                <div class="timeline-year">2025–</div>
+                <div class="timeline-entry">Aurora-lens. AI governance infrastructure. Five provisional patents. <span class="note">Because someone had to.</span></div>
+            </div>
+        </section>
+
+        <section class="contact">
+            <p class="contact-label">Contact</p>
+            <p><a href="mailto:margaret.stokes.ai@gmail.com">margaret.stokes.ai@gmail.com</a></p>
+            <p>ORCID: <a href="https://orcid.org/0009-0004-6422-4174">0009-0004-6422-4174</a></p>
+        </section>
+
+    </div>
+</main>
+
+<footer>
+    <div class="container">
+        <p>Margaret Stokes &mdash; <a href="mailto:margaret.stokes.ai@gmail.com">margaret.stokes.ai@gmail.com</a></p>
+        <p><a href="/">milamba.com</a> &mdash; online since 1997</p>
+    </div>
+</footer>
+
+</body>
+</html>
