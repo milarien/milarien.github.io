@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Martin Luther King and Nonviolent Resistance — Margaret Stokes</title>
+    <meta name="description" content="A philosophy exam essay by Margaret Stokes. Written in twenty minutes after a family emergency. Perfect score.">
+    <meta name="author" content="Margaret Stokes">
+
+    <meta property="og:title" content="Martin Luther King and Nonviolent Resistance">
+    <meta property="og:description" content="A philosophy exam essay. Written in twenty minutes after a family emergency. Perfect score.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://milamba.com/writing/martin-luther-king.html">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --ink: #1a1a1a;
+            --paper: #f5f2ed;
+            --paper-dark: #eae5dd;
+            --accent: #b33a1a;
+            --muted: #6b6560;
+            --rule: #c8c1b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { font-size: 18px; scroll-behavior: smooth; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-weight: 300;
+            color: var(--ink);
+            background: var(--paper);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* ---- HEADER ---- */
+        header {
+            padding: 2rem 0 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding-bottom: 1.5rem;
+        }
+
+        .topbar-name {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-weight: 500;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+        }
+
+        .topbar-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .topbar-links a {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: 0.03em;
+            transition: color 0.2s;
+        }
+
+        .topbar-links a:hover { color: var(--accent); }
+        .topbar-links a.active { color: var(--ink); }
+
+        /* ---- HERO ---- */
+        .hero {
+            padding: 4rem 0 3rem;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .hero-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 400;
+            line-height: 1.2;
+            color: var(--ink);
+            margin-bottom: 1.25rem;
+        }
+
+        .hero-note {
+            max-width: 580px;
+            font-size: 0.9rem;
+            color: var(--muted);
+            line-height: 1.85;
+            font-style: italic;
+        }
+
+        /* ---- ESSAY ---- */
+        .essay {
+            padding: 3.5rem 0 5rem;
+            max-width: 660px;
+        }
+
+        .essay p {
+            font-size: 1rem;
+            line-height: 1.9;
+            color: var(--ink);
+            margin-bottom: 1.5rem;
+        }
+
+        .essay p:last-child {
+            margin-bottom: 0;
+        }
+
+        .essay .references {
+            margin-top: 3rem;
+            padding-top: 2.5rem;
+            border-top: 1px solid var(--rule);
+        }
+
+        .essay .references p {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            line-height: 1.8;
+            color: var(--muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .essay .ref-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 1rem;
+        }
+
+        /* ---- FOOTER ---- */
+        footer {
+            border-top: 1px solid var(--rule);
+            padding: 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        footer p {
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        footer a {
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer a:hover { color: var(--accent); }
+
+        @media (max-width: 600px) {
+            .topbar { flex-direction: column; gap: 1rem; }
+            footer { flex-direction: column; gap: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="topbar">
+            <a href="/" class="topbar-name">Margaret Stokes</a>
+            <nav class="topbar-links">
+                <a href="/governance/">Governance</a>
+                <a href="/writing/" class="active">Writing</a>
+                <a href="/australia/">Australia</a>
+                <a href="/about/">About</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="container">
+
+        <section class="hero">
+            <p class="hero-label"><a href="/writing/" style="color: inherit; text-decoration: none;">Writing</a> &nbsp;/&nbsp; Essay</p>
+            <h1>Martin Luther King and<br>Nonviolent Resistance</h1>
+            <p class="hero-note">
+                This was a three-hour philosophy exam. I was studying in the university library when I was
+                called to the cr&egrave;che &mdash; my son, nine months old, had been hurt. By the time I had
+                got to him, seen the doctors, and made it back to the exam room, I had twenty minutes left.
+                I wrote furiously, handed it in, and never expected to pass.<br><br>
+                Perfect score. No special circumstance sought.
+            </p>
+        </section>
+
+        <div class="essay">
+
+            <p>Martin Luther King was a man with a dream. He dreamt of a world &ldquo;&hellip;where all men live together as brothers and respect the dignity and worth of all human personality.&rdquo; (1986, p.14). He dreamt of a world where oppression and segregation did not exist; a world where we could live in peace and harmony; a world where we could live without fear. He believed this &lsquo;better&rsquo; world could exist if we could learn to meet wickedness with altruistic love, instead of with force.</p>
+
+            <p>Meeting wickedness with altruistic love meant meeting it with God&rsquo;s love, which, to King, was Agape. This was God&rsquo;s love working in the hearts of men (1958, p.105). King believed that meeting wickedness with altruistic love meant meeting it with nonviolent resistance, because, to King, nonviolent resistance was Agape &ldquo;&hellip;in action&rdquo; (1958, p.105).</p>
+
+            <p>Nonviolent resistance is a method of righting social wrongs without using violence, which King learned from reading of Mahatma Gandhi&rsquo;s work in India. He was greatly influenced by Gandhi and believed him to be the first person to use the &ldquo;&hellip;love ethic of Jesus&hellip;&rdquo; as &ldquo;&hellip;a potent instrument for social and collective transformation&rdquo; (1958, p.97). To resist nonviolently means, firstly, to not be physically aggressive in any way. It means not initiating violence against others and not retaliating when violence is used against you. Secondly, it means not seeking to defeat or humiliate your opponent, but, rather, seeking to win their friendship and understanding. In other words, it is trying to set up a win/win situation. Thirdly, it means directing any attack at the &lsquo;evil&rsquo; systems and not the &lsquo;evildoers&rsquo;. Fourthly, it means maintaining love for others, especially the opponent, at all times, in order to avoid doing any spiritual violence. Fifthly, it requires maintaining faith in the future and believing that God, or the universe for those who don&rsquo;t believe in a personal God, is on the side of justice, and therefore your side (1958, pp.102&ndash;104). Sixthly, it means willingly accepting suffering, as &ldquo;&hellip;unearned suffering is redemptive, and that suffering may serve to transform the social situation&rdquo; (1986, p.47).</p>
+
+            <p>King believed that to have a better world we needed social change. There were three ways King believed that we could seek this change. First was passive acceptance, which was unacceptable as it led only to &ldquo;&hellip;moral and spiritual suicide&rdquo; (1986, p.25). Second, we could initiate violent action. However, not only was this the antithesis of everything King believed in as a Christian; he also believed that it could never lead to permanent social change (1986, p.86). The third way was nonviolence and to King this was the only way. He claimed that the possibility of positive social change had &ldquo;&hellip;only been offered by the nonviolent movement&rdquo; (1986, p.56). King felt that violence was immoral as it did &ldquo;&hellip;nothing but intensify the existence of evil and hate in the universe&rdquo; (1986, p.85). He also had practical reasons for rejecting violence. He wanted full integration into American society for his people and he felt that violence would not get them what they wanted. He claimed that &ldquo;To destroy anything, person or property, can&rsquo;t bring us closer to the goal we seek&rdquo; (1986, p.58). He also recognised that his people were outnumbered and had no access to weapons and therefore could not even begin to hope for victory if they turned to violence (1986, p.83). King&rsquo;s reasons for choosing nonviolence over the alternatives certainly seem to be legitimate. As a Christian, it would have been very difficult for him to justify choosing otherwise. Also, I believe he was right in his assessment of violence. It often seems to be the case that violence attracts more violence and worsens a situation. As well, his practical reasons were sound. His people were a minority, they were oppressed, and attacking with violence would not have gained them anything. As well, King believed that to have a better world we needed to create community. He believed that God had created in such a way that we could only be fulfilled within the context of community (1986, p.20). He felt that violence and hate increased the gulf in our already broken community and that love was the only way to heal this break. He believed that nonviolent resistance would remove the evils that caused the break and as it was a way of Christian love, would serve to heal the breach at the same time (1986, p.20). This is perhaps a much more idealistic reason and yet somehow it rings true. Love as the answer to the wrongs of the world is not just espoused by Christians, but also by many other religions, such as Buddhism. It is hard to deny that more loving behaviour by people in general would decrease the hate and violence that surround us; however, I doubt that a Christian community would be everybody&rsquo;s ideal world.</p>
+
+            <p>Other than the above reasons for advocating nonviolence as the way to create a better world, King had good evidence to show that it worked. It had worked successfully for Gandhi in India to &ldquo;&hellip;free his people from the economic exploitation and the political domination inflicted on them by a foreign power&rdquo; (1986, p.45). It had worked successfully for students (1986, pp.45&ndash;58). It had worked in Monroe, North Carolina, when a black doctor was arrested unjustly (1986, p.33). This was good evidence and good reason to believe that nonviolence would create a better world. There were four main methods used in nonviolent resistance to generate social change. The first of these methods was shame. To King, this was a core premise. He believed that nonviolent resistance would &ldquo;&hellip;develop a sense of shame in the opponent and thereby bring about a transformation and a change of heart.&rdquo; (1986, p.12 &amp; 1958, p.99). This would happen by the resisters willingly accepting suffering and violence without retaliating or conceding the issue. The opponent would then see the wrongness of what they had been doing and be ashamed, and so be motivated to change (1963A, p.28). Although this was a very important premise to King, it is also very dubious. Shaming people is a very precarious method of generating change. To begin with, those you are opposing have to be capable of being ashamed. King believed that all people could be shamed. He believed that if you appealed to the good in them, they would respond (1986, p.48). This is simply not the case. Hitler was not shamed by the protests of the Jews, and it is hard to imagine Pol Pot or Saddam Hussein being shamed by nonviolent protest. King also believed that &ldquo;&hellip;the oppressor&hellip;could not shoot down in daylight unarmed men, women and children&rdquo; (1986, p.64). The recent Beijing massacre says loudly and clearly that there are some who will shoot down in daylight unarmed men, women and children. Russia bringing tanks and armed men against her citizens proclaims the same message. Nonviolent resistance doesn&rsquo;t seem to work when the opponent doesn&rsquo;t care and can&rsquo;t be shamed. This is particularly notable in communist countries, despite King&rsquo;s assertion that nonviolent resistance would work even in &ldquo;&hellip;totalitarian regimes&rdquo; (1986, p.26). As well, of those who are capable of being shamed, they must also be courageous enough to admit their wrong and take responsibility for changing. Whilst we might admire those who can do this, it must be recognised that not everyone can. There are those who will instead hate those who shame them rather than attempt to change. King had ample evidence of this throughout his campaign in the form of hate mail, harassing phone calls, and the bombing of his home. Also, there are those people who may be shamed and yet have other, more powerful reasons for maintaining the status quo, no matter how wrong or immoral the &lsquo;status quo&rsquo; may be. It seems that King failed to take these considerations into account.</p>
+
+            <p>The other three methods which King used to achieve social change through nonviolence seem to be more practical. These methods were: first, enlisting the support of other members of the society. He believed that if he made the movement &ldquo;&hellip;powerful enough, dramatic enough, morally appealing enough&rdquo; (1986, p.66) people of goodwill would rally to his cause and put pressure on the government to change. Second, he attempted to persuade others that his cause was right and they were wrong (1958, p.102). He did this in his appeals to constitutional rights and the rights given to all human beings. Third, he used economic pressure. As he said: &ldquo;There is nothing quite so effective as a refusal to cooperate economically with the forces and institutions which perpetuate evil in our communities.&rdquo; (1986, p.60). The specific tactics he used to gain support and apply economic pressure were things such as marches (1963B, p.66), boycotts (1963B, pp.96&ndash;67), civil disobedience (1963B, p.68) and sit-ins at places where it would draw attention, such as lunch counters and department stores (1963B, p.56).</p>
+
+            <p>These methods of achieving social change seem much more practical and workable. They are methods that have a great deal of power in a democratic and materially oriented society, and as such are good reasons for believing in nonviolence, at least in the type of culture in which King lived. King&rsquo;s reasons for believing that meeting wickedness with altruistic love would create a better world seem to be a mixture of idealism and practical realism. Those such as his belief in the power of love are morally fine reasons, but purely idealistic, and, as such, not particularly good reasons. However, nonviolent resistance did work for Gandhi and it did work for King. It helped him to achieve some of the changes that he desperately wanted, and it worked without generating further violence or hatred. This alone is a good reason for believing that nonviolence can help create a better world. However, it must be recognised that its use is limited to those societies that place value on individual human life and which are vulnerable to economic and public pressure, and even in these societies there are certain personality types that are not vulnerable to this type of method.</p>
+
+            <div class="references">
+                <p class="ref-label">References</p>
+                <p>King, M.L. <em>Stride Toward Freedom.</em> Harper &amp; Row, New York, 1958.</p>
+                <p>King, M.L. <em>Strength to Love.</em> Harper &amp; Row, New York, 1963. [1963A]</p>
+                <p>King, M.L. <em>Why We Can&rsquo;t Wait.</em> Harper &amp; Row, New York, 1963. [1963B]</p>
+                <p>King, M.L. <em>Testament of Hope,</em> ed. J.M. Washington. Harper &amp; Row, New York, 1986.</p>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<footer>
+    <div class="container">
+        <p>Margaret Stokes &mdash; <a href="mailto:margaret.stokes.ai@gmail.com">margaret.stokes.ai@gmail.com</a></p>
+        <p><a href="/">milamba.com</a> &mdash; online since 1997</p>
+    </div>
+</footer>
+
+</body>
+</html>
