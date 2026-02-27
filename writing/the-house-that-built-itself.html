@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The House that Built Itself — Margaret Stokes</title>
+    <meta name="description" content="A children's story by Margaret Stokes. A pile of wood decides it wants to be a house.">
+    <meta name="author" content="Margaret Stokes">
+
+    <meta property="og:title" content="The House that Built Itself">
+    <meta property="og:description" content="A children's story. A pile of wood decides it wants to be a house.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://milamba.com/writing/the-house-that-built-itself.html">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --ink: #1a1a1a;
+            --paper: #f5f2ed;
+            --paper-dark: #eae5dd;
+            --accent: #b33a1a;
+            --muted: #6b6560;
+            --rule: #c8c1b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { font-size: 18px; scroll-behavior: smooth; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-weight: 300;
+            color: var(--ink);
+            background: var(--paper);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* ---- HEADER ---- */
+        header {
+            padding: 2rem 0 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding-bottom: 1.5rem;
+        }
+
+        .topbar-name {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-weight: 500;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+        }
+
+        .topbar-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .topbar-links a {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: 0.03em;
+            transition: color 0.2s;
+        }
+
+        .topbar-links a:hover { color: var(--accent); }
+        .topbar-links a.active { color: var(--ink); }
+
+        /* ---- HERO ---- */
+        .hero {
+            padding: 4rem 0 3rem;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .hero-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            font-weight: 400;
+            line-height: 1.2;
+            color: var(--ink);
+            margin-bottom: 1.25rem;
+        }
+
+        .hero-note {
+            max-width: 540px;
+            font-size: 0.9rem;
+            color: var(--muted);
+            line-height: 1.8;
+            font-style: italic;
+        }
+
+        /* ---- STORY ---- */
+        .story {
+            padding: 3.5rem 0 5rem;
+            max-width: 640px;
+        }
+
+        .story p {
+            font-size: 1rem;
+            line-height: 1.9;
+            color: var(--ink);
+            margin-bottom: 1.5rem;
+        }
+
+        .story p:last-child {
+            margin-bottom: 0;
+        }
+
+        .story-section-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin: 3.5rem 0 2rem;
+            padding-top: 3rem;
+            border-top: 1px solid var(--rule);
+        }
+
+        .story-rule {
+            border: none;
+            border-top: 1px solid var(--rule);
+            margin: 3rem 0;
+        }
+
+        /* ---- FOOTER ---- */
+        footer {
+            border-top: 1px solid var(--rule);
+            padding: 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        footer p {
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        footer a {
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer a:hover { color: var(--accent); }
+
+        @media (max-width: 600px) {
+            .topbar { flex-direction: column; gap: 1rem; }
+            footer { flex-direction: column; gap: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="topbar">
+            <a href="/" class="topbar-name">Margaret Stokes</a>
+            <nav class="topbar-links">
+                <a href="/governance/">Governance</a>
+                <a href="/writing/" class="active">Writing</a>
+                <a href="/australia/">Australia</a>
+                <a href="/about/">About</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="container">
+
+        <section class="hero">
+            <p class="hero-label"><a href="/writing/" style="color: inherit; text-decoration: none;">Writing</a> &nbsp;/&nbsp; Story</p>
+            <h1>The House that Built Itself</h1>
+            <p class="hero-note">
+                Written for my nephew. We used to drive past an empty block on the way to school,
+                and gradually, week by week, a house appeared.
+            </p>
+        </section>
+
+        <div class="story">
+
+            <p>There was once a very large pile of wood that sat in the middle of an empty block of land. That pile of wood sat there for days and days. Often the wood wondered what would happen to it — it wasn't very much fun just sitting there.</p>
+
+            <p>After a while the pile of wood became very bored just sitting there on an empty block. So, the planks started to talk to each other about what they could do. After a lot of discussion, they decided that they wanted to join together and be a house!</p>
+
+            <p>There was great excitement in the wood-pile then.</p>
+
+            <p>"A house!" they said to each other. "How wonderful to be a house."</p>
+
+            <p>So the planks started making plans to build themselves into a house.</p>
+
+            <p>The next morning, they started work very early. They piled themselves up and tried and tried to put themselves together in the shape of a house&hellip; but every time they tried, they just fell apart. All day they tried — with no luck.</p>
+
+            <p>The planks were very upset that night. They desperately wanted to be a house, but they just couldn't stay together.</p>
+
+            <p>They talked and talked all night, trying to think of ways they could put themselves together to be a house: but there was just no way.</p>
+
+            <p>Suddenly, a plank cried out!</p>
+
+            <p>"I have it, I know!" it said. "We can't be a house on our own — we need lots of things to be a house. We need nails and tiles, windows and doors; we need plaster and paint, curtains and lights; we even need pipes and carpets and concrete and clay. We need lots of things. We can't be a house until we have all the others."</p>
+
+            <p>So, the planks decided that they would have to go and find the other things they needed. They sent out lots of little splinters with instructions on what they needed. Then finally they settled down to wait&hellip;</p>
+
+            <p>Well, those little splinters were very busy. They trooped out and searched high and low. They talked to sacks of concrete and trees and flowers and nails and tools and tiles&hellip; And they didn't stop there! They visited carpets and curtains and lights. The splinters found paint and pipes, bathtubs and sinks, and much more.</p>
+
+            <p>Meanwhile, the wood waited. Oh, it was hard for the wood. They thought their little splinters would never come back. It seemed like years since they left. Some of the wood gave up hope of ever being a house. And still they waited.</p>
+
+            <p>Then, one day, some weeks after the splinters had left, the planks of wood looked along the road and they saw something wonderful and amazing. Hundreds of things, all marching down the road towards them. There were tools and carpets and floor tiles and roof tiles. Pipes, paint, nails and concrete, there were windows and plaster, clay and so much more. And right at the front were all their little splinters.</p>
+
+            <p>There was great excitement that day. Everyone laughed and talked and said how wonderful it would be to be a house. A real, proper house, instead of bits and pieces that were nothing on their own.</p>
+
+            <p>They sorted themselves into piles. All the things that belonged on the outside went first. Then the things that went inside and all the trees and flowers for the garden went and waited at the end of the block. They weren't needed until later, and thought they would be best off out of everyone's way.</p>
+
+            <p>The next day the work started in earnest. The concrete poured itself into foundations. The planks stacked themselves into frames and rafters, while the nails and hammers flew around, keeping them together. Everyone worked very hard. There were some arguments about where the windows and doors should go, but they were soon sorted out — everyone wanted to get back to work, of course!</p>
+
+            <p>Two days later, the outside of the house was ready. The tiles were on, and the windows and doors worked as they should. Everything was in order and all the things on the outside settled back to watch the rest.</p>
+
+            <p>It was the paint, next! It flew all around the house. It painted the outside in fresh, clean white, with green trim on the windows and doors. Everyone agreed that it looked beautiful when it was done. Then the wallpaper helped the paint on the inside. They worked very hard to make the home as pretty and wonderful as they could.</p>
+
+            <p>Finally the paint and wallpaper were done, and straight away the carpets and curtains marched in — followed very closely by all the lights and bathroom fittings, the stove and dishwasher, and all the other things that a house needs.</p>
+
+            <p>When everything was in place in the house, it was finally time for the garden to be done. The trees and flowers went straight to work. They worked and worked to get themselves in just the right places until the garden was the most beautiful in the street.</p>
+
+            <p>"At last," the wood said to everyone else, still in its new paint. "At last we're a house. Now we can be happy."</p>
+
+            <p>Everyone settled back to enjoy being a house&hellip; but something just wasn't quite right. So they all talked and finally they decided that it was because there was no furniture. After all, what is a house without furniture!</p>
+
+            <p>So out went the little splinters all over again, this time with instructions to bring back furniture for the house and the garden.</p>
+
+            <p>The splinters searched again, until they found everything they needed: they found a lounge suite and beds, wardrobes and a kitchen table with six chairs. They found furniture for the dining room and plates and bowls, knives, forks, and even some spoons. They got a table and chairs, with a nice big sun umbrella for the garden. At last, it was time to return with all the furniture, hoping that now the house would be happy.</p>
+
+            <p>Everyone was very glad to see all the furniture and the splinters. They spent a long time deciding just where it all should go. When all the furniture was finally in place, they all got back to enjoying being a house.</p>
+
+            <p>Everything was fine for the next few weeks. The house felt good, and it looked even better. It would look around at itself and enjoy being a house — and it could, too. After all, it was the most beautiful house in the street. Life was very peaceful and quiet and the planks of wood were very glad that they had thought of being a house.</p>
+
+            <p>But, after a while, the house again became unhappy. It felt that it was just too quiet. It was fairly boring to just sit there, and admire itself, and lonely. It needed a family. The house longed to see children playing, to feel them run up and down the corridors, to smell dinner cooking. It wanted some pets — two cats and a dog would be nice, the house thought to itself. It just couldn't be happy again until it had a family.</p>
+
+            <p>The splinters had to go out once again. But it wasn't quite so easy, this time&hellip; Finding a family was very hard work, and it couldn't just be any family. The house was very specific about the family it wanted. There had to be children — at least two, and there had to be pets. It had to be a happy family, and it had to need a house. It also had to look after the house: the house was very proud of itself, and it wanted its family to be proud of it, too.</p>
+
+            <p>Well, the splinters looked, and looked, and looked, but they just couldn't find a family like the one the house wanted. Either there weren't children, or there were no pets, or they were happy where they were and didn't need a new house.</p>
+
+            <p>Eventually, the splinters gave up, and decided to go back to the house. They knew that the house would be very sad, but&hellip; what could they do? They just couldn't find the right family.</p>
+
+            <p>Very sadly the splinters went home. When they got to the house, however, they stopped. There were two children standing in front of it! The splinters went over to the children to see what they wanted.</p>
+
+            <p>"If only we had a house like this," the little boy said to his sister. "Then mummy and daddy wouldn't be so worried any more."</p>
+
+            <p>"It is such a lovely house," sighed the little girl.</p>
+
+            <p>Well, the splinters were overjoyed! Here was a family, obviously in need of a house, and the children were well cared for, so obviously they'd look after the house, too, but — did they have pets? The splinters had to ask: they couldn't let this chance go by.</p>
+
+            <p>So the splinters and the children had a long, long talk. It turned out, that they did have pets! Two cats and a dog — just like the house wanted. The children told the splinters that they needed a new house to live in because they had to leave their old house. They said how much their parents had worried because it was so hard to find a house that didn't mind children and animals.</p>
+
+            <p>The splinters told the children how much the house wanted a family with children and pets because it was lonely, and didn't feel like a proper house while it was empty.</p>
+
+            <p>The children were very excited and went straight home to get their parents and show them the house they had found! When they came back, the little splinters told the parents everything that they'd told the children and said how happy the house would be, if only they would live there and look after it and be happy.</p>
+
+            <p>The family and their pets moved into the house the very next day. They were so happy because they had such a beautiful house, and the house finally felt like a real house, and was content.</p>
+
+            <p class="story-section-label">An alternative ending &mdash; cyclical</p>
+
+            <p>So, the family and their pets moved into the house the very next day. They lived there, and cared for the house for many years, and the house cared for them, too. Sometimes the house would be damaged, though — the cats would scratch the furniture, or the children would dent the walls, and some other things, and so the father kept supplies in the garden, for when it needed repairing.</p>
+
+            <p>As time went on, the supplies got smaller and smaller, until there was just a pile of wood left. Often the planks wondered what would happen to them — it wasn't very fun just sitting there. After a while, and a lot of discussion, they decided that they wanted to join together, and be a house&hellip;</p>
+
+        </div>
+    </div>
+</main>
+
+<footer>
+    <div class="container">
+        <p>Margaret Stokes &mdash; <a href="mailto:margaret.stokes.ai@gmail.com">margaret.stokes.ai@gmail.com</a></p>
+        <p><a href="/">milamba.com</a> &mdash; online since 1997</p>
+    </div>
+</footer>
+
+</body>
+</html>
