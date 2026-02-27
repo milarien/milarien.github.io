@@ -1,0 +1,324 @@
+<html>
+
+<head>
+<title>Aussie Links</title>
+</head>
+
+<body bgcolor="#4A5D49" text="#FFFF00" link="#FFFF00" vlink="#808000" alink="#FF0000" background="../images/greenroo2.jpg">
+
+<p align="center"><a name="top"></a><img src="../images/links.gif" alt="links.gif (11006 bytes)" WIDTH="233" HEIGHT="100"><br>
+</p>
+
+<p align="center"><font face="Comic Sans MS"><a href="links.htm#one"><big>General
+Australian Tourism Information</big></a><br>
+<a href="links.htm#two"><big>The Inhabitants of Australia</big></a><br>
+<a href="links.htm#three"><big>General Information</big></a><br>
+<a href="links.htm#four"><big>Australian Newspapers</big></a><br>
+<a href="links.htm#five"><big>Official Information<br>
+</big></a><font size="4"><a href="#six">Friends and Other
+Links</a></font><br>
+</font></p>
+
+<p align="center">&nbsp;
+      <!-- Start Of Moreover.com News Javascript Code -->
+  
+  <SCRIPT LANGUAGE="Javascript">
+  <!--
+  // the array global_article is used to allow multiple categories
+  var global_article = new Array();
+  var global_article_counter = 0;
+  var article = null;
+  var early_exit = 1;
+  var moreover_text = 0;
+  function load_wizard()
+    {
+    
+    var newwin = window.open("","clone","resizable,scrollbars,width=500");
+    document.forms.moreover_clone.submit();
+    return true;
+    }
+  
+  // -->
+  </SCRIPT>
+  <SCRIPT LANGUAGE="Javascript" SRC="http://p.moreover.com/cgi-local/page?c=Australia%20news&o=js&n=5">
+  </SCRIPT>
+  <SCRIPT LANGUAGE="Javascript">
+  <!--
+  // load global_article array with articles from category
+  if (article != null)
+    {
+    early_exit = 0;
+
+    for (var article_counter = 0; article_counter < article.length; article_counter++)
+      {
+      global_article[global_article_counter] = article[article_counter];
+      global_article[global_article_counter].url += "&w=442535";
+      global_article[global_article_counter].url += "' TARGET='_blank";
+      global_article[global_article_counter].document_url += "' TARGET='_blank";
+      global_article_counter++;
+      }
+
+
+    }
+  // -->
+  </SCRIPT>
+  <SCRIPT LANGUAGE="Javascript">
+  <!--
+  if (global_article.length == 0)
+      {
+      if (early_exit)
+        {
+        document.writeln("<CENTER>Please reload this page to view the headlines</CENTER>");
+        }
+      else
+        {
+        document.writeln("<CENTER>Sorry, no articles matched your search criteria</CENTER>");
+        early_exit = 1;
+        }
+      }
+  // -->
+  </SCRIPT>
+  <SCRIPT LANGUAGE="Javascript" SRC="http://p.moreover.com/dr/wizard_text.js"></SCRIPT>
+  <SCRIPT LANGUAGE="Javascript">
+  <!--
+  if (!early_exit)
+  {
+  var webfeed_heading = "";
+  var width = "400";
+  var numberofarticles = global_article.length;
+  var item_spacing = "5";
+  var cluster_bgcolor = "495D4A";
+  var cluster_border = "0";
+  var heading_display = "Yes";
+  var time_display = "Yes";
+  var cell_spacing = "0";
+  var cell_padding = "1";
+  var heading_bgcolor = "495D4A";
+  var heading_font = "Verdana, Arial,Helvetica, sans-serif";
+  var heading_font_size = "-1";
+  var heading_fgcolor = "ffff00";
+  var headline_bgcolor = "495D4A";
+  var headline_font = "Verdana, Arial,Helvetica, sans-serif";
+  var headline_font_size = "-1";
+  var headline_fgcolor = "ffff00";
+  var source_font = "Verdana, Arial,Helvetica, sans-serif";
+  var source_font_size = "-2";
+  var source_fgcolor = "ff6600";
+  var access_font = "Verdana, Arial,Helvetica, sans-serif";
+  var access_font_size = "-2";
+  var access_fgcolor = "ff6600";
+  var time_font = "Verdana, Arial,Helvetica, sans-serif";
+  var time_font_size = "-2";
+  var time_fgcolor = "ff6600";
+  var time = new Array(global_article.length);
+
+  // Print out the table containing the headlines
+  document.writeln("<CENTER><TABLE BORDER="+cluster_border+" BGCOLOR='#"+cluster_bgcolor+"' WIDTH='"+width+"' CELLPADDING=2 CELLSPACING=0>");
+  document.writeln("<tr><td  align='center'><img src='http://i.moreover.com/images/moreover_wizard_link.gif' border='0'></td></tr>")
+  document.writeln("<TR><TD><CENTER><TABLE BGCOLOR='#"+cluster_bgcolor+"' CELLPADDING="+cell_padding+" CELLSPACING="+cell_spacing+"  WIDTH='100%'>");
+
+  if (heading_display == "Yes")
+    {
+    // Print a new category heading
+    document.writeln("<TR BGCOLOR='#"+heading_bgcolor+"'><TD>");
+    document.writeln("<FONT SIZE="+heading_font_size+" FACE="+heading_font+" COLOR='#"+heading_fgcolor+"'>");
+    document.writeln("<B>"+webfeed_heading+"</B></FONT></TD></TR>");
+    }
+
+  // Start loop for articles
+  for (var counter=0; counter < numberofarticles; counter++)
+    {
+    if ((counter == (global_article.length - 1)) && moreover_text == 1) 
+      { 
+      headline_fgcolor = source_fgcolor; 
+      time_display = "No";
+      }
+
+    // Print out the headline
+    document.writeln("<TR BGCOLOR='#"+headline_bgcolor+"'><TD><A HREF='"+global_article[counter].url+"' >");
+    document.writeln("<FONT SIZE="+headline_font_size+" FACE="+headline_font+" COLOR='#"+headline_fgcolor+"'");
+    document.writeln(">"+global_article[counter].headline_text+"...</FONT></A><br>");
+
+    
+      // Print out the source
+        if ((counter != (global_article.length - 1)) || moreover_text != 1)
+        {
+        document.writeln("<A HREF='"+global_article[counter].document_url+"' >");
+        document.writeln("<FONT FACE="+source_font+" SIZE="+source_font_size+" COLOR='#"+source_fgcolor+"'>");
+        document.writeln(""+global_article[counter].source+"</FONT></A>&nbsp;&nbsp;");
+        }
+    
+
+    // Print out reg/sub if appropriate
+    if (global_article[counter].access_status == "sub" || global_article[counter].access_status == "reg")
+      {
+      document.writeln(" <A HREF='"+global_article[counter].access_registration+"'>");
+      document.writeln("<FONT FACE="+access_font+" SIZE="+access_font_size);
+      document.writeln(" COLOR='#"+access_fgcolor+"'>"+global_article[counter].access_status+"</FONT></A>&nbsp;&nbsp;");
+      }
+
+    // Print out the harvest time
+    if (time_display == "Yes")
+      {
+      // Make a new date object
+      time[counter] = new Date(global_article[counter].harvest_time);
+      time[counter].setHours(time[counter].getHours() - (time[counter].getTimezoneOffset() / 60 ));
+      document.writeln("<FONT FACE="+time_font+" SIZE="+time_font_size+" COLOR='#"+time_fgcolor+"'>");
+      document.writeln(""+time[counter].toString()+"</FONT>");
+      } 
+
+    document.writeln("</TD></TR><TR BGCOLOR='#"+headline_bgcolor+"'><TD BGCOLOR='#"+headline_bgcolor+"' HEIGHT="+item_spacing+"></TD></TR>");
+    } // End of article loop
+
+  // Start of clone button code //
+  // NOTE: DO NOT REMOVE any of the code in this section //
+  document.writeln("<FORM METHOD='POST' ACTION='http://www.moreover.com/cgi-local/wizard_clone.pl' target='clone' name='moreover_clone'>");
+  document.writeln("<INPUT TYPE='hidden' NAME='parent_code' VALUE='442535'>");
+  document.writeln("<INPUT TYPE='hidden' NAME='heading_font_size' VALUE='-1'><INPUT TYPE='hidden' NAME='source_font_size' VALUE='-2'>")
+  document.writeln("<INPUT TYPE='hidden' NAME='cluster_width' VALUE='400'><INPUT TYPE='hidden' NAME='time_display' VALUE='Yes'>")
+  document.writeln("<INPUT TYPE='hidden' NAME='time_font' VALUE='Verdana, Arial,Helvetica, sans-serif'><INPUT TYPE='hidden' NAME='cluster_cellspacing' VALUE='0'>")
+  document.writeln("<INPUT TYPE='hidden' NAME='heading_font' VALUE='Verdana, Arial,Helvetica, sans-serif'><INPUT TYPE='hidden' NAME='cluster_bgcolor' VALUE='495D4A'>")
+  document.writeln("<INPUT TYPE='hidden' NAME='number_of_headlines' VALUE='5'><INPUT TYPE='hidden' NAME='search_keywords' VALUE=''>")
+  document.writeln("<INPUT TYPE='hidden' NAME='refine_category' VALUE=''><INPUT TYPE='hidden' NAME='time_fgcolor' VALUE='ff6600'>")
+  document.writeln("<INPUT TYPE='hidden' NAME='access_fgcolor' VALUE='ff6600'><INPUT TYPE='hidden' NAME='time_font_size' VALUE='-2'>")
+  document.writeln("<INPUT TYPE='hidden' NAME='headline_bgcolor' VALUE='495D4A'><INPUT TYPE='hidden' NAME='access_font_size' VALUE='-2'>")
+  document.writeln("<INPUT TYPE='hidden' NAME='cluster_name' VALUE='c=Australia%20news&o=js'><INPUT TYPE='hidden' NAME='heading_display' VALUE='Yes'>")
+  document.writeln("<INPUT TYPE='hidden' NAME='headline_fgcolor' VALUE='ffff00'><INPUT TYPE='hidden' NAME='source_font' VALUE='Verdana, Arial,Helvetica, sans-serif'>")
+  document.writeln("<INPUT TYPE='hidden' NAME='access_font' VALUE='Verdana, Arial,Helvetica, sans-serif'><INPUT TYPE='hidden' NAME='headline_font_size' VALUE='-1'>")
+  document.writeln("<INPUT TYPE='hidden' NAME='headline_font' VALUE='Verdana, Arial,Helvetica, sans-serif'><INPUT TYPE='hidden' NAME='heading_bold' VALUE='Yes'>")
+  document.writeln("<INPUT TYPE='hidden' NAME='item_spacing' VALUE='5'><INPUT TYPE='hidden' NAME='wizard_brand' VALUE='moreover_new'>")
+  document.writeln("<INPUT TYPE='hidden' NAME='heading_bgcolor' VALUE='495D4A'><INPUT TYPE='hidden' NAME='cluster_cellpadding' VALUE='1'>")
+  document.writeln("<INPUT TYPE='hidden' NAME='heading_fgcolor' VALUE='ffff00'><INPUT TYPE='hidden' NAME='source_fgcolor' VALUE='ff6600'>")
+  document.writeln("<INPUT TYPE='hidden' NAME='cluster_border' VALUE='0'><INPUT TYPE='hidden' NAME='cluster_layout' VALUE='<br>'>")
+
+  document.writeln("</FORM>");
+  // End of clone button code //
+
+  document.writeln("</TABLE></CENTER></TD></TR></TABLE></CENTER>");
+
+  // ************************************************************************************
+  // This code is subject to the copyright and warranty restrictions detailed at 
+  // http://www.moreover.com/wizard_copyright.html
+  // Copyright 2000 Moreover.com Inc. All rights reserved.
+  // *************************************************************************************
+  } 
+  // -->
+  </SCRIPT>
+  <A HREF="http://www.moreover.com"><FONT COLOR="#495D4A"> </FONT></A>
+  <!-- End Of Moreover.com News Javascript Code -->
+
+
+</p>
+
+<p><a name="one"><big><font face="Comic Sans MS"><big><big>General Australian Tourism
+Information</big></big></font></big></a></p>
+
+<p><font face="Comic Sans MS"><a href="http://www.wa.gov.au/watc/index.html">Welcome to
+Western Australia</a>&nbsp; - Western Australian Tourism Commission<br>
+<a href="http://www.tourism.sa.gov.au/">South Australia</a> - South Australian Tourism
+Commission <br>
+<a href="http://www.visitvictoria.com.au/">Visit Victoria</a> - An excellent
+resource for Melbourne, Victoria.<br>
+<a href="http://www.destinationqueensland.com/tq.cfm">Queensland</a> - &quot;Destination Queensland&quot;<br>
+New South Wales -
+&quot;About New South Wales&quot; <br>
+<a href="http://www.nt.gov.au/">Northern Territory</a> - A great site on the
+Northern Territory - lots of information. <br>
+<a href="http://www.canberratourism.com.au/">Australian Capital Territory</a>
+- &quot;Welcome to Canberra&quot;<br>
+<a href="http://www.tas.gov.au/">Tasmania</a> - Tasmania Online<br>
+<a href="http://www.travelaustralia.com.au/">Travel Australia Internet</a> <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A comprehensive listing of Where to Stay,
+Things to Do and Places to see<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; throughout Australia.<br>
+<a href="http://www.aussie.net.au/index.aust">Australian Tourism Commission</a> <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Fairly Comprehensive Site that includes a
+search engine. Lots of info about Australia here.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Multiple choice of language makes it
+easy for all to use.<br>
+<a href="http://www.flinders.com.au/home.htm">Australia Outdoor Connections</a> <br>
+</font></p>
+
+<p><a href="links.htm#top"><img src="../images/topsm.gif" alt="topsm.gif (1916 bytes)" border="0" WIDTH="51" HEIGHT="35"></a><font face="Comic Sans MS"><br>
+</font><br>
+<br>
+<a name="two"><big><font face="Comic Sans MS"><big><big>The Inhabitants of Australia</big></big></font></big></a></p>
+
+<p align="left"><font face="Comic Sans MS"><a href="http://linus.it.uts.edu.au/~don/larvae/larvae.html">Caterpillars: especially Australian
+ones</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; This is a fascinating site with tons of
+pictures of Australian caterpillars, butterflies and moths.&nbsp;&nbsp;<br>
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Make sure you check this site out :)<br>
+<a href="http://www.ozemail.com.au/~wildscap/page3.html">Australian Ecotours</a><br>
+<a href="http://www.birdwatch.com/">Bird watching in Australia</a> - (actually a travel
+service, but some good pictures)<br>
+<a href="http://cwpp.slq.qld.gov.au/butterfly/">Butterfly and Other
+Inverterbrates Club Inc.</a>&nbsp;<br>
+&nbsp;&nbsp;&nbsp;
+</font>&nbsp;&nbsp;&nbsp;&nbsp; <font face="Comic Sans MS">A great site on
+butterflies, with pages for kids to colour in and a lot of fun things to to. <br>
+<br>
+More links coming soon...
+</font></p>
+
+<p align="left"><a href="links.htm#top"><img src="../images/topsm.gif" alt="topsm.gif (1916 bytes)" border="0" align="center" WIDTH="51" HEIGHT="35"></a></p>
+
+<p><a name="three"><big><font face="Comic Sans MS"><big><big>General Information</big></big></font></big></a></p>
+
+<p><font face="Comic Sans MS"><a href="http://www.uq.net.au/~zzlreid/slang.html">Larry's
+Aussie Slang and Phrase Dictionary</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; No, not all Australians speak like this! :)
+&nbsp; But we do generally understand it!<br>
+<a href="http://www.orie.cornell.edu/~nedwards/australiana/s.c.a.faq.2.html">Soc.Culture.Australian
+FAQ</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A little dated - but the information is great
+and definitely worth reading.<br>
+<a href="http://www.ozramp.net.au/~senani/">Trishan's Oz Page</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A personal home page packed with info....<br>
+</font><br>
+<a href="links.htm#top"><img src="../images/topsm.gif" alt="topsm.gif (1916 bytes)" border="0" WIDTH="51" HEIGHT="35"></a></p>
+
+<p><a name="four"><big><font face="Comic Sans MS"><big><big>Australian Newspapers</big></big></font></big></a></p>
+
+<p><font face="Comic Sans MS"><a href="http://www.theage.com.au/">The Age</a> (Melbourne
+newspaper) <br>
+<a href="http://www.smh.com.au/index.html">Sydney Morning Herald</a> <br>
+<a href="http://www.brw.com.au/">Business Review Weekly</a><br>
+<a href="http://www.heraldsun.news.com.au/">The Herald Sun</a> (Melbourne)<br>
+<br>
+For a more complete listing of Australian media try:<br>
+<a href="http://www.yahoo.com.au/Regional/Countries/Australia/News_and_Media/">Yahoo!
+Australia &amp; NZ - News and Media</a></font></p>
+
+<p><a href="links.htm#top"><img src="../images/topsm.gif" alt="topsm.gif (1916 bytes)" border="0" WIDTH="51" HEIGHT="35"></a></p>
+
+<p><a name="five"><big><font face="Comic Sans MS"><big><big>Official Information</big></big></font></big></a></p>
+
+<p><font face="Comic Sans MS"><a href="http://www.traveldocs.com/au/">Australian Visa's</a><br>
+&nbsp;&nbsp;&nbsp; Very informative site if you're looking to travel to Australia.<br>
+<a href="http://www.ozemail.com.au/~mthornto/12cits.htm">Information on gaining Australian
+Citizenship &quot;Citizenship of Australia&quot;</a><br>
+<br>
+</font></p>
+
+<p><font face="Comic Sans MS" size="5"><b><a name="six">Friends and Other Links</a></b></font></p>
+
+<p><font face="Comic Sans MS"><a href="http://www.neopets.com/refer.phtml?username=milamba">A
+great place for kids to play (and parents!) and learn.</a></font></p>
+
+<p><br>
+<a href="links.htm#top"><img src="../images/topsm.gif" alt="topsm.gif (1916 bytes)" border="0" WIDTH="51" HEIGHT="35"></a></p>
+
+<p align="center"><font face="Comic Sans MS"><br>
+<map name="FPMap0">
+<area href="mailto:webmaster@milamba.com" shape="polygon" coords="288, 108, 442, 104, 450, 149, 292, 163">
+<area href="../index.htm" shape="polygon" coords="286, 21, 271, 78, 425, 101, 423, 46">
+<area href="../index.htm" shape="polygon" coords="123, 80, 266, 92, 258, 159, 108, 142">
+<area href="../index.htm" shape="polygon" coords="92, 19, 93, 78, 248, 59, 241, 8"></map><img polygon="(123,80) (266,92) (258,159) (108,142) ../index.htm" polygon="(92,19) (93,78) (248,59) (241,8) ../index.htm" src="../images/map.gif" alt="Image Map" border="0" usemap="#FPMap0" width="535" height="180"></font></p>
+
+<p align="center"><br>
+<font face="Comic Sans MS"><a href="../States/scenery.htm">Scenery</a>&nbsp;&nbsp; <a href="../inhabit/inhabit.htm">Inhabitants</a>&nbsp;&nbsp; <a href="../Aussies/honorary.htm">Honorary Aussies</a> &nbsp;&nbsp;&nbsp; <a href="links.htm" target="_top">Links</a>&nbsp;&nbsp; <a href="current.htm">Awards</a>&nbsp;&nbsp; <a href="bio.htm">Bio</a>&nbsp;&nbsp; <a href="credits.htm">Credits and things</a><br>
+<a href="guest.htm">Guestbook</a>&nbsp;&nbsp;&nbsp; &nbsp; <a href="../index.htm">Home</a>
+&nbsp;&nbsp;&nbsp; <a href="mailto:webmaster@milamba.com">Write</a></font></p>
+</body>
+</html>
