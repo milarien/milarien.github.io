@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Rainbow Horse — Margaret Stokes</title>
+    <meta name="description" content="A children's story by Margaret Stokes. Written from a dream in 1989. An origin myth — why horses lost their wings, and where rainbows come from.">
+    <meta name="author" content="Margaret Stokes">
+
+    <meta property="og:title" content="The Rainbow Horse">
+    <meta property="og:description" content="An origin myth. Why horses lost their wings, and where rainbows come from. Written from a dream, 1989.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://milamba.com/writing/the-rainbow-horse.html">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --ink: #1a1a1a;
+            --paper: #f5f2ed;
+            --paper-dark: #eae5dd;
+            --accent: #b33a1a;
+            --muted: #6b6560;
+            --rule: #c8c1b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { font-size: 18px; scroll-behavior: smooth; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-weight: 300;
+            color: var(--ink);
+            background: var(--paper);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* ---- HEADER ---- */
+        header {
+            padding: 2rem 0 0;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding-bottom: 1.5rem;
+        }
+
+        .topbar-name {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-weight: 500;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+        }
+
+        .topbar-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .topbar-links a {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: 0.03em;
+            transition: color 0.2s;
+        }
+
+        .topbar-links a:hover { color: var(--accent); }
+        .topbar-links a.active { color: var(--ink); }
+
+        /* ---- HERO ---- */
+        .hero {
+            padding: 4rem 0 3rem;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .hero-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            font-weight: 400;
+            line-height: 1.2;
+            color: var(--ink);
+            margin-bottom: 1.25rem;
+        }
+
+        .hero-note {
+            max-width: 540px;
+            font-size: 0.9rem;
+            color: var(--muted);
+            line-height: 1.8;
+            font-style: italic;
+        }
+
+        /* ---- STORY ---- */
+        .story {
+            padding: 3.5rem 0 5rem;
+            max-width: 640px;
+        }
+
+        .story p {
+            font-size: 1rem;
+            line-height: 1.9;
+            color: var(--ink);
+            margin-bottom: 1.5rem;
+        }
+
+        .story p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ---- FOOTER ---- */
+        footer {
+            border-top: 1px solid var(--rule);
+            padding: 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        footer p {
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        footer a {
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer a:hover { color: var(--accent); }
+
+        @media (max-width: 600px) {
+            .topbar { flex-direction: column; gap: 1rem; }
+            footer { flex-direction: column; gap: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="topbar">
+            <a href="/" class="topbar-name">Margaret Stokes</a>
+            <nav class="topbar-links">
+                <a href="/governance/">Governance</a>
+                <a href="/writing/" class="active">Writing</a>
+                <a href="/australia/">Australia</a>
+                <a href="/about/">About</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="container">
+
+        <section class="hero">
+            <p class="hero-label"><a href="/writing/" style="color: inherit; text-decoration: none;">Writing</a> &nbsp;/&nbsp; Story</p>
+            <h1>The Rainbow Horse</h1>
+            <p class="hero-note">
+                Written from a dream, 1989. An origin myth &mdash; why horses lost their wings and colours,
+                and where rainbows come from.
+            </p>
+        </section>
+
+        <div class="story">
+
+            <p>Once upon a time horses lived in their own land where there were no people. It was a very beautiful place. There were deep, dark forests, high mountains capped with snow, warm blue lakes and flowers everywhere. The horses called their land Erewan, and all the creatures who lived there were very happy.</p>
+
+            <p>The horses ruled Erewan. They were the most beautiful of all the creatures in the land. Their coats were bright, joyful colors and they had big, strong wings. The King of the horses was the most beautiful of them all. The other horses were one color, but the King was all colors. That&rsquo;s why he was King.</p>
+
+            <p>Lots of other creatures lived in Erewan. There were fairies and gnomes, tigers, elephants and goblins, in fact, any creature you could imagine and even some you couldn&rsquo;t lived in Erewan and they all loved the horses.</p>
+
+            <p>But there was one kind of creature that loved the horses best of all &mdash; the pixies. They were the horses&rsquo; special friends and they made their homes inside the horses&rsquo; ears. The King of the pixies lived in the King Horse&rsquo;s ear, and every horse had its own special pixie that stayed with it always.</p>
+
+            <p>The horses were happy in Erewan. They played and laughed and danced. They soared through the air on their powerful wings and the sky lit up with all their colors. There was no sadness in Erewan.</p>
+
+            <p>One day a very exciting thing happened. A new type of creature came to Erewan &mdash; people. They looked like giant pixies, but with funny round ears instead. All the creatures were amazed and very glad that they had come, because the people could be happy in Erewan, as they all were.</p>
+
+            <p>The King horse flew down to meet the people, and welcome them to his land. He told them how pleased he was that they had come and how much he hoped they would feel at home here.</p>
+
+            <p>But the people couldn&rsquo;t understand a word he was saying.</p>
+
+            <p>The horses didn&rsquo;t mind. They thought that in time the people would learn their language. The King decided to have a big feast and declare a holiday to welcome the people.</p>
+
+            <p>All the creatures in Erewan gathered together for the party. They had a marvelous time. There were lots to eat and drink and best of all, the horses gathered together in the sky and danced for the people.</p>
+
+            <p>The people had never seen anything quite as beautiful as these horses. They watched them dancing, their colors shining in the sun, and they laughed, clapped, and were happy. The horses saw that they had pleased their new friends and were happy too. But the pixies were not happy. They weren&rsquo;t quite sure about the people or why they had come. They wanted the horses to be careful, but the horses thought the pixies were being a little silly and they didn&rsquo;t listen.</p>
+
+            <p>Soon it was time for the people to return to their own land. They wanted to take some of the horses home with them. They wanted to show all their friends the beautiful horses and to always be able to look at them. The people thought they would be the envy of all their friends if they could bring back some of these colorful creatures.</p>
+
+            <p>So, the people waited until one night when they found a group of horses fast asleep in a forest clearing. The people crept up to the horses very quietly and threw great big nets over the top of them. The horses woke up and tried to fly away, but the nets stopped them. They became very frightened and the pixies started screaming for help as loudly as they could. But they were so small that only the horses could hear them. Then the people got some long ropes and tied up the horses so they couldn&rsquo;t fly away and they took the horses out of Erewan as quickly as they could. The pixies went too. They couldn&rsquo;t leave their special horses alone &mdash; but they were very careful never to let the people see them.</p>
+
+            <p>The horses were unhappy at being taken away from their homes and families. Their colors faded away and became dull colors, like brown and black. Their wings grew smaller and smaller until they disappeared, because they were magic wings and needed to be used every day.</p>
+
+            <p>The pixies were worried about their horses and tried everything they could think of to make them happy again. They danced, sang, and told the horses jokes &mdash; but nothing worked. The horses stayed unhappy and their colors stayed dull and just wouldn&rsquo;t change back.</p>
+
+            <p>Meanwhile in Erewan, the King horse had discovered that the people had left and taken some of the horses with them. The King became very angry and he stormed all over the land with his colors flashing. But there was nothing he could do. If he left Erewan to follow the people he would lose his magic and his wings would disappear. He would be as helpless as they were.</p>
+
+            <p>The King called all the horses and the pixies in the land to a great meeting. When they had all arrived he told them what the people had done. All the creatures were so upset and immediately tried to think of ways to get their friends back. But they couldn&rsquo;t think of anything. There was nothing they could do. This made them all very sad but they wanted to let their friends know that they remembered them and always would. So they thought and thought until they came up with a wonderful plan.</p>
+
+            <p>Meanwhile, the people had finally arrived home with the horses. They let them out into their paddocks and hoped that once they were untied they would get their colors and wings back.</p>
+
+            <p>Everyone in the people&rsquo;s land came to see the strange creatures that their friends had brought home and the people told them all about the beautiful colors and the horses&rsquo; wings. They didn&rsquo;t tell them about the pixies because they didn&rsquo;t know they were there.</p>
+
+            <p>All the people waited and waited for the horses to become bright colors and grow wings. But nothing happened. The horses couldn&rsquo;t be truly happy because they had lost their families and friends. They could never return home again and so they stayed the dull colors and their wings never regrew.</p>
+
+            <p>The people finally understood what they had done by trapping the beautiful horses and taking them from their home. They became very sad.</p>
+
+            <p>&ldquo;How much better,&rdquo; they said to each other, &ldquo;to have left them where they belonged. Then we would always have had the memory of their beauty instead of the sad reminder of these unhappy horses.&rdquo;</p>
+
+            <p>In Erewan, the King horse and all the other horses and pixies were working hard on their plan to let their friends know they were thinking about them.</p>
+
+            <p>A few days later in the people&rsquo;s land, it rained and when the rain stopped a very strange thing happened. A beautiful, colorful arc appeared in the sky &mdash; a rainbow. All the people in the land came running to look at it.</p>
+
+            <p>&ldquo;That&rsquo;s all the colors the horses were,&rdquo; they said to each other. Then the people felt even sadder at what they had done.</p>
+
+            <p>The pixies and the horses looked at the colorful rainbow and they were happy. They knew that this was a special message from their king. It meant they would always be remembered.</p>
+
+            <p>The King horse had taken a little piece of color from every horse and he&rsquo;d woven it into the beautiful arc. Then he sent them soaring from his land to the people&rsquo;s land for everyone to see. At the same time he had made a very special magic to protect Erewan. From that day on the only way that people could come to Erewan was to find the end of the rainbow &mdash; and no-one ever could.</p>
+
+            <p>As time went on the horses and the pixies became used to their new land, and happiness returned to them, although the colors and their wings never did. And every time it rains and a rainbow appears all the horses and pixies feel a special joy because they know that they have never been forgotten. They can remember their bright and beautiful land, Erewan, which is now safe &mdash; at the end of the rainbow.</p>
+
+        </div>
+    </div>
+</main>
+
+<footer>
+    <div class="container">
+        <p>Margaret Stokes &mdash; <a href="mailto:margaret.stokes.ai@gmail.com">margaret.stokes.ai@gmail.com</a></p>
+        <p><a href="/">milamba.com</a> &mdash; online since 1997</p>
+    </div>
+</footer>
+
+</body>
+</html>
