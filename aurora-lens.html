@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora-Lens — Runtime Enforcement for Enterprise LLM Systems</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0c0c0e;
+    --paper: #f4f1eb;
+    --accent: #c8391a;
+    --muted: #6b6660;
+    --rule: #d4cfc8;
+    --code-bg: #1a1916;
+    --code-text: #e8e4dc;
+    --green: #1a6b3a;
+    --green-bg: #eef5f1;
+    --border-strong: #0c0c0e;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: var(--paper);
+    border-bottom: 1.5px solid var(--border-strong);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 3rem;
+    height: 60px;
+  }
+
+  .nav-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--ink); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1.5px solid var(--border-strong);
+    padding-top: 60px;
+  }
+
+  .hero-left {
+    padding: 8rem 4rem 6rem 3rem;
+    border-right: 1.5px solid var(--border-strong);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 2rem;
+    height: 1.5px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(3rem, 5vw, 4.5rem);
+    line-height: 1.08;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin-bottom: 2rem;
+    color: var(--ink);
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 42ch;
+    line-height: 1.7;
+    margin-bottom: 3rem;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--ink);
+    color: var(--paper);
+    text-decoration: none;
+    padding: 0.9rem 2rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: background 0.2s, color 0.2s;
+    align-self: flex-start;
+  }
+
+  .hero-cta:hover { background: var(--accent); }
+
+  .hero-right {
+    padding: 8rem 3rem 6rem 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .statement-block {
+    border-top: 1.5px solid var(--border-strong);
+    padding: 2.5rem 0;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.6s forwards;
+  }
+
+  .statement-block:nth-child(1) { animation-delay: 0.2s; }
+  .statement-block:nth-child(2) { animation-delay: 0.4s; }
+  .statement-block:nth-child(3) { animation-delay: 0.6s; }
+  .statement-block:last-child { border-bottom: 1.5px solid var(--border-strong); }
+
+  .statement-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+  }
+
+  .statement-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    border-bottom: 1.5px solid var(--border-strong);
+  }
+
+  .section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 6rem 3rem;
+  }
+
+  .section-header {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 4rem;
+    margin-bottom: 4rem;
+    align-items: start;
+  }
+
+  .section-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-top: 0.4rem;
+  }
+
+  h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 3.5vw, 2.8rem);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  /* ── WHAT IT DOES ── */
+  .capabilities-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 4rem;
+  }
+
+  .cap-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .cap-item {
+    border-top: 1.5px solid var(--rule);
+    padding: 1.8rem 0;
+    display: grid;
+    grid-template-columns: 1.5rem 1fr;
+    gap: 1.2rem;
+    align-items: start;
+  }
+
+  .cap-item:last-child { border-bottom: 1.5px solid var(--rule); }
+
+  .cap-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    padding-top: 0.2rem;
+  }
+
+  .cap-text strong {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    font-size: 0.95rem;
+  }
+
+  .cap-text span {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  /* ── WHY IT MATTERS ── */
+  .contrast-section {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .contrast-section .section-number { color: #6b6660; }
+
+  .contrast-section h2 { color: var(--paper); }
+
+  .contrast-section .section-header {
+    margin-bottom: 3rem;
+  }
+
+  .contrast-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr 1fr;
+    gap: 4rem;
+  }
+
+  .contrast-col-labels {
+    display: grid;
+    grid-column: 2 / 4;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1.5px solid #333;
+    margin-bottom: 0;
+  }
+
+  .contrast-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6b6660;
+  }
+
+  .contrast-label.active { color: var(--accent); }
+
+  .contrast-rows {
+    grid-column: 2 / 4;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .contrast-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    border-bottom: 1.5px solid #222;
+    padding: 1.5rem 0;
+  }
+
+  .contrast-cell {
+    font-size: 0.9rem;
+    color: #8a8580;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .contrast-cell.highlight {
+    color: var(--paper);
+  }
+
+  .contrast-cell::before {
+    content: '—';
+    color: #333;
+    flex-shrink: 0;
+  }
+
+  .contrast-cell.highlight::before {
+    content: '✓';
+    color: var(--accent);
+    font-size: 0.8rem;
+  }
+
+  /* ── TEST RESULTS ── */
+  .results-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 4rem;
+  }
+
+  .results-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+  }
+
+  .stat-block {
+    border-top: 3px solid var(--accent);
+    padding-top: 1.5rem;
+  }
+
+  .stat-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3.5rem;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    color: var(--ink);
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .audit-box {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.8;
+    grid-column: 1 / -1;
+  }
+
+  .audit-comment { color: #5a5750; }
+  .audit-key { color: #7ab8f5; }
+  .audit-val { color: #a8e6b4; }
+  .audit-red { color: #f07070; }
+  .audit-yellow { color: #f0c070; }
+
+  /* ── ARCHITECTURE ── */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 4rem;
+  }
+
+  .arch-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .arch-card {
+    border: 1.5px solid var(--rule);
+    padding: 2rem;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+
+  .arch-card:hover { border-color: var(--ink); }
+
+  .arch-card-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .arch-card h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+    margin-bottom: 0.75rem;
+  }
+
+  .arch-card p {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* ── POSITIONING ── */
+  .positioning-section {
+    background: var(--green-bg);
+  }
+
+  .positioning-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 4rem;
+  }
+
+  .positioning-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .lead-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    line-height: 1.45;
+    color: var(--ink);
+    max-width: 60ch;
+  }
+
+  .body-text {
+    font-size: 0.95rem;
+    color: var(--muted);
+    max-width: 58ch;
+    line-height: 1.75;
+  }
+
+  .target-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 1rem;
+  }
+
+  .target-item {
+    border-top: 1.5px solid var(--rule);
+    padding: 1.2rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .target-item:last-child { border-bottom: 1.5px solid var(--rule); }
+
+  .target-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── CTA / CONTACT ── */
+  .contact-section {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .contact-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 8rem 3rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+  }
+
+  .contact-left h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--paper);
+    margin-bottom: 1.5rem;
+  }
+
+  .contact-left p {
+    font-size: 0.95rem;
+    color: #8a8580;
+    line-height: 1.75;
+    max-width: 44ch;
+    margin-bottom: 2.5rem;
+  }
+
+  .contact-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--accent);
+    color: var(--paper);
+    text-decoration: none;
+    padding: 1rem 2rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: opacity 0.2s;
+  }
+
+  .contact-cta:hover { opacity: 0.85; }
+
+  .contact-right {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .contact-detail {
+    border-top: 1.5px solid #222;
+    padding: 1.5rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .contact-detail:last-child { border-bottom: 1.5px solid #222; }
+
+  .detail-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #5a5750;
+  }
+
+  .detail-value {
+    font-size: 0.95rem;
+    color: var(--paper);
+  }
+
+  .detail-value a {
+    color: var(--paper);
+    text-decoration: none;
+    border-bottom: 1.5px solid #444;
+    padding-bottom: 1px;
+    transition: border-color 0.2s;
+  }
+
+  .detail-value a:hover { border-color: var(--accent); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1.5px solid #222;
+    background: var(--ink);
+    color: #5a5750;
+    padding: 1.5rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 0 1.5rem; }
+    .nav-links { display: none; }
+
+    .hero { grid-template-columns: 1fr; }
+    .hero-left { border-right: none; border-bottom: 1.5px solid var(--border-strong); padding: 6rem 1.5rem 4rem; }
+    .hero-right { padding: 4rem 1.5rem; }
+
+    .section-header { grid-template-columns: 1fr; gap: 1rem; }
+    .section-inner { padding: 4rem 1.5rem; }
+
+    .capabilities-grid,
+    .results-grid,
+    .arch-grid,
+    .positioning-grid { grid-template-columns: 1fr; gap: 2rem; }
+
+    .contrast-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .contrast-col-labels,
+    .contrast-rows { grid-column: 1; }
+
+    .results-content { grid-template-columns: 1fr 1fr; }
+
+    .arch-content { grid-template-columns: 1fr; }
+
+    .contact-inner { grid-template-columns: 1fr; gap: 3rem; padding: 5rem 1.5rem; }
+
+    footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">Aurora-Lens</a>
+  <ul class="nav-links">
+    <li><a href="#what-it-does">Capabilities</a></li>
+    <li><a href="#why">Why It Matters</a></li>
+    <li><a href="#validation">Validation</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="eyebrow">Runtime Enforcement Layer</div>
+    <h1>Your LLM needs a<br><em>gatekeeper,</em><br>not a disclaimer.</h1>
+    <p class="hero-sub">Aurora-Lens sits in front of your LLM endpoints, intercepts outputs that fail admissibility checks before they reach users, and writes a tamper-evident record of every governed inference. No retrofitting. No policy theater.</p>
+    <a href="#contact" class="hero-cta">Request Technical Documentation →</a>
+  </div>
+  <div class="hero-right">
+    <div class="statement-block">
+      <div class="statement-label">The Problem</div>
+      <div class="statement-text">Every LLM governance tool you've seen operates <em>after</em> the damage is done.</div>
+    </div>
+    <div class="statement-block">
+      <div class="statement-label">The Distinction</div>
+      <div class="statement-text">Aurora-Lens enforces admissibility <em>inside</em> the inference boundary — before the response leaves the system.</div>
+    </div>
+    <div class="statement-block">
+      <div class="statement-label">The Consequence</div>
+      <div class="statement-text">This is not advisory governance. It <em>changes liability posture.</em></div>
+    </div>
+  </div>
+</div>
+
+<!-- WHAT IT DOES -->
+<section id="what-it-does">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-number">01 — Capabilities</div>
+      <h2>What Aurora-Lens enforces at inference time</h2>
+    </div>
+    <div class="capabilities-grid">
+      <div></div>
+      <ul class="cap-list">
+        <li class="cap-item">
+          <span class="cap-num">01</span>
+          <div class="cap-text">
+            <strong>Deterministic admissibility enforcement</strong>
+            <span>Every response passes through a governance kernel before delivery. Not probabilistic scoring — binary admissibility with explicit pass/fail logic.</span>
+          </div>
+        </li>
+        <li class="cap-item">
+          <span class="cap-num">02</span>
+          <div class="cap-text">
+            <strong>Pre-delivery interception</strong>
+            <span>Unsafe, contradictory, or policy-violating outputs are caught and blocked before users ever see them. The model never knows it was overridden.</span>
+          </div>
+        </li>
+        <li class="cap-item">
+          <span class="cap-num">03</span>
+          <div class="cap-text">
+            <strong>Cryptographically verifiable audit chain</strong>
+            <span>Every governed inference is logged in a hash-linked, HMAC-sealed chain. Tamper-evident by construction. Suitable for regulatory review.</span>
+          </div>
+        </li>
+        <li class="cap-item">
+          <span class="cap-num">04</span>
+          <div class="cap-text">
+            <strong>Drop-in proxy integration</strong>
+            <span>Works in front of any existing LLM API. No model retraining. No SDK changes. If you have an OpenAI-compatible endpoint, Aurora-Lens fits in front of it today.</span>
+          </div>
+        </li>
+        <li class="cap-item">
+          <span class="cap-num">05</span>
+          <div class="cap-text">
+            <strong>Streaming and high-concurrency support</strong>
+            <span>Stream-safe cancellation handling. Mid-stream interception without 500 errors. Validated under adversarial load conditions.</span>
+          </div>
+        </li>
+        <li class="cap-item">
+          <span class="cap-num">06</span>
+          <div class="cap-text">
+            <strong>Forensic preservation of original output</strong>
+            <span>The raw model response is stored, not discarded. Every intervention is auditable against what the model actually said.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- WHY IT MATTERS -->
+<section id="why" class="contrast-section">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-number">02 — Positioning</div>
+      <h2>Why the timing of enforcement is everything</h2>
+    </div>
+    <div class="contrast-grid">
+      <div></div>
+      <div style="grid-column: 2 / 4; display: flex; flex-direction: column;">
+        <div class="contrast-col-labels">
+          <span class="contrast-label">Standard governance tooling</span>
+          <span class="contrast-label active">Aurora-Lens</span>
+        </div>
+        <div class="contrast-rows">
+          <div class="contrast-row">
+            <div class="contrast-cell">Operates at evaluation time — after deployment</div>
+            <div class="contrast-cell highlight">Operates at inference time — inside the request boundary</div>
+          </div>
+          <div class="contrast-row">
+            <div class="contrast-cell">Policy documentation layer — advisory, not binding</div>
+            <div class="contrast-cell highlight">Enforcement layer — admissibility is binary and structural</div>
+          </div>
+          <div class="contrast-row">
+            <div class="contrast-cell">Classification overlays applied post-hoc</div>
+            <div class="contrast-cell highlight">Interception occurs before delivery, not after</div>
+          </div>
+          <div class="contrast-row">
+            <div class="contrast-cell">Audit logs are reconstructed approximations</div>
+            <div class="contrast-cell highlight">Audit chain is cryptographically sealed at inference time</div>
+          </div>
+          <div class="contrast-row">
+            <div class="contrast-cell">Non-answers are treated as system failures</div>
+            <div class="contrast-cell highlight">Explicit refusal is a governed, correct terminal outcome</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALIDATION -->
+<section id="validation">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-number">03 — Validation</div>
+      <h2>Adversarial harness results</h2>
+    </div>
+    <div class="results-grid">
+      <div></div>
+      <div class="results-content">
+        <div class="stat-block">
+          <div class="stat-number">237/237</div>
+          <div class="stat-label">Stress scenarios passed across mixed streaming and concurrent load conditions</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-number">465+</div>
+          <div class="stat-label">Full test suite passing, including malformed payload resilience and mid-stream cancellation</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-number">5/5</div>
+          <div class="stat-label">Real-LLM integration tests passing against live endpoints</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-number">Zero</div>
+          <div class="stat-label">Silent integrity failures — audit verification distinguishes anchored chains from unanchored slices explicitly</div>
+        </div>
+
+        <div class="audit-box">
+<span class="audit-comment">// Sample audit chain entry — tamper-evident, hash-linked</span>
+{
+  <span class="audit-key">"record_id"</span>:      <span class="audit-val">"rec_8f3a2c..."</span>,
+  <span class="audit-key">"timestamp"</span>:      <span class="audit-val">"2025-11-29T14:32:07.881Z"</span>,
+  <span class="audit-key">"model"</span>:           <span class="audit-val">"gpt-4o"</span>,
+  <span class="audit-key">"admissible"</span>:     <span class="audit-red">false</span>,
+  <span class="audit-key">"refusal_reason"</span>: <span class="audit-val">"policy_violation:contradictory_claim"</span>,
+  <span class="audit-key">"original_preserved"</span>: <span class="audit-red">true</span>,
+  <span class="audit-key">"chain_integrity"</span>: <span class="audit-val">"anchored"</span>,
+  <span class="audit-key">"hmac"</span>:            <span class="audit-yellow">"sha256:d4e9f1..."</span>,
+  <span class="audit-key">"prev_hash"</span>:       <span class="audit-yellow">"sha256:a1b2c3..."</span>
+}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-number">04 — Architecture</div>
+      <h2>Built for enterprise integration</h2>
+    </div>
+    <div class="arch-grid">
+      <div></div>
+      <div class="arch-content">
+        <div class="arch-card">
+          <div class="arch-card-tag">Core Component</div>
+          <h3>Proxy Enforcement Model</h3>
+          <p>Sits transparently in front of LLM endpoints. No SDK changes required. Intercepts at the HTTP layer before responses propagate downstream.</p>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-tag">Core Component</div>
+          <h3>Deterministic Governance Kernel</h3>
+          <p>Admissibility decisions are rule-based and deterministic, not probabilistic. Same input, same enforcement outcome. Auditable by design.</p>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-tag">Core Component</div>
+          <h3>Persistent State Tracking</h3>
+          <p>Maintains reasoning context across multi-turn sessions. Enforces consistency constraints that span individual inference calls.</p>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-tag">Core Component</div>
+          <h3>Policy Profile Versioning</h3>
+          <p>Enforcement rules are versioned, auditable, and deployable without system restarts. Policy changes are traceable to specific audit chain entries.</p>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-tag">Integration</div>
+          <h3>Transparent Forensic Logging</h3>
+          <p>Original model outputs are preserved alongside governed outputs. Every intervention is traceable to its enforcement rule, timestamp, and chain position.</p>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-tag">Integration</div>
+          <h3>Enterprise AI Platform Compatibility</h3>
+          <p>Designed to fit into existing AI infrastructure and security stacks. OpenAI-compatible proxy endpoints. Works with any model behind an API.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POSITIONING -->
+<section id="positioning" class="positioning-section">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-number">05 — Strategic Fit</div>
+      <h2>Who this is built for</h2>
+    </div>
+    <div class="positioning-grid">
+      <div></div>
+      <div class="positioning-content">
+        <p class="lead-text">If your AI deployment has consequences — financial, legal, medical, regulatory — you need a record that shows every decision was governed, not guessed at.</p>
+        <p class="body-text">Aurora-Lens is not consumer tooling. It is infrastructure for organisations where an AI-generated output that cannot be proven admissible is a liability event. The audit chain exists precisely for the moment someone asks: <em>prove it.</em></p>
+        <ul class="target-list">
+          <li class="target-item"><span class="target-dot"></span>Enterprise AI platforms requiring compliance-grade audit trails</li>
+          <li class="target-item"><span class="target-dot"></span>AI security vendors building regulated-industry products</li>
+          <li class="target-item"><span class="target-dot"></span>Model providers serving healthcare, legal, or financial clients</li>
+          <li class="target-item"><span class="target-dot"></span>Infrastructure-level LLM hosts under emerging AI regulation</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="contact-section">
+  <div class="contact-inner">
+    <div class="contact-left">
+      <h2>Exploring strategic acquisition or deep integration.</h2>
+      <p>Technical documentation and full validation materials are available to qualified partners on request. Engagement is limited to a small number of organisations at this stage.</p>
+      <a href="mailto:milamba@milamba.com" class="contact-cta">Start a Conversation →</a>
+    </div>
+    <div class="contact-right">
+      <div class="contact-detail">
+        <span class="detail-label">Contact</span>
+        <span class="detail-value">Margaret Stokes</span>
+      </div>
+      <div class="contact-detail">
+        <span class="detail-label">Email</span>
+        <span class="detail-value"><a href="mailto:milamba@milamba.com">milamba@milamba.com</a></span>
+      </div>
+      <div class="contact-detail">
+        <span class="detail-label">Technical Documentation</span>
+        <span class="detail-value"><a href="https://milamba.com/aurora" target="_blank">milamba.com/aurora</a></span>
+      </div>
+      <div class="contact-detail">
+        <span class="detail-label">Enquiry Type</span>
+        <span class="detail-value">Strategic acquisition, licensing, or deep integration partnerships</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>Aurora-Lens — Admissibility-Controlled Inference Enforcement</span>
+  <span>Provisional patent filed · Technical documentation on request</span>
+</footer>
+
+</body>
+</html>
