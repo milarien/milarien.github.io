@@ -623,6 +623,230 @@
     </div>
 </section>
 
+<!-- PROCESS FLOW DIAGRAM -->
+<div style="border-bottom: 1px solid var(--rule); padding: 3rem 0;">
+<div class="container">
+
+<style>
+  .flow-diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    font-family: inherit;
+  }
+  .flow-node {
+    width: 100%;
+    border: 1px solid var(--rule);
+    padding: 1rem 1.25rem;
+    position: relative;
+    background: transparent;
+  }
+  .flow-node.narrow   { max-width: 280px; text-align: center; }
+  .flow-node.gate     { border-color: var(--muted); }
+  .flow-node.admit    { max-width: 290px; border-color: #2d7a3a; }
+  .flow-node.refuse   { max-width: 290px; border-color: var(--accent); }
+  .flow-node.engine   { max-width: 290px; }
+  .flow-node.ledger   { max-width: 290px; border-color: var(--accent); opacity: 0.8; }
+  .flow-node.output   { max-width: 280px; text-align: center; border-color: #2d7a3a; }
+  .flow-node-sub {
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+  }
+  .flow-node-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .flow-node.gate   .flow-node-title { color: var(--ink); }
+  .flow-node.admit  .flow-node-title { color: #2d7a3a; }
+  .flow-node.refuse .flow-node-title { color: var(--accent); }
+  .flow-node.output .flow-node-title { color: #2d7a3a; }
+  .flow-node-items {
+    margin-top: 0.6rem;
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .flow-node-items li {
+    font-size: 0.8rem;
+    color: var(--muted);
+    padding-left: 1rem;
+    position: relative;
+  }
+  .flow-node-items li::before {
+    content: '–';
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+  }
+  .flow-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .flow-arrow-line {
+    width: 1px;
+    height: 28px;
+    background: var(--rule);
+  }
+  .flow-arrow-head {
+    width: 0; height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid var(--muted);
+  }
+  .flow-split {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+  }
+  .flow-branch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    max-width: 320px;
+  }
+  .flow-split-line {
+    height: 28px;
+    width: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
+  .flow-split-line::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    height: 1px;
+    background: var(--rule);
+  }
+  .flow-branch:first-child .flow-split-line::before { left: 50%; right: 0; }
+  .flow-branch:last-child  .flow-split-line::before { left: 0; right: 50%; }
+  .flow-split-line::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 100%;
+    background: var(--rule);
+  }
+  .flow-split-arrowhead {
+    width: 0; height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid var(--muted);
+  }
+  .flow-branch-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .flow-branch-label.admit-lbl  { color: #2d7a3a; }
+  .flow-branch-label.refuse-lbl { color: var(--accent); }
+</style>
+
+<figure class="flow-diagram" aria-label="Epistemic Governance Process Flow">
+
+  <div class="flow-node narrow">
+    <div class="flow-node-sub">Entry Point</div>
+    <div class="flow-node-title">User Input</div>
+  </div>
+
+  <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
+
+  <div class="flow-node">
+    <div class="flow-node-sub">Layer 01 — Structure Extraction</div>
+    <div class="flow-node-title">Interpretation Layer</div>
+    <ul class="flow-node-items">
+      <li>Roles</li>
+      <li>Domains</li>
+      <li>Spans</li>
+    </ul>
+  </div>
+
+  <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
+
+  <div class="flow-node gate">
+    <div class="flow-node-sub">Spine — Epistemic Governance</div>
+    <div class="flow-node-title">Admissibility Gate</div>
+    <ul class="flow-node-items">
+      <li>Structural validity</li>
+      <li>Domain authority</li>
+      <li>Constraint satisfaction</li>
+      <li>Ambiguity resolution</li>
+    </ul>
+  </div>
+
+  <div class="flow-split">
+
+    <div class="flow-branch">
+      <div class="flow-split-line"></div>
+      <div class="flow-split-arrowhead"></div>
+      <div class="flow-branch-label admit-lbl">Admit</div>
+      <div class="flow-node admit">
+        <div class="flow-node-sub">Resolution</div>
+        <div class="flow-node-title">Admit</div>
+        <ul class="flow-node-items"><li>Resolution permitted</li></ul>
+      </div>
+      <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
+      <div class="flow-node engine">
+        <div class="flow-node-sub">Layer 02</div>
+        <div class="flow-node-title">Expression Engine</div>
+        <ul class="flow-node-items">
+          <li>LLM / Generator</li>
+          <li>Controlled output</li>
+        </ul>
+      </div>
+      <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
+      <div class="flow-node output">
+        <div class="flow-node-sub">Result</div>
+        <div class="flow-node-title">Final Output</div>
+      </div>
+    </div>
+
+    <div class="flow-branch">
+      <div class="flow-split-line"></div>
+      <div class="flow-split-arrowhead"></div>
+      <div class="flow-branch-label refuse-lbl">Stop / Refuse</div>
+      <div class="flow-node refuse">
+        <div class="flow-node-sub">Blocked Action</div>
+        <div class="flow-node-title">Stop / Refuse</div>
+        <ul class="flow-node-items"><li>Blocked action</li></ul>
+      </div>
+      <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
+      <div class="flow-node ledger">
+        <div class="flow-node-sub">Audit Trail</div>
+        <div class="flow-node-title">Forensic Ledger</div>
+        <ul class="flow-node-items">
+          <li>trace_id</li>
+          <li>failed rules</li>
+          <li>state_hash</li>
+          <li>timestamp</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+</figure>
+
+</div>
+</div>
+
 <!-- SCENARIO -->
 <div class="scenario-section">
     <div class="container">
