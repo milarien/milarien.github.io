@@ -517,7 +517,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 6rem;
-    align-items: center;
+    align-items: start;
   }
 
   .contact-left h2 {
@@ -593,6 +593,161 @@
 
   .detail-value a:hover { border-color: var(--accent); }
 
+  /* ── CONTACT FORM ── */
+  .form-section {
+    background: #111110;
+    border-top: 1.5px solid #222;
+  }
+
+  .form-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 5rem 3rem 6rem;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 4rem;
+  }
+
+  .form-label-col {
+    padding-top: 0.4rem;
+  }
+
+  .form-section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #5a5750;
+  }
+
+  .form-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .form-row {
+    border-top: 1.5px solid #222;
+    padding: 1.5rem 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .form-row.full {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row:last-of-type {
+    border-bottom: 1.5px solid #222;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .field-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #5a5750;
+  }
+
+  .field-input,
+  .field-select,
+  .field-textarea {
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid #333;
+    color: var(--paper);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.95rem;
+    padding: 0.6rem 0;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .field-input:focus,
+  .field-select:focus,
+  .field-textarea:focus {
+    border-bottom-color: var(--accent);
+  }
+
+  .field-input::placeholder,
+  .field-textarea::placeholder {
+    color: #3a3935;
+  }
+
+  .field-select {
+    appearance: none;
+    cursor: pointer;
+    color: #8a8580;
+  }
+
+  .field-select option {
+    background: #1a1916;
+    color: var(--paper);
+  }
+
+  .field-textarea {
+    resize: none;
+    height: 100px;
+    line-height: 1.6;
+  }
+
+  .form-submit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 2rem;
+    gap: 2rem;
+  }
+
+  .form-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: #5a5750;
+    letter-spacing: 0.04em;
+    max-width: 36ch;
+    line-height: 1.6;
+  }
+
+  .form-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--accent);
+    color: var(--paper);
+    border: none;
+    padding: 1rem 2rem;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+  }
+
+  .form-btn:hover { opacity: 0.85; }
+  .form-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .form-status {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    padding-top: 1rem;
+    min-height: 1.5rem;
+  }
+
+  .form-status.success { color: #6abf8a; }
+  .form-status.error { color: var(--accent); }
+
   /* ── FOOTER ── */
   footer {
     border-top: 1.5px solid #222;
@@ -633,6 +788,10 @@
     .arch-content { grid-template-columns: 1fr; }
 
     .contact-inner { grid-template-columns: 1fr; gap: 3rem; padding: 5rem 1.5rem; }
+
+    .form-inner { grid-template-columns: 1fr; gap: 2rem; padding: 4rem 1.5rem; }
+    .form-row { grid-template-columns: 1fr; }
+    .form-submit-row { flex-direction: column; align-items: flex-start; }
 
     footer { flex-direction: column; gap: 0.5rem; text-align: center; }
   }
@@ -897,7 +1056,7 @@
     <div class="contact-left">
       <h2>Exploring strategic acquisition or deep integration.</h2>
       <p>Technical documentation and full validation materials are available to qualified partners on request. Engagement is limited to a small number of organisations at this stage.</p>
-      <a href="mailto:margaret.stokes.ai@gmail.com" class="contact-cta">Start a Conversation →</a>
+      <a href="/cdn-cgi/l/email-protection#bfd2decdd8decddacb91cccbd0d4dacc91ded6ffd8d2ded6d391dcd0d2" class="contact-cta">Email Directly →</a>
     </div>
     <div class="contact-right">
       <div class="contact-detail">
@@ -906,7 +1065,7 @@
       </div>
       <div class="contact-detail">
         <span class="detail-label">Email</span>
-        <span class="detail-value"><a href="mailto:margaret.stokes.ai@gmail.com">margaret.stokes.ai@gmail.com</a></span>
+        <span class="detail-value"><a href="/cdn-cgi/l/email-protection#b1dcd0c3d6d0c3d4c59fc2c5dedad4c29fd0d8f1d6dcd0d8dd9fd2dedc"><span class="__cf_email__" data-cfemail="0469657663657661702a77706b6f61772a656d446369656d682a676b69">[email&#160;protected]</span></a></span>
       </div>
       <div class="contact-detail">
         <span class="detail-label">Technical Documentation</span>
@@ -920,10 +1079,85 @@
   </div>
 </section>
 
+<!-- CONTACT FORM -->
+<section class="form-section">
+  <div class="form-inner">
+    <div class="form-label-col">
+      <div class="form-section-label">06 — Enquiry</div>
+    </div>
+    <div class="form-wrapper">
+      <form id="contact-form" action="https://formspree.io/f/xbdavbna" method="POST">
+        <div class="form-row">
+          <div class="field-group">
+            <label class="field-label" for="name">Name</label>
+            <input class="field-input" type="text" id="name" name="name" placeholder="Your name" required>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="org">Organisation</label>
+            <input class="field-input" type="text" id="org" name="organisation" placeholder="Company or institution" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field-group">
+            <label class="field-label" for="email">Email</label>
+            <input class="field-input" type="email" id="email" name="email" placeholder="you@organisation.com" required>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="enquiry-type">Enquiry type</label>
+            <select class="field-select" id="enquiry-type" name="enquiry_type">
+              <option value="" disabled selected>Select one</option>
+              <option value="acquisition">Strategic acquisition</option>
+              <option value="licensing">Licensing discussion</option>
+              <option value="integration">Deep integration partnership</option>
+              <option value="technical">Technical documentation request</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row full">
+          <div class="field-group">
+            <label class="field-label" for="message">Message</label>
+            <textarea class="field-textarea" id="message" name="message" placeholder="What would you like to discuss?"></textarea>
+          </div>
+        </div>
+        <div class="form-submit-row">
+          <p class="form-note">Responses within one business day. Documentation available under NDA on request.</p>
+          <button type="submit" class="form-btn" id="submit-btn">Send Enquiry →</button>
+        </div>
+        <div class="form-status" id="form-status"></div>
+      </form>
+    </div>
+  </div>
+</section>
+
 <footer>
   <span>Aurora-Lens — Admissibility-Controlled Inference Enforcement</span>
   <span>Provisional patent filed · Technical documentation on request</span>
 </footer>
 
-</body>
-</html>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  const form = document.getElementById('contact-form');
+  const btn = document.getElementById('submit-btn');
+  const status = document.getElementById('form-status');
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    status.textContent = '';
+    status.className = 'form-status';
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (response.ok) {
+        status.textContent = '— Enquiry received. You will hear back within one business day.';
+        status.className = 'form-status success';
+        form.reset();
+        btn.textContent = 'Sent ✓';
+      } else {
+        throw new Erro
