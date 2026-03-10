@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aurora Lens — Inference-time governance for large language models</title>
+<title>Aurora-Lens — Runtime Enforcement for Enterprise LLM Systems</title>
 <meta property="og:url" content="https://milamba.com/aurora-lens.html">
-<meta property="og:title" content="Aurora Lens — Inference-time governance for large language models">
-<meta property="og:description" content="A runtime governance asset that determines whether model output is admissible before it reaches the application, and records the outcome in a deterministic audit trail.">
+<meta property="og:title" content="Aurora-Lens — Runtime Enforcement for Enterprise LLM Systems">
+<meta property="og:description" content="Deterministic inference-time governance. Not probabilistic. Not advisory. Structurally binding.">
 <meta property="og:image" content="https://milamba.com/logo.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -122,7 +122,7 @@
     line-height: 1.08;
     font-weight: 400;
     letter-spacing: -0.02em;
-    margin-bottom: 1.25rem;
+    margin-bottom: 2rem;
     color: var(--ink);
   }
 
@@ -134,19 +134,12 @@
   .hero-sub {
     font-size: 1.1rem;
     color: var(--muted);
-    max-width: 44ch;
+    max-width: 42ch;
     line-height: 1.7;
     margin-bottom: 3rem;
   }
 
-  .hero-ctas {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-    align-items: flex-start;
-  }
-
-  .btn-primary {
+  .hero-cta {
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
@@ -158,28 +151,11 @@
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    transition: background 0.2s;
-  }
-
-  .btn-primary:hover { background: var(--accent); }
-
-  .btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: transparent;
-    color: var(--ink);
-    text-decoration: none;
-    padding: 0.9rem 2rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    border: 1.5px solid var(--ink);
     transition: background 0.2s, color 0.2s;
+    align-self: flex-start;
   }
 
-  .btn-secondary:hover { background: var(--ink); color: var(--paper); }
+  .hero-cta:hover { background: var(--accent); }
 
   .hero-right {
     padding: 8rem 3rem 6rem 4rem;
@@ -258,34 +234,13 @@
     letter-spacing: -0.01em;
   }
 
-  /* ── PROSE GRID ── */
-  .prose-grid {
+  /* ── WHAT IT DOES ── */
+  .capabilities-grid {
     display: grid;
     grid-template-columns: 200px 1fr;
     gap: 4rem;
   }
 
-  .prose-body {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    max-width: 68ch;
-  }
-
-  .prose-body p {
-    font-size: 0.975rem;
-    color: var(--muted);
-    line-height: 1.78;
-  }
-
-  .prose-body p.lead {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.35rem;
-    color: var(--ink);
-    line-height: 1.45;
-  }
-
-  /* ── CAPABILITIES / PROPERTIES ── */
   .cap-list {
     list-style: none;
     display: flex;
@@ -323,18 +278,85 @@
     font-size: 0.9rem;
   }
 
-  /* ── WHY IT MATTERS (dark) ── */
+  /* ── WHY IT MATTERS ── */
   .contrast-section {
     background: var(--ink);
     color: var(--paper);
   }
 
   .contrast-section .section-number { color: #6b6660; }
-  .contrast-section h2 { color: var(--paper); }
-  .contrast-section .prose-body p { color: #8a8580; }
-  .contrast-section .prose-body p.lead { color: var(--paper); }
 
-  /* ── EVIDENCE / TEST RESULTS ── */
+  .contrast-section h2 { color: var(--paper); }
+
+  .contrast-section .section-header {
+    margin-bottom: 3rem;
+  }
+
+  .contrast-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr 1fr;
+    gap: 4rem;
+  }
+
+  .contrast-col-labels {
+    display: grid;
+    grid-column: 2 / 4;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1.5px solid #333;
+    margin-bottom: 0;
+  }
+
+  .contrast-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6b6660;
+  }
+
+  .contrast-label.active { color: var(--accent); }
+
+  .contrast-rows {
+    grid-column: 2 / 4;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .contrast-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    border-bottom: 1.5px solid #222;
+    padding: 1.5rem 0;
+  }
+
+  .contrast-cell {
+    font-size: 0.9rem;
+    color: #8a8580;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .contrast-cell.highlight {
+    color: var(--paper);
+  }
+
+  .contrast-cell::before {
+    content: '—';
+    color: #333;
+    flex-shrink: 0;
+  }
+
+  .contrast-cell.highlight::before {
+    content: '✓';
+    color: var(--accent);
+    font-size: 0.8rem;
+  }
+
+  /* ── TEST RESULTS ── */
   .results-grid {
     display: grid;
     grid-template-columns: 200px 1fr;
@@ -382,48 +404,51 @@
   .audit-red { color: #f07070; }
   .audit-yellow { color: #f0c070; }
 
-  .body-text {
-    font-size: 0.95rem;
-    color: var(--muted);
-    max-width: 58ch;
-    line-height: 1.75;
-  }
-
-  /* ── WHAT IS INCLUDED ── */
-  .included-grid {
+  /* ── ARCHITECTURE ── */
+  .arch-grid {
     display: grid;
     grid-template-columns: 200px 1fr;
     gap: 4rem;
   }
 
-  .included-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
+  .arch-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
   }
 
-  .included-item {
-    border-top: 1.5px solid var(--rule);
-    padding: 1.25rem 0;
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    font-size: 0.925rem;
-    color: var(--ink);
+  .arch-card {
+    border: 1.5px solid var(--rule);
+    padding: 2rem;
+    position: relative;
+    transition: border-color 0.2s;
   }
 
-  .included-item:last-child { border-bottom: 1.5px solid var(--rule); }
+  .arch-card:hover { border-color: var(--ink); }
 
-  .included-marker {
+  .arch-card-tag {
     font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--accent);
-    padding-top: 0.15rem;
-    flex-shrink: 0;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
   }
 
-  /* ── STRATEGIC FIT ── */
+  .arch-card h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+    margin-bottom: 0.75rem;
+  }
+
+  .arch-card p {
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* ── POSITIONING ── */
   .positioning-section {
     background: var(--green-bg);
   }
@@ -446,6 +471,13 @@
     line-height: 1.45;
     color: var(--ink);
     max-width: 60ch;
+  }
+
+  .body-text {
+    font-size: 0.95rem;
+    color: var(--muted);
+    max-width: 58ch;
+    line-height: 1.75;
   }
 
   .target-list {
@@ -506,27 +538,10 @@
     color: #8a8580;
     line-height: 1.75;
     max-width: 44ch;
-    margin-bottom: 1.5rem;
-  }
-
-  .contact-left .origin-note {
-    font-size: 0.875rem;
-    color: #6b6660;
-    line-height: 1.75;
-    max-width: 48ch;
     margin-bottom: 2.5rem;
-    border-left: 2px solid #333;
-    padding-left: 1.25rem;
   }
 
-  .contact-ctas {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-    align-items: flex-start;
-  }
-
-  .contact-cta-primary {
+  .contact-cta {
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
@@ -541,25 +556,7 @@
     transition: opacity 0.2s;
   }
 
-  .contact-cta-primary:hover { opacity: 0.85; }
-
-  .contact-cta-secondary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: transparent;
-    color: var(--paper);
-    text-decoration: none;
-    padding: 1rem 2rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    border: 1.5px solid #444;
-    transition: border-color 0.2s;
-  }
-
-  .contact-cta-secondary:hover { border-color: var(--paper); }
+  .contact-cta:hover { opacity: 0.85; }
 
   .contact-right {
     display: flex;
@@ -755,67 +752,6 @@
   .form-status.success { color: #6abf8a; }
   .form-status.error { color: var(--accent); }
 
-  /* ── REFERENCES ── */
-  .references-section {
-    background: #111110;
-    border-top: 1.5px solid #222;
-  }
-
-  .references-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 4rem 3rem;
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 4rem;
-  }
-
-  .ref-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #5a5750;
-    padding-top: 0.4rem;
-  }
-
-  .ref-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .ref-item {
-    border-top: 1.5px solid #222;
-    padding: 1.25rem 0;
-    display: grid;
-    grid-template-columns: 160px 1fr;
-    gap: 2rem;
-    align-items: baseline;
-  }
-
-  .ref-item:last-child { border-bottom: 1.5px solid #222; }
-
-  .ref-type {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #5a5750;
-  }
-
-  .ref-link {
-    font-size: 0.9rem;
-    color: #8a8580;
-    text-decoration: none;
-    border-bottom: 1.5px solid #333;
-    padding-bottom: 1px;
-    transition: color 0.2s, border-color 0.2s;
-    word-break: break-all;
-  }
-
-  .ref-link:hover { color: var(--paper); border-color: var(--accent); }
-
   /* ── FOOTER ── */
   footer {
     border-top: 1.5px solid #222;
@@ -842,21 +778,24 @@
     .section-header { grid-template-columns: 1fr; gap: 1rem; }
     .section-inner { padding: 4rem 1.5rem; }
 
-    .prose-grid,
+    .capabilities-grid,
     .results-grid,
-    .included-grid,
+    .arch-grid,
     .positioning-grid { grid-template-columns: 1fr; gap: 2rem; }
 
+    .contrast-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .contrast-col-labels,
+    .contrast-rows { grid-column: 1; }
+
     .results-content { grid-template-columns: 1fr 1fr; }
+
+    .arch-content { grid-template-columns: 1fr; }
 
     .contact-inner { grid-template-columns: 1fr; gap: 3rem; padding: 5rem 1.5rem; }
 
     .form-inner { grid-template-columns: 1fr; gap: 2rem; padding: 4rem 1.5rem; }
     .form-row { grid-template-columns: 1fr; }
     .form-submit-row { flex-direction: column; align-items: flex-start; }
-
-    .references-inner { grid-template-columns: 1fr; gap: 2rem; padding: 3rem 1.5rem; }
-    .ref-item { grid-template-columns: 1fr; gap: 0.5rem; }
 
     footer { flex-direction: column; gap: 0.5rem; text-align: center; }
   }
@@ -866,13 +805,13 @@
 
 <!-- NAV -->
 <nav>
-  <a class="nav-logo" href="#">Aurora Lens</a>
+  <a class="nav-logo" href="#">Aurora-Lens</a>
   <ul class="nav-links">
     <li><a href="/">milamba.com</a></li>
-    <li><a href="#why">Why it matters</a></li>
-    <li><a href="#different">What's different</a></li>
-    <li><a href="#evidence">Evidence</a></li>
-    <li><a href="#strategic-fit">Strategic fit</a></li>
+    <li><a href="#what-it-does">Capabilities</a></li>
+    <li><a href="#why">Why It Matters</a></li>
+    <li><a href="#validation">Validation</a></li>
+    <li><a href="#architecture">Architecture</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
 </nav>
@@ -880,105 +819,77 @@
 <!-- HERO -->
 <div class="hero">
   <div class="hero-left">
-    <div class="eyebrow">Runtime Governance Asset</div>
-    <h1>Aurora Lens</h1>
-    <p class="hero-sub">Inference-time governance for large language models. Aurora Lens evaluates whether model output is admissible before it reaches the application, and records the outcome in a deterministic audit trail.</p>
-    <div class="hero-ctas">
-      <a href="mailto:margaret.stokes.ai@gmail.com?subject=Technical Brief Request — Aurora Lens" class="btn-primary">Request Technical Brief →</a>
-      <a href="mailto:margaret.stokes.ai@gmail.com?subject=Strategic Interest — Aurora Lens" class="btn-secondary">Email Regarding Strategic Interest →</a>
-    </div>
+    <div class="eyebrow">Runtime Enforcement Layer</div>
+    <h1>Your LLM needs a<br><em>gatekeeper,</em><br>not a disclaimer.</h1>
+    <p class="hero-sub">Aurora-Lens sits in front of your LLM endpoints, intercepts outputs that fail admissibility checks before they reach users, and writes a tamper-evident record of every governed inference. No retrofitting. No policy theater.</p>
+    <a href="#contact" class="hero-cta">Request Technical Documentation →</a>
   </div>
   <div class="hero-right">
     <div class="statement-block">
-      <div class="statement-label">The gap</div>
-      <div class="statement-text">Most AI controls sit before deployment or after failure.</div>
+      <div class="statement-label">The Problem</div>
+      <div class="statement-text">Every LLM governance tool you've seen operates <em>after</em> the damage is done.</div>
     </div>
     <div class="statement-block">
-      <div class="statement-label">The interval</div>
-      <div class="statement-text">Aurora Lens governs the live interval in which model output becomes <em>operational action.</em></div>
+      <div class="statement-label">The Distinction</div>
+      <div class="statement-text">Aurora-Lens enforces admissibility <em>inside</em> the inference boundary — before the response leaves the system.</div>
     </div>
     <div class="statement-block">
-      <div class="statement-label">The consequence</div>
-      <div class="statement-text">Admissibility is determined before delivery. Not described afterward.</div>
+      <div class="statement-label">The Consequence</div>
+      <div class="statement-text">This is not advisory governance. It <em>changes liability posture.</em></div>
     </div>
   </div>
 </div>
 
-<!-- WHY THIS ASSET MATTERS -->
-<section id="why">
+<!-- WHAT IT DOES -->
+<section id="what-it-does">
   <div class="section-inner">
     <div class="section-header">
-      <div class="section-number">01 — The gap</div>
-      <h2>Why this asset matters</h2>
+      <div class="section-number">01 — Capabilities</div>
+      <h2>What Aurora-Lens enforces at inference time</h2>
     </div>
-    <div class="prose-grid">
+    <div class="capabilities-grid">
       <div></div>
-      <div class="prose-body">
-        <p class="lead">Aurora Lens addresses a structural gap in deployed AI systems.</p>
-        <p>Benchmarks, red-teaming, and monitoring can reveal risk. They do not govern what the model is permitted to say at the moment of output. Aurora Lens does.</p>
-        <p>This matters wherever unsupported or illegitimate output creates operational, legal, regulatory, or safety exposure.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- WHAT MAKES IT DIFFERENT -->
-<section id="different" class="contrast-section">
-  <div class="section-inner">
-    <div class="section-header">
-      <div class="section-number">02 — Distinction</div>
-      <h2>What makes Aurora Lens different</h2>
-    </div>
-    <div class="prose-grid">
-      <div></div>
-      <div class="prose-body">
-        <p class="lead">Aurora Lens is not a benchmark, not a dashboard, and not a prompt wrapper.</p>
-        <p>It was built to address a persistent failure in deployed language systems: fluent output presented as legitimate knowledge under uncertainty, ambiguity, or missing evidence.</p>
-      </div>
-    </div>
-    <div class="prose-grid" style="margin-top: 4rem;">
-      <div></div>
-      <ul class="cap-list" style="border-top: none;">
-        <li class="cap-item" style="border-top-color: #333;">
-          <span class="cap-num" style="color:#5a5750;">01</span>
+      <ul class="cap-list">
+        <li class="cap-item">
+          <span class="cap-num">01</span>
           <div class="cap-text">
-            <strong style="color:var(--paper);">Deterministic admissibility enforcement</strong>
-            <span>Same input, same enforcement outcome. Not probabilistic scoring.</span>
+            <strong>Deterministic admissibility enforcement</strong>
+            <span>Every response passes through a governance kernel before delivery. Not probabilistic scoring — binary admissibility with explicit pass/fail logic.</span>
           </div>
         </li>
-        <li class="cap-item" style="border-top-color: #333;">
-          <span class="cap-num" style="color:#5a5750;">02</span>
+        <li class="cap-item">
+          <span class="cap-num">02</span>
           <div class="cap-text">
-            <strong style="color:var(--paper);">Refusal as a valid terminal outcome</strong>
-            <span>Non-answers are governed correct outcomes, not system failures.</span>
+            <strong>Pre-delivery interception</strong>
+            <span>Unsafe, contradictory, or policy-violating outputs are caught and blocked before users ever see them. The model never knows it was overridden.</span>
           </div>
         </li>
-        <li class="cap-item" style="border-top-color: #333;">
-          <span class="cap-num" style="color:#5a5750;">03</span>
+        <li class="cap-item">
+          <span class="cap-num">03</span>
           <div class="cap-text">
-            <strong style="color:var(--paper);">Explicit handling of ambiguity and insufficient evidence</strong>
-            <span>The system names what it cannot resolve, rather than collapsing to a guess.</span>
+            <strong>Cryptographically verifiable audit chain</strong>
+            <span>Every governed inference is logged in a hash-linked, HMAC-sealed chain. Tamper-evident by construction. Suitable for regulatory review.</span>
           </div>
         </li>
-        <li class="cap-item" style="border-top-color: #333;">
-          <span class="cap-num" style="color:#5a5750;">04</span>
+        <li class="cap-item">
+          <span class="cap-num">04</span>
           <div class="cap-text">
-            <strong style="color:var(--paper);">Structured intervention outcomes</strong>
-            <span>Every enforcement action is typed, recorded, and traceable.</span>
+            <strong>Drop-in proxy integration</strong>
+            <span>Works in front of any existing LLM API. No model retraining. No SDK changes. If you have an OpenAI-compatible endpoint, Aurora-Lens fits in front of it today.</span>
           </div>
         </li>
-        <li class="cap-item" style="border-top-color: #333;">
-          <span class="cap-num" style="color:#5a5750;">05</span>
+        <li class="cap-item">
+          <span class="cap-num">05</span>
           <div class="cap-text">
-            <strong style="color:var(--paper);">Forensic audit records for governed inference</strong>
-            <span>Hash-chained, HMAC-sealed, tamper-evident by construction. Suitable for regulatory review.</span>
+            <strong>Streaming and high-concurrency support</strong>
+            <span>Stream-safe cancellation handling. Mid-stream interception without 500 errors. Validated under adversarial load conditions.</span>
           </div>
         </li>
-        <li class="cap-item" style="border-top-color: #333; border-bottom-color: #333;">
-          <span class="cap-num" style="color:#5a5750;">06</span>
+        <li class="cap-item">
+          <span class="cap-num">06</span>
           <div class="cap-text">
-            <strong style="color:var(--paper);">Model-agnostic deployment surface</strong>
-            <span>Works in front of any existing LLM API. No model retraining. No SDK changes.</span>
+            <strong>Forensic preservation of original output</strong>
+            <span>The raw model response is stored, not discarded. Every intervention is auditable against what the model actually said.</span>
           </div>
         </li>
       </ul>
@@ -986,19 +897,60 @@
   </div>
 </section>
 
-<!-- EVIDENCE OF REALITY -->
-<section id="evidence">
+<!-- WHY IT MATTERS -->
+<section id="why" class="contrast-section">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-number">02 — Positioning</div>
+      <h2>Why the timing of enforcement is everything</h2>
+    </div>
+    <div class="contrast-grid">
+      <div></div>
+      <div style="grid-column: 2 / 4; display: flex; flex-direction: column;">
+        <div class="contrast-col-labels">
+          <span class="contrast-label">Standard governance tooling</span>
+          <span class="contrast-label active">Aurora-Lens</span>
+        </div>
+        <div class="contrast-rows">
+          <div class="contrast-row">
+            <div class="contrast-cell">Operates at evaluation time — after deployment</div>
+            <div class="contrast-cell highlight">Operates at inference time — inside the request boundary</div>
+          </div>
+          <div class="contrast-row">
+            <div class="contrast-cell">Policy documentation layer — advisory, not binding</div>
+            <div class="contrast-cell highlight">Enforcement layer — admissibility is binary and structural</div>
+          </div>
+          <div class="contrast-row">
+            <div class="contrast-cell">Classification overlays applied post-hoc</div>
+            <div class="contrast-cell highlight">Interception occurs before delivery, not after</div>
+          </div>
+          <div class="contrast-row">
+            <div class="contrast-cell">Audit logs are reconstructed approximations</div>
+            <div class="contrast-cell highlight">Audit chain is cryptographically sealed at inference time</div>
+          </div>
+          <div class="contrast-row">
+            <div class="contrast-cell">Non-answers are treated as system failures</div>
+            <div class="contrast-cell highlight">Explicit refusal is a governed, correct terminal outcome</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALIDATION -->
+<section id="validation">
   <div class="section-inner">
     <div class="section-header">
       <div class="section-number">03 — Validation</div>
-      <h2>Evidence of reality</h2>
+      <h2>Adversarial harness results</h2>
     </div>
     <div class="results-grid">
       <div></div>
       <div class="results-content">
         <div class="stat-block">
           <div class="stat-number">237/237</div>
-          <div class="stat-label">Stress scenarios passed under adversarial, mixed streaming and concurrent load conditions</div>
+          <div class="stat-label">Stress scenarios passed across mixed streaming and concurrent load conditions</div>
         </div>
         <div class="stat-block">
           <div class="stat-number">465+</div>
@@ -1006,7 +958,7 @@
         </div>
         <div class="stat-block">
           <div class="stat-number">5/5</div>
-          <div class="stat-label">Live integration tests passing against real LLM endpoints</div>
+          <div class="stat-label">Real-LLM integration tests passing against live endpoints</div>
         </div>
         <div class="stat-block">
           <div class="stat-number">Zero</div>
@@ -1016,94 +968,109 @@
         <div class="audit-box">
 <span class="audit-comment">// Sample audit chain entry — tamper-evident, hash-linked</span>
 {
-  <span class="audit-key">"record_id"</span>:           <span class="audit-val">"rec_8f3a2c..."</span>,
-  <span class="audit-key">"timestamp"</span>:           <span class="audit-val">"2025-11-29T14:32:07.881Z"</span>,
-  <span class="audit-key">"model"</span>:                <span class="audit-val">"gpt-4o"</span>,
-  <span class="audit-key">"admissible"</span>:          <span class="audit-red">false</span>,
-  <span class="audit-key">"refusal_reason"</span>:      <span class="audit-val">"policy_violation:contradictory_claim"</span>,
+  <span class="audit-key">"record_id"</span>:      <span class="audit-val">"rec_8f3a2c..."</span>,
+  <span class="audit-key">"timestamp"</span>:      <span class="audit-val">"2025-11-29T14:32:07.881Z"</span>,
+  <span class="audit-key">"model"</span>:           <span class="audit-val">"gpt-4o"</span>,
+  <span class="audit-key">"admissible"</span>:     <span class="audit-red">false</span>,
+  <span class="audit-key">"refusal_reason"</span>: <span class="audit-val">"policy_violation:contradictory_claim"</span>,
   <span class="audit-key">"original_preserved"</span>: <span class="audit-red">true</span>,
-  <span class="audit-key">"chain_integrity"</span>:    <span class="audit-val">"anchored"</span>,
-  <span class="audit-key">"hmac"</span>:                <span class="audit-yellow">"sha256:d4e9f1..."</span>,
-  <span class="audit-key">"prev_hash"</span>:           <span class="audit-yellow">"sha256:a1b2c3..."</span>
+  <span class="audit-key">"chain_integrity"</span>: <span class="audit-val">"anchored"</span>,
+  <span class="audit-key">"hmac"</span>:            <span class="audit-yellow">"sha256:d4e9f1..."</span>,
+  <span class="audit-key">"prev_hash"</span>:       <span class="audit-yellow">"sha256:a1b2c3..."</span>
 }
         </div>
+        <p class="body-text" style="margin-top:2rem;">Full source-level review and validation materials available under NDA.</p>
+        <p class="body-text" style="margin-top:1rem;">Stokes, M. (2026). <em>Epistemic Legitimacy as a Governance Layer for Large Language Models: Architecture and Implementation.</em> SSRN. <a href="https://ssrn.com/abstract=6244239" target="_blank" style="color:inherit;">ssrn.com/abstract=6244239</a></p>
+        <p class="body-text" style="margin-top:0.5rem;">Stokes, M. (2026). <em>Epistemic Legitimacy as a Governance Layer for LLMs: Architecture and Implementation.</em> Zenodo. <a href="https://doi.org/10.5281/zenodo.18653120" target="_blank" style="color:inherit;">doi:10.5281/zenodo.18653120</a></p>
+        <p class="body-text" style="margin-top:0.5rem;">Stokes, M. (2026). <em>Operational Alignment of Aurora-Lens with OECD Due Diligence Guidance for Responsible AI.</em> Zenodo. <a href="https://doi.org/10.5281/zenodo.18719033" target="_blank" style="color:inherit;">doi:10.5281/zenodo.18719033</a></p>
 
-        <p class="body-text">Stokes, M. (2026). <em>Epistemic Legitimacy as a Governance Layer for Large Language Models.</em> SSRN. <a href="https://ssrn.com/abstract=6244239" target="_blank" style="color:inherit;">ssrn.com/abstract=6244239</a></p>
-        <p class="body-text">Stokes, M. (2026). <em>Operational Alignment of Aurora-Lens with OECD Due Diligence Guidance for Responsible AI.</em> Zenodo. <a href="https://doi.org/10.5281/zenodo.18719033" target="_blank" style="color:inherit;">doi:10.5281/zenodo.18719033</a></p>
-
-        <div class="audit-box" style="margin-top: 0.5rem;">
-<span class="audit-comment">// Implementation proof — runs without an API key</span>
+        <div class="audit-box" style="margin-top:2rem;">
+<span class="audit-comment">// Evaluate now — no API key required</span>
 pip install aurora-lens
 aurora-lens demo healthcare
-<span class="audit-comment">// Four clinical governance scenarios in-process.
-// Tamper-evident forensic audit log written to disk.</span>
+        </div>
+        <p class="body-text" style="margin-top:1rem;">Runs four clinical safety scenarios in-process and writes a tamper-evident forensic audit log to disk. The full record is printed on completion.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="section-number">04 — Architecture</div>
+      <h2>Built for enterprise integration</h2>
+    </div>
+    <div class="arch-grid">
+      <div></div>
+      <div class="arch-content">
+        <div class="arch-card">
+          <div class="arch-card-tag">Core Component</div>
+          <h3>Proxy Enforcement Model</h3>
+          <p>Sits transparently in front of LLM endpoints. No SDK changes required. Intercepts at the HTTP layer before responses propagate downstream.</p>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-tag">Core Component</div>
+          <h3>Deterministic Governance Kernel</h3>
+          <p>Admissibility decisions are rule-based and deterministic, not probabilistic. Same input, same enforcement outcome. Auditable by design.</p>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-tag">Core Component</div>
+          <h3>Persistent State Tracking</h3>
+          <p>Maintains reasoning context across multi-turn sessions. Enforces consistency constraints that span individual inference calls.</p>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-tag">Core Component</div>
+          <h3>Policy Profile Versioning</h3>
+          <p>Enforcement rules are versioned, auditable, and deployable without system restarts. Policy changes are traceable to specific audit chain entries.</p>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-tag">Integration</div>
+          <h3>Transparent Forensic Logging</h3>
+          <p>Original model outputs are preserved alongside governed outputs. Every intervention is traceable to its enforcement rule, timestamp, and chain position.</p>
+        </div>
+        <div class="arch-card">
+          <div class="arch-card-tag">Integration</div>
+          <h3>Enterprise AI Platform Compatibility</h3>
+          <p>Designed to fit into existing AI infrastructure and security stacks. OpenAI-compatible proxy endpoints. Works with any model behind an API.</p>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- WHAT IS INCLUDED -->
-<section id="included">
+<!-- POSITIONING -->
+<section id="positioning" class="positioning-section">
   <div class="section-inner">
     <div class="section-header">
-      <div class="section-number">04 — Asset surface</div>
-      <h2>What is included</h2>
-    </div>
-    <div class="included-grid">
-      <div>
-        <p class="body-text" style="padding-top: 0.4rem;">This is an acquisition-ready technical asset, not a speculative proposal.</p>
-      </div>
-      <ul class="included-list">
-        <li class="included-item"><span class="included-marker">—</span>Runtime implementation</li>
-        <li class="included-item"><span class="included-marker">—</span>Evaluation package on PyPI</li>
-        <li class="included-item"><span class="included-marker">—</span>Technical documentation</li>
-        <li class="included-item"><span class="included-marker">—</span>Empirical evidence materials</li>
-        <li class="included-item"><span class="included-marker">—</span>Research papers and public references</li>
-        <li class="included-item"><span class="included-marker">—</span>Website and acquisition-facing overview materials</li>
-        <li class="included-item"><span class="included-marker">—</span>Founder-originated architecture</li>
-        <li class="included-item"><span class="included-marker">—</span>Patent-positioned supporting intellectual property</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<!-- STRATEGIC FIT -->
-<section id="strategic-fit" class="positioning-section">
-  <div class="section-inner">
-    <div class="section-header">
-      <div class="section-number">05 — Strategic fit</div>
-      <h2>Where Aurora Lens belongs</h2>
+      <div class="section-number">05 — Strategic Fit</div>
+      <h2>Who this is built for</h2>
     </div>
     <div class="positioning-grid">
       <div></div>
       <div class="positioning-content">
-        <p class="lead-text">Aurora Lens is relevant to organisations operating where runtime output legitimacy matters.</p>
+        <p class="lead-text">If your AI deployment has consequences — financial, legal, medical, regulatory — you need a record that shows every decision was governed, not guessed at.</p>
+        <p class="body-text"><strong>Aurora-Lens is privately held and founder-controlled.</strong></p>
+        <p class="body-text">Aurora-Lens is not consumer tooling. It is infrastructure for organisations where an AI-generated output that cannot be proven admissible is a liability event. The audit chain exists precisely for the moment someone asks: <em>prove it.</em></p>
         <ul class="target-list">
-          <li class="target-item"><span class="target-dot"></span>Enterprise AI governance and compliance vendors</li>
-          <li class="target-item"><span class="target-dot"></span>AI assurance and model security vendors</li>
-          <li class="target-item"><span class="target-dot"></span>Regulated workflow platforms</li>
-          <li class="target-item"><span class="target-dot"></span>Clinical and pharmaceutical AI infrastructure</li>
-          <li class="target-item"><span class="target-dot"></span>Audit and risk technology providers</li>
-          <li class="target-item"><span class="target-dot"></span>Foundation model companies requiring runtime control</li>
+          <li class="target-item"><span class="target-dot"></span>Enterprise AI platforms requiring compliance-grade audit trails</li>
+          <li class="target-item"><span class="target-dot"></span>AI security vendors building regulated-industry products</li>
+          <li class="target-item"><span class="target-dot"></span>Model providers serving healthcare, legal, or financial clients</li>
+          <li class="target-item"><span class="target-dot"></span>Infrastructure-level LLM hosts under emerging AI regulation</li>
         </ul>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CONTACT / TRANSACTION -->
+<!-- CONTACT -->
 <section id="contact" class="contact-section">
   <div class="contact-inner">
     <div class="contact-left">
-      <h2>Transaction</h2>
-      <p>Aurora Lens is a founder-controlled asset.</p>
-      <p>Serious strategic interest is welcome by email. The intended endpoint is acquisition or placement within a larger platform where inference-time governance, admissibility control, refusal, and deterministic audit can become part of production AI infrastructure.</p>
-      <p class="origin-note">Aurora Lens was designed and built by Margaret Stokes in direct response to persistent failure modes in deployed language systems: fabricated certainty, premature ambiguity collapse, unsupported claims, and absent runtime accountability.</p>
-      <div class="contact-ctas">
-        <a href="mailto:margaret.stokes.ai@gmail.com?subject=Technical Brief Request — Aurora Lens" class="contact-cta-primary">Request Technical Brief →</a>
-        <a href="mailto:margaret.stokes.ai@gmail.com?subject=Strategic Interest — Aurora Lens" class="contact-cta-secondary">Email Regarding Strategic Interest →</a>
-      </div>
+      <h2>Exploring strategic acquisition or deep integration.</h2>
+      <p>Technical documentation and full validation materials are available to qualified partners on request. Engagement is limited to a small number of organisations at this stage.</p>
+      <a href="/cdn-cgi/l/email-protection#bfd2decdd8decddacb91cccbd0d4dacc91ded6ffd8d2ded6d391dcd0d2" class="contact-cta">Email Directly →</a>
     </div>
     <div class="contact-right">
       <div class="contact-detail">
@@ -1112,26 +1079,26 @@ aurora-lens demo healthcare
       </div>
       <div class="contact-detail">
         <span class="detail-label">Email</span>
-        <span class="detail-value"><a href="mailto:margaret.stokes.ai@gmail.com">margaret.stokes.ai@gmail.com</a></span>
+        <span class="detail-value"><a href="/cdn-cgi/l/email-protection#b1dcd0c3d6d0c3d4c59fc2c5dedad4c29fd0d8f1d6dcd0d8dd9fd2dedc"><span class="__cf_email__" data-cfemail="0469657663657661702a77706b6f61772a656d446369656d682a676b69">[email&#160;protected]</span></a></span>
       </div>
       <div class="contact-detail">
-        <span class="detail-label">For</span>
-        <span class="detail-value">Serious technical or strategic interest</span>
+        <span class="detail-label">Technical Documentation</span>
+        <span class="detail-value"><a href="https://milamba.com/aurora-lens.html" target="_blank">milamba.com/aurora-lens.html</a></span>
       </div>
       <div class="contact-detail">
         <span class="detail-label">ORCID</span>
-        <span class="detail-value"><a href="https://orcid.org/0009-0004-6422-4174" target="_blank">0009-0004-6422-4174</a></span>
+        <span class="detail-value"><a href="https://orcid.org/0009-0004-6422-4174" target="_blank" style="color:inherit;">0009-0004-6422-4174</a></span>
       </div>
       <div class="contact-detail">
-        <span class="detail-label">IP status</span>
-        <span class="detail-value">Five provisional patent applications filed.</span>
+        <span class="detail-label">Enquiry Type</span>
+        <span class="detail-value">Strategic acquisition, licensing, or deep integration partnerships</span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ENQUIRY FORM -->
-<section id="enquiry" class="form-section">
+<!-- CONTACT FORM -->
+<section class="form-section">
   <div class="form-inner">
     <div class="form-label-col">
       <div class="form-section-label">06 — Enquiry</div>
@@ -1157,10 +1124,10 @@ aurora-lens demo healthcare
             <label class="field-label" for="enquiry-type">Enquiry type</label>
             <select class="field-select" id="enquiry-type" name="enquiry_type">
               <option value="" disabled selected>Select one</option>
-              <option value="technical">Technical brief request</option>
               <option value="acquisition">Strategic acquisition</option>
               <option value="licensing">Licensing discussion</option>
               <option value="integration">Deep integration partnership</option>
+              <option value="technical">Technical documentation request</option>
               <option value="other">Other</option>
             </select>
           </div>
@@ -1172,7 +1139,7 @@ aurora-lens demo healthcare
           </div>
         </div>
         <div class="form-submit-row">
-          <p class="form-note">Responses within one business day. Full source-level documentation available under NDA on request.</p>
+          <p class="form-note">Responses within one business day. Documentation available under NDA on request.</p>
           <button type="submit" class="form-btn" id="submit-btn">Send Enquiry →</button>
         </div>
         <div class="form-status" id="form-status"></div>
@@ -1181,41 +1148,12 @@ aurora-lens demo healthcare
   </div>
 </section>
 
-<!-- PUBLIC REFERENCES -->
-<section class="references-section">
-  <div class="references-inner">
-    <div class="ref-label">Public references</div>
-    <div class="ref-list">
-      <div class="ref-item">
-        <span class="ref-type">PyPI</span>
-        <a class="ref-link" href="https://pypi.org/project/aurora-lens/" target="_blank">pypi.org/project/aurora-lens/</a>
-      </div>
-      <div class="ref-item">
-        <span class="ref-type">Research</span>
-        <a class="ref-link" href="https://zenodo.org/records/18719033" target="_blank">zenodo.org/records/18719033</a>
-      </div>
-      <div class="ref-item">
-        <span class="ref-type">SSRN</span>
-        <a class="ref-link" href="https://ssrn.com/abstract=6244239" target="_blank">ssrn.com/abstract=6244239</a>
-      </div>
-      <div class="ref-item">
-        <span class="ref-type">GitHub</span>
-        <a class="ref-link" href="https://github.com/aurora-assets" target="_blank">github.com/aurora-assets</a>
-      </div>
-      <div class="ref-item">
-        <span class="ref-type">Technical overview</span>
-        <a class="ref-link" href="https://github.com/aurora-assets/acquisition-overview" target="_blank">github.com/aurora-assets/acquisition-overview</a>
-      </div>
-    </div>
-  </div>
-</section>
-
 <footer>
-  <span>Aurora Lens — Inference-time governance for large language models</span>
-  <span>Five provisional patents filed · margaret.stokes.ai@gmail.com</span>
+  <span>Aurora-Lens — Admissibility-Controlled Inference Enforcement</span>
+  <span>Provisional patent filed · Technical documentation on request</span>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   const form = document.getElementById('contact-form');
   const btn = document.getElementById('submit-btn');
   const status = document.getElementById('form-status');
@@ -1240,15 +1178,4 @@ aurora-lens demo healthcare
         form.reset();
         btn.textContent = 'Sent ✓';
       } else {
-        throw new Error('Server error');
-      }
-    } catch (err) {
-      status.textContent = '— Something went wrong. Email directly: margaret.stokes.ai@gmail.com';
-      status.className = 'form-status error';
-      btn.disabled = false;
-      btn.textContent = 'Send Enquiry →';
-    }
-  });
-</script>
-</body>
-</html>
+        throw new Erro
