@@ -389,6 +389,33 @@
     line-height: 1.75;
   }
 
+  .proof-callout {
+    grid-column: 1 / -1;
+    border-left: 3px solid var(--ink);
+    padding: 1.5rem 1.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .proof-callout-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .proof-callout p {
+    font-size: 0.9rem;
+    color: var(--ink);
+    line-height: 1.75;
+    max-width: 60ch;
+  }
+
+  .proof-callout p + p {
+    margin-top: 0.5rem;
+  }
+
   /* ── WHAT IS INCLUDED ── */
   .included-grid {
     display: grid;
@@ -1037,6 +1064,13 @@ pip install aurora-lens
 aurora-lens demo healthcare
 <span class="audit-comment">// Four clinical governance scenarios in-process.
 // Tamper-evident forensic audit log written to disk.</span>
+        </div>
+
+        <div class="proof-callout">
+          <div class="proof-callout-label">Controlled proof session — 2026-03-10</div>
+          <p>A live integration walkthrough against claude-sonnet-4-5-20250929 via the running proxy. Five scenarios across four domains: medical, legal, financial, and epistemic. Five distinct governance boundaries. Five matched outcomes.</p>
+          <p>The session identified three lexical coverage gaps in the financial and directive checkers. All were resolved during the session. The architecture held.</p>
+          <p style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--muted);">Full session record available on request.</p>
         </div>
       </div>
     </div>
