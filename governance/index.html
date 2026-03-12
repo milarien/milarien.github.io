@@ -115,6 +115,18 @@
             color: var(--accent);
         }
 
+        .topbar-links a.nav-highlight {
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 0.25rem 0.65rem;
+            border-radius: 2px;
+        }
+
+        .topbar-links a.nav-highlight:hover {
+            background: var(--accent);
+            color: var(--paper);
+        }
+
         .hero {
             padding: 4rem 0 3.5rem;
         }
@@ -607,7 +619,7 @@
                 <a href="#problem">The Problem</a>
                 <a href="#how">How It Works</a>
                 <a href="runtime-governance.html">Runtime Governance</a>
-                <a href="/aurora-lens.html">Aurora-Lens</a>
+                <a href="/aurora-lens.html" class="nav-highlight">Aurora-Lens</a>
                 <a href="#research">Research</a>
                 <a href="#contact">Contact</a>
             </nav>
@@ -1045,6 +1057,17 @@
             <h4>Empirical Demonstration of LLM Failure Modes in Pronoun Ambiguity Resolution</h4>
             <p class="pub-meta">Stokes, M. (2025). Raw model outputs, replication protocol, and working implementation. &nbsp;·&nbsp; ORCID: <a href="https://orcid.org/0009-0004-6422-4174">0009-0004-6422-4174</a></p>
             <a href="https://osf.io/pv84s/">Data &amp; code on OSF →</a>
+        </div>
+
+        <div class="pub-card">
+            <h4>Present-Centered Cognition Model (PCCM): A Cross-Substrate Framework for Understanding Consciousness, Presence, and Latent States in Humans and Machines</h4>
+            <p class="pub-meta">Stokes, M. (2026). Preprint. &nbsp;·&nbsp; ORCID: <a href="https://orcid.org/0009-0004-6422-4174">0009-0004-6422-4174</a></p>
+            <a href="https://doi.org/10.5281/zenodo.18976303">Read on Zenodo →</a>
+        </div>
+
+        <div style="margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--rule);">
+            <p class="section-body" style="margin-bottom: 1.5rem;">Aurora-Lens is the implementation of these principles — deterministic runtime governance for regulated LLM systems.</p>
+            <a href="/aurora-lens.html" style="display: inline-block; background: var(--ink); color: var(--paper); font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; padding: 0.85rem 1.75rem; transition: background 0.2s;">See Aurora-Lens →</a>
         </div>
     </div>
 </section>
