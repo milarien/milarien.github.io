@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Streaming Governance — Aurora-Lens</title>
+  <meta name="description" content="Aurora-Lens streaming governance model: full-buffer streaming, state machine, constitutional invariants.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink:#121110; --paper:#f5f1ea; --panel:#fcfaf6; --rule:#d0c7bb; --muted:#635d58; --accent:#b13d1f; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'IBM Plex Sans',sans-serif; background:var(--paper); color:var(--ink); line-height:1.75; -webkit-font-smoothing:antialiased; }
+    .container { max-width:860px; margin:0 auto; padding:0 1.5rem; }
+    header { position:sticky; top:0; z-index:10; background:rgba(245,241,234,0.94); backdrop-filter:blur(8px); border-bottom:1px solid var(--rule); }
+    .nav { min-height:68px; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+    .brand { font-family:'IBM Plex Mono',monospace; font-size:0.82rem; text-transform:uppercase; letter-spacing:0.08em; text-decoration:none; color:var(--ink); }
+    .nav-links { display:flex; flex-wrap:wrap; gap:1.1rem; }
+    .nav-links a { text-decoration:none; color:var(--muted); font-size:0.82rem; }
+    .nav-links a:hover { color:var(--accent); }
+    .page { padding:3rem 0 5rem; }
+    .eyebrow { font-family:'IBM Plex Mono',monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--accent); margin-bottom:1rem; }
+    h1 { font-family:'DM Serif Display',serif; font-size:clamp(2rem,4vw,3rem); font-weight:400; margin-bottom:0.75rem; }
+    .scope { color:var(--muted); font-size:0.95rem; max-width:60ch; margin-bottom:2.5rem; border-bottom:1px solid var(--rule); padding-bottom:1.5rem; }
+    h2 { font-family:'DM Serif Display',serif; font-size:1.6rem; font-weight:400; margin:2.5rem 0 0.75rem; }
+    h3 { font-size:1rem; font-weight:500; margin:1.5rem 0 0.5rem; }
+    p { color:var(--muted); margin-bottom:0.9rem; }
+    pre { background:var(--panel); border:1px solid var(--rule); padding:1.25rem; font-family:'IBM Plex Mono',monospace; font-size:0.8rem; line-height:1.6; overflow-x:auto; margin:1rem 0 1.5rem; white-space:pre; }
+    table { width:100%; border-collapse:collapse; font-size:0.88rem; margin:1rem 0 1.5rem; }
+    th { font-family:'IBM Plex Mono',monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); text-align:left; padding:0.5rem 0.75rem; border-bottom:1px solid var(--rule); }
+    td { padding:0.5rem 0.75rem; border-bottom:1px solid var(--rule); color:var(--muted); vertical-align:top; }
+    td:first-child { font-family:'IBM Plex Mono',monospace; font-size:0.8rem; color:var(--ink); white-space:nowrap; }
+    .inv { margin:1.25rem 0; padding:1rem 1.25rem; background:var(--panel); border-left:3px solid var(--accent); }
+    .inv strong { color:var(--ink); font-weight:500; display:block; margin-bottom:0.35rem; }
+    .inv p { margin-bottom:0; font-size:0.95rem; }
+    footer { padding:1.5rem 0 3rem; color:var(--muted); font-size:0.9rem; border-top:1px solid var(--rule); }
+    footer a { color:inherit; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="/">Margaret Stokes</a>
+      <nav class="nav-links">
+        <a href="/aurora-lens.html">Aurora-Lens</a>
+        <a href="/governance/">Governance</a>
+        <a href="/docs/system-capabilities.html">Capabilities</a>
+        <a href="mailto:margaret.stokes.ai@gmail.com">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container page">
+      <div class="eyebrow">Docs · Streaming Governance</div>
+      <h1>Streaming governance in Aurora-Lens</h1>
+      <p class="scope">This document covers the v1 full-buffer streaming governance model as implemented in <code>aurora_lens/lens.py</code> and <code>aurora_lens/govern/stream_gate.py</code>. State machine and constitutional invariants only.</p>
+
+      <h2>Model</h2>
+      <p>Full-buffer streaming governance is the v1 streaming model. Provider output streams internally into a private buffer; raw model tokens never become user-visible consequence before the final admissibility decision. The user receives either the admitted buffer or a governed continuation — never both, never a fragment of the suppressed candidate.</p>
+
+      <h2>Streaming state machine</h2>
+      <pre>UPSTREAM_STREAMING
+      │
+      │  all provider chunks received (or fallback generate() used)
+      ▼
+BUFFER_COMPLETE
+      │
+      │  checker.check(full_text) + governor.evaluate(full_text, pef)
+      ▼
+VERIFYING
+      │
+      ├─── ADMIT (action ∈ {PASS, SOFT_CORRECT}) ────────────────────┐
+      │                                                                │
+      ▼                                                                ▼
+SUPPRESSING_BUFFER                                          RELEASING_BUFFER
+  bridge.intervene() produces governed continuation.        Buffered chunks emitted
+  Buffer permanently suppressed.                            as "chunk" events,
+  Governed continuation emitted as single                   preserving original cadence.
+  "governed_chunk" event.
+      │                                                                │
+      └────────────────────────┬───────────────────────────────────────┘
+                               │
+                               ▼
+                        METADATA_EMITTED  ("metadata" event)
+                               │
+                               ▼
+                           COMPLETE
+
+ABORTED  (provider stream raised before buffer was complete)</pre>
+
+      <h3>Event kinds emitted to the caller</h3>
+      <table>
+        <tr><th>Kind</th><th>When</th><th>Content</th></tr>
+        <tr><td>chunk</td><td>ADMIT path only, one per buffered chunk</td><td>(chunk_dict, content_delta) from private buffer</td></tr>
+        <tr><td>governed_chunk</td><td>NON-ADMIT path, one event total</td><td>Fresh chunk_dict wrapping the governed continuation</td></tr>
+        <tr><td>progress</td><td>Optional (stream_emit_progress=True)</td><td>ProgressSignal — lifecycle label only</td></tr>
+        <tr><td>metadata</td><td>Final event on every non-aborted path</td><td>Aurora dict: governance, turn, stream fields</td></tr>
+      </table>
+      <p>Governed chunk_dicts are constructed fresh from the governed text, not derived from raw provider chunks. Reusing provider chunks would leak structural information about the suppressed candidate via delta boundaries.</p>
+
+      <h2>Provider abort vs. client disconnect</h2>
+      <h3>Provider abort during private buffering</h3>
+      <p>The upstream generate_stream() raises (e.g. asyncio.CancelledError) before the buffer is complete. No content has reached the user. The finally block logs a forensic abort entry (stream_completed=False, stream_abort_reason="provider_abort"). The exception propagates to the caller.</p>
+      <h3>Client disconnect after governed release</h3>
+      <p>The upstream stream completed normally during buffering. Governance ran. Chunks were released. The caller broke out of the generator mid-delivery. From the perspective of the upstream stream, this is not an early close — the provider stream completed before any chunk was released. No abort entry is written; the governance decision and its forensic record are already committed.</p>
+
+      <h2>Constitutional invariants</h2>
+
+      <div class="inv">
+        <strong>1. No content escapes before admissibility.</strong>
+        <p>The generator yields no chunk, governed_chunk, or progress event containing substantive content before VERIFYING completes. Accumulation is entirely private.</p>
+      </div>
+
+      <div class="inv">
+        <strong>2. The suppression decision is final.</strong>
+        <p>Once SUPPRESSING_BUFFER is entered, no fragment of the buffer appears in any subsequent user-visible output — not in the governed continuation, not in a progress event, not in metadata.</p>
+      </div>
+
+      <div class="inv">
+        <strong>3. Forensic logging is identical to the non-streaming path.</strong>
+        <p>The same log_decision() call runs on both paths. Non-ADMIT entries include blocked_response_hash (sha256 of the suppressed buffer) and governed_response_hash (sha256 of the governed continuation). ADMIT entries carry no hash fields.</p>
+      </div>
+
+      <div class="inv">
+        <strong>4. Conversation history records the governed response, not the candidate.</strong>
+        <p>On a non-ADMIT path, self._history is appended with the governed continuation. The suppressed candidate is stored only in decision.original_response — forensic only, not returned to the caller.</p>
+      </div>
+
+      <div class="inv">
+        <strong>5. Progress signals carry no substantive information.</strong>
+        <p>ProgressSignal.status is constrained to {"streaming", "verifying", "releasing"} and validated at construction. These labels identify lifecycle phase only. They carry no flag names, no pathway identifiers, no content, and no field derived from user input or LLM output.</p>
+      </div>
+
+      <div class="inv">
+        <strong>6. Streaming and non-streaming paths are outcome-equivalent.</strong>
+        <p>process() and process_stream() reach the same admissibility decision by the same code path (checker → governor → bridge). The only difference is delivery mechanism.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 Margaret Stokes · <a href="/aurora-lens.html">Aurora-Lens</a> · <a href="/governance/">Governance</a> · <a href="mailto:margaret.stokes.ai@gmail.com">Contact</a></p>
+    </div>
+  </footer>
+</body>
+</html>

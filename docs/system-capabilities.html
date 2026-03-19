@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Capabilities — Aurora-Lens</title>
+  <meta name="description" content="Aurora-Lens v2.0.0 system capabilities: what it can and cannot do, flag types, continuation pathways, deployment surfaces, and policy matrix.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink:#121110; --paper:#f5f1ea; --panel:#fcfaf6; --rule:#d0c7bb; --muted:#635d58; --accent:#b13d1f; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'IBM Plex Sans',sans-serif; background:var(--paper); color:var(--ink); line-height:1.75; -webkit-font-smoothing:antialiased; }
+    .container { max-width:980px; margin:0 auto; padding:0 1.5rem; }
+    header { position:sticky; top:0; z-index:10; background:rgba(245,241,234,0.94); backdrop-filter:blur(8px); border-bottom:1px solid var(--rule); }
+    .nav { min-height:68px; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+    .brand { font-family:'IBM Plex Mono',monospace; font-size:0.82rem; text-transform:uppercase; letter-spacing:0.08em; text-decoration:none; color:var(--ink); }
+    .nav-links { display:flex; flex-wrap:wrap; gap:1.1rem; }
+    .nav-links a { text-decoration:none; color:var(--muted); font-size:0.82rem; }
+    .nav-links a:hover { color:var(--accent); }
+    .page { padding:3rem 0 5rem; }
+    .eyebrow { font-family:'IBM Plex Mono',monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--accent); margin-bottom:1rem; }
+    h1 { font-family:'DM Serif Display',serif; font-size:clamp(2rem,4vw,3rem); font-weight:400; margin-bottom:0.5rem; }
+    .version { font-family:'IBM Plex Mono',monospace; font-size:0.78rem; color:var(--muted); margin-bottom:2rem; padding-bottom:1.5rem; border-bottom:1px solid var(--rule); }
+    h2 { font-family:'DM Serif Display',serif; font-size:1.7rem; font-weight:400; margin:3rem 0 1rem; }
+    h3 { font-size:1rem; font-weight:500; margin:1.75rem 0 0.6rem; color:var(--ink); }
+    p { color:var(--muted); margin-bottom:0.9rem; font-size:0.97rem; }
+    table { width:100%; border-collapse:collapse; font-size:0.86rem; margin:0.75rem 0 1.5rem; }
+    th { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); text-align:left; padding:0.5rem 0.75rem; border-bottom:2px solid var(--rule); background:var(--panel); }
+    td { padding:0.5rem 0.75rem; border-bottom:1px solid var(--rule); color:var(--muted); vertical-align:top; font-size:0.85rem; }
+    td:first-child { font-family:'IBM Plex Mono',monospace; font-size:0.78rem; color:var(--ink); white-space:nowrap; }
+    .flag-group { margin-bottom:1.25rem; }
+    .flag-group-label { font-family:'IBM Plex Mono',monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin-bottom:0.4rem; }
+    .flags { font-family:'IBM Plex Mono',monospace; font-size:0.8rem; color:var(--muted); line-height:1.8; }
+    .cannot-do { background:var(--panel); border:1px solid var(--rule); padding:1rem 1.25rem; margin-bottom:0.75rem; }
+    .cannot-do strong { color:var(--ink); font-size:0.95rem; display:block; margin-bottom:0.3rem; }
+    .cannot-do p { margin-bottom:0; font-size:0.88rem; }
+    footer { padding:1.5rem 0 3rem; color:var(--muted); font-size:0.9rem; border-top:1px solid var(--rule); }
+    footer a { color:inherit; }
+    @media (max-width:600px) { td:first-child { white-space:normal; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="/">Margaret Stokes</a>
+      <nav class="nav-links">
+        <a href="/aurora-lens.html">Aurora-Lens</a>
+        <a href="/governance/">Governance</a>
+        <a href="/docs/streaming-governance.html">Streaming</a>
+        <a href="mailto:margaret.stokes.ai@gmail.com">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container page">
+      <div class="eyebrow">Docs · System Capabilities</div>
+      <h1>System capabilities</h1>
+      <p class="version">Version 2.0.0 — March 2026</p>
+
+      <h2>Core purpose</h2>
+      <p>Aurora-Lens is a deterministic, inference-time governance layer between your application and an LLM. It maintains a session-scoped PEF from extracted entities, claims, and updates derived from user input; checks LLM output against that state and policy rules; applies policy-driven continuation control before responses reach callers; and writes tamper-evident audit records.</p>
+      <p>Aurora-Lens is a governance layer over existing LLMs. It does not replace the model's reasoning engine. Lens handles admissibility of candidate output. The Governor handles lawful continuation. Governance and continuation decisions are deterministic and do not rely on an LLM.</p>
+
+      <h2>What it can do</h2>
+
+      <h3>Interpretation — pre-LLM</h3>
+      <table>
+        <tr><th>Capability</th><th>How</th></tr>
+        <tr><td>Extract entities, attributes, relationships</td><td>SpacyBackend (spaCy en_core_web_sm) or optional LLM extraction backend</td></tr>
+        <tr><td>Update PEF from extraction</td><td>Claims and entity mentions written to session state</td></tr>
+        <tr><td>Detect ambiguous referents</td><td>Multiple candidate antecedents for pronouns or definite NPs trigger a pre-LLM gate</td></tr>
+        <tr><td>Detect comparative ambiguity</td><td>Comparative adjectives with 2+ eligible comparands trigger a pre-LLM gate</td></tr>
+        <tr><td>Block before LLM when necessary</td><td>Unresolved referents and comparative ambiguity trigger clarification and skip the LLM call</td></tr>
+      </table>
+
+      <h3>Verification — post-LLM</h3>
+      <table>
+        <tr><th>Capability</th><th>How</th></tr>
+        <tr><td>Compare LLM claims to PEF</td><td>Checker compares extracted claims against established facts</td></tr>
+        <tr><td>Detect epistemic violations</td><td>UNBOUND_ENTITY, UNSUPPORTED_ATTRIBUTE, UNSUPPORTED_EVENT, UNVERIFIED_FACT_ASSERTION, TIME_SMEAR, CONTRADICTED_FACT, UNVERIFIED_REGULATORY_CLAIM, IDENTITY_DRIFT</td></tr>
+        <tr><td>Detect structural / binding failures</td><td>UNRESOLVED_REFERENT, UNRESOLVED_COMPARAND, EXTRACTION_EMPTY, EXTRACTION_FAILED</td></tr>
+        <tr><td>Detect normative violations</td><td>MEDICAL_DOSAGE_RECOMMENDATION, PEDIATRIC_DOSAGE_RECOMMENDATION, NUMERIC_MEDICAL_INSTRUCTION, EMERGENCY_TRIAGE_GUIDANCE, SELF_HARM_INSTRUCTION, ILLEGAL_INSTRUCTION, TARGETED_DEFAMATION, SENSITIVE_PII_EXPOSURE, PERSONALIZED_MEDICAL_ADVICE, PERSONALIZED_LEGAL_ADVICE, PERSONALIZED_FINANCIAL_ADVICE</td></tr>
+        <tr><td>Preserve LLM output</td><td>original_response stored separately from governed_response</td></tr>
+      </table>
+
+      <h3>Governance — Governor</h3>
+      <table>
+        <tr><th>Capability</th><th>How</th></tr>
+        <tr><td>Map flags to LensStatus</td><td>StatusTranslator: STOP &gt; REFUSE &gt; ASK &gt; ADMIT</td></tr>
+        <tr><td>Resolve context</td><td>ContextResolver: Domain, AuthorityClass, UserClass from context vars, flags, and defaults</td></tr>
+        <tr><td>Resolve policy</td><td>PolicyResolver: 50-row policy matrix by (Domain, AuthorityClass, LensStatus, UserClass)</td></tr>
+        <tr><td>Enforce pathway renderers</td><td>12 continuation pathways, each with its own renderer; no LLM call and no blocked content in continuation</td></tr>
+        <tr><td>Per-key policy override</td><td>auth.keys[].policy for strict vs moderate per API key</td></tr>
+      </table>
+
+      <h3>Forensic audit</h3>
+      <table>
+        <tr><th>Capability</th><th>How</th></tr>
+        <tr><td>Hash-chained ledger</td><td>AFL-JSONL-1: cid and prev_cid form a chain; tampering is detectable</td></tr>
+        <tr><td>HMAC signing</td><td>Optional HMAC-SHA256 per entry and AttestedOutput</td></tr>
+        <tr><td>Content addressing</td><td>FNV-64 CIDs for events</td></tr>
+        <tr><td>Versioned forensic envelope</td><td>For non-ADMIT outcomes: status, pathway_id, output_mode, commitment state, escalation target, blocked and governed response hashes, state hash, event hash</td></tr>
+        <tr><td>Audit verification CLI</td><td>aurora-lens verify-audit --ledger &lt;path&gt;</td></tr>
+        <tr><td>Evidence export</td><td>aurora-lens export-evidence produces a self-contained bundle</td></tr>
+      </table>
+
+      <h3>Deployment surfaces</h3>
+      <table>
+        <tr><th>Surface</th><th>Description</th></tr>
+        <tr><td>Library</td><td>from aurora_lens.lens import Lens — process(), process_stream(), seed_history(), reset()</td></tr>
+        <tr><td>Proxy</td><td>aurora-lens proxy — OpenAI-compatible HTTP API, streaming, session management, YAML config</td></tr>
+        <tr><td>Batch runner</td><td>aurora-lens batch --input scenarios.jsonl --output results.jsonl --audit audit.jsonl</td></tr>
+        <tr><td>Chat</td><td>aurora-lens chat — interactive CLI with live governance decisions</td></tr>
+        <tr><td>Demo</td><td>aurora-lens demo — reference walkthrough</td></tr>
+        <tr><td>LangChain</td><td>get_governed_chat_openai() — drop-in ChatOpenAI wrapping the proxy</td></tr>
+      </table>
+
+      <h3>LLM providers</h3>
+      <table>
+        <tr><th>Provider</th><th>How</th></tr>
+        <tr><td>OpenAI</td><td>OpenAIAdapter</td></tr>
+        <tr><td>Anthropic</td><td>ClaudeAdapter</td></tr>
+        <tr><td>Any OpenAI-compatible API</td><td>provider: openai + base_url (Grok, Gemini, Ollama, Azure, OpenRouter, etc.)</td></tr>
+      </table>
+
+      <h2>What it cannot do</h2>
+
+      <div class="cannot-do"><strong>Governance of unseen content</strong><p>Streaming uses full-buffer governance in v1. Raw model tokens are not user-visible before the final admissibility decision. Already-released admitted content is not withdrawn.</p></div>
+      <div class="cannot-do"><strong>Verification outside PEF</strong><p>Facts not established in the session PEF cannot be contradicted.</p></div>
+      <div class="cannot-do"><strong>Resolution of ambiguous referents</strong><p>Unclear references are flagged and blocked; they are not guessed.</p></div>
+      <div class="cannot-do"><strong>Clinical, legal, or financial determinations</strong><p>The system blocks or routes; it does not make professional determinations.</p></div>
+      <div class="cannot-do"><strong>Guaranteed extraction accuracy</strong><p>Depends on backend; SpacyBackend is deterministic but can miss or misparse.</p></div>
+      <div class="cannot-do"><strong>Persistent PEF by default</strong><p>PEF is in-memory; cross-restart persistence requires operator-supplied storage.</p></div>
+      <div class="cannot-do"><strong>Multimodal verification</strong><p>Text only; no direct analysis of audio or images.</p></div>
+      <div class="cannot-do"><strong>Bypass prevention from audit alone</strong><p>The audit trail proves what passed through Aurora-Lens. Network-level enforcement that all traffic must pass through the proxy is a deployment responsibility.</p></div>
+
+      <h2>Continuation pathways (12)</h2>
+      <table>
+        <tr><th>Pathway</th><th>Outcome shape</th><th>interaction_open</th></tr>
+        <tr><td>P_ADMIT_STANDARD</td><td>Full response</td><td>true</td></tr>
+        <tr><td>P_ASK_DISAMBIGUATE</td><td>Clarification question</td><td>true</td></tr>
+        <tr><td>P_ASK_MISSING_FACT</td><td>Request for missing facts</td><td>true</td></tr>
+        <tr><td>P_REFUSE_EXPLAIN_REDIRECT</td><td>Refusal + optional redirect</td><td>true</td></tr>
+        <tr><td>P_REFUSE_ESCALATE_PRO</td><td>Refusal + professional redirect</td><td>true</td></tr>
+        <tr><td>P_HANDOFF_SUMMARY</td><td>Boundary notice, offer to summarise</td><td>true</td></tr>
+        <tr><td>P_STOP_REDIRECT_QUALIFIED</td><td>Hard stop + qualified professional redirect</td><td>true</td></tr>
+        <tr><td>P_STOP_ESCALATE</td><td>Generic medical escalation</td><td>false</td></tr>
+        <tr><td>P_STOP_ESCALATE_EMERGENCY</td><td>Emergency triage escalation</td><td>false</td></tr>
+        <tr><td>P_STOP_SUPPORTIVE_DEESCALATE</td><td>Self-harm: supportive refusal, crisis resources</td><td>true</td></tr>
+        <tr><td>P_STOP_REFUSE_CLEAN</td><td>Illegal instruction: clean refusal, no alternatives</td><td>false</td></tr>
+        <tr><td>P_STOP_TERMINAL / P_STOP_FORENSIC</td><td>Terminal stop</td><td>false</td></tr>
+      </table>
+
+      <h2>Flag types</h2>
+      <div class="flag-group">
+        <p class="flag-group-label">Epistemic</p>
+        <p class="flags">UNBOUND_ENTITY · UNSUPPORTED_ATTRIBUTE · UNSUPPORTED_EVENT · UNVERIFIED_FACT_ASSERTION · TIME_SMEAR · CONTRADICTED_FACT · UNVERIFIED_REGULATORY_CLAIM · IDENTITY_DRIFT</p>
+      </div>
+      <div class="flag-group">
+        <p class="flag-group-label">Structural</p>
+        <p class="flags">UNRESOLVED_REFERENT · UNRESOLVED_COMPARAND · EXTRACTION_EMPTY · EXTRACTION_FAILED</p>
+      </div>
+      <div class="flag-group">
+        <p class="flag-group-label">Normative — hard stop</p>
+        <p class="flags">MEDICAL_DOSAGE_RECOMMENDATION · PEDIATRIC_DOSAGE_RECOMMENDATION · NUMERIC_MEDICAL_INSTRUCTION · EMERGENCY_TRIAGE_GUIDANCE · SELF_HARM_INSTRUCTION · ILLEGAL_INSTRUCTION · TARGETED_DEFAMATION</p>
+      </div>
+      <div class="flag-group">
+        <p class="flag-group-label">Normative — verify or refuse</p>
+        <p class="flags">SENSITIVE_PII_EXPOSURE · PERSONALIZED_MEDICAL_ADVICE · PERSONALIZED_LEGAL_ADVICE · PERSONALIZED_FINANCIAL_ADVICE</p>
+      </div>
+
+      <h2>Deployment modes</h2>
+      <table>
+        <tr><th>Mode</th><th>PERSONALIZED_* flags</th><th>Epistemic flags</th></tr>
+        <tr><td>public</td><td>STOP</td><td>REFUSE</td></tr>
+        <tr><td>enterprise</td><td>REFUSE</td><td>REFUSE</td></tr>
+        <tr><td>open</td><td>REFUSE</td><td>ADMIT (annotate and pass)</td></tr>
+      </table>
+
+      <h2>Policy matrix</h2>
+      <p>50 rows covering: domains (general, ambiguity, medical, legal, finance, research, crisis), authority classes (GP, DA, HS), Lens statuses (ADMIT, ASK, REFUSE, STOP), and flag-specific overrides where applicable.</p>
+
+      <h2>Integration points</h2>
+      <table>
+        <tr><th>Integration</th><th>How</th></tr>
+        <tr><td>Custom extraction</td><td>Implement ExtractionBackend and pass via LensConfig</td></tr>
+        <tr><td>Custom governance</td><td>Implement GovernanceBridge and replace CanonicalGovernorBridge</td></tr>
+        <tr><td>Custom policy</td><td>Operator-supplied policy_matrix.json at deploy time</td></tr>
+        <tr><td>Session persistence</td><td>Operator-supplied backend (e.g. Redis) via proxy config</td></tr>
+        <tr><td>Kubernetes</td><td>Reference manifests in k8s/</td></tr>
+        <tr><td>Docker</td><td>Single-container and docker-compose configs</td></tr>
+      </table>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 Margaret Stokes · <a href="/aurora-lens.html">Aurora-Lens</a> · <a href="/governance/">Governance</a> · <a href="mailto:margaret.stokes.ai@gmail.com">Contact</a></p>
+    </div>
+  </footer>
+</body>
+</html>

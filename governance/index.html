@@ -1,1108 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Margaret Stokes — AI Governance Architecture</title>
-    <meta name="description" content="Aurora-Lens: Deterministic governance infrastructure for AI systems deployed in regulated environments. Audit-grade accountability for LLM outputs.">
-    <meta name="keywords" content="AI governance, LLM audit, epistemic governance, AI compliance, regulated AI, Aurora-Lens, deterministic AI governance">
-    <meta name="author" content="Margaret Stokes">
-    
-    <!-- Open Graph -->
-    <meta property="og:title" content="Your AI can't prove why it said what it said.">
-    <meta property="og:description" content="Aurora-Lens: Deterministic governance infrastructure for AI systems deployed in regulated environments.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://milamba.com/governance/">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --ink: #1a1a1a;
-            --paper: #f5f2ed;
-            --paper-dark: #eae5dd;
-            --accent: #b33a1a;
-            --accent-light: #d4512e;
-            --muted: #6b6560;
-            --rule: #c8c1b8;
-            --code-bg: #2b2926;
-            --code-fg: #e8e2d9;
-            --admit: #2d7a3a;
-            --stop: #b33a1a;
-            --refuse: #8a6d1b;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            font-size: 18px;
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: 'IBM Plex Sans', sans-serif;
-            font-weight: 300;
-            color: var(--ink);
-            background: var(--paper);
-            line-height: 1.7;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* ---- TEXTURE ---- */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 1000;
-        }
-
-        /* ---- LAYOUT ---- */
-        .container {
-            max-width: 820px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        section {
-            padding: 4rem 0;
-        }
-
-        /* ---- HEADER / HERO ---- */
-        header {
-            padding: 2rem 0 0;
-            border-bottom: 1px solid var(--rule);
-        }
-
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            padding-bottom: 1.5rem;
-        }
-
-        .topbar-name {
-            font-family: 'IBM Plex Sans', sans-serif;
-            font-weight: 500;
-            font-size: 0.85rem;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-
-        .topbar-links {
-            display: flex;
-            gap: 1.5rem;
-        }
-
-        .topbar-links a {
-            font-size: 0.8rem;
-            font-weight: 400;
-            color: var(--muted);
-            text-decoration: none;
-            letter-spacing: 0.03em;
-            transition: color 0.2s;
-        }
-
-        .topbar-links a:hover {
-            color: var(--accent);
-        }
-
-        .topbar-links a.nav-highlight {
-            color: var(--accent);
-            border: 1px solid var(--accent);
-            padding: 0.25rem 0.65rem;
-            border-radius: 2px;
-        }
-
-        .topbar-links a.nav-highlight:hover {
-            background: var(--accent);
-            color: var(--paper);
-        }
-
-        .hero {
-            padding: 4rem 0 3.5rem;
-        }
-
-        .hero-problem {
-            font-family: 'DM Serif Display', serif;
-            font-size: 2.8rem;
-            line-height: 1.15;
-            color: var(--ink);
-            max-width: 700px;
-            margin-bottom: 1.5rem;
-            opacity: 0;
-            animation: fadeUp 0.8s ease forwards;
-        }
-
-        .hero-problem em {
-            font-style: italic;
-            color: var(--accent);
-        }
-
-        .hero-sub {
-            font-size: 1.15rem;
-            font-weight: 300;
-            color: var(--muted);
-            max-width: 600px;
-            line-height: 1.6;
-            margin-bottom: 2rem;
-            opacity: 0;
-            animation: fadeUp 0.8s ease 0.15s forwards;
-        }
-
-        .hero-answer {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--accent);
-            letter-spacing: 0.02em;
-            opacity: 0;
-            animation: fadeUp 0.8s ease 0.3s forwards;
-        }
-
-        /* ---- SCENARIO BLOCK ---- */
-        .scenario-section {
-            background: var(--code-bg);
-            color: var(--code-fg);
-            margin: 0;
-            padding: 3.5rem 0;
-        }
-
-        .scenario-label {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.75rem;
-            font-weight: 500;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--accent-light);
-            margin-bottom: 1.5rem;
-        }
-
-        .scenario-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: 1.6rem;
-            color: var(--code-fg);
-            margin-bottom: 1.5rem;
-            line-height: 1.3;
-        }
-
-        .scenario-body {
-            font-size: 0.95rem;
-            line-height: 1.75;
-            color: #b8b2a8;
-            max-width: 650px;
-            margin-bottom: 2rem;
-        }
-
-        .scenario-comparison {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-top: 1.5rem;
-        }
-
-        @media (max-width: 640px) {
-            .scenario-comparison {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .scenario-box {
-            padding: 1.5rem;
-            border-radius: 4px;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.82rem;
-            line-height: 1.65;
-        }
-
-        .scenario-box.without {
-            background: rgba(179, 58, 26, 0.12);
-            border: 1px solid rgba(179, 58, 26, 0.3);
-        }
-
-        .scenario-box.with {
-            background: rgba(45, 122, 58, 0.12);
-            border: 1px solid rgba(45, 122, 58, 0.3);
-        }
-
-        .scenario-box-label {
-            font-weight: 500;
-            font-size: 0.72rem;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-bottom: 0.75rem;
-        }
-
-        .scenario-box.without .scenario-box-label {
-            color: var(--accent-light);
-        }
-
-        .scenario-box.with .scenario-box-label {
-            color: #5cb86c;
-        }
-
-        .scenario-output {
-            color: #d4cfc6;
-        }
-
-        .scenario-output .tag-stop {
-            color: var(--accent-light);
-            font-weight: 500;
-        }
-
-        .scenario-output .tag-admit {
-            color: #5cb86c;
-            font-weight: 500;
-        }
-
-        /* ---- THE PROBLEM ---- */
-        .problem-grid {
-            display: grid;
-            grid-template-columns: 3.5rem 1fr;
-            gap: 1rem 1.5rem;
-            margin-top: 2rem;
-        }
-
-        .problem-number {
-            font-family: 'DM Serif Display', serif;
-            font-size: 2rem;
-            color: var(--rule);
-            text-align: right;
-            line-height: 1.4;
-        }
-
-        .problem-text {
-            padding-top: 0.3rem;
-        }
-
-        .problem-text h3 {
-            font-family: 'IBM Plex Sans', sans-serif;
-            font-weight: 600;
-            font-size: 1rem;
-            margin-bottom: 0.3rem;
-        }
-
-        .problem-text p {
-            font-size: 0.95rem;
-            color: var(--muted);
-        }
-
-        /* ---- HOW IT WORKS ---- */
-        .arch-diagram {
-            margin: 2.5rem 0;
-            padding: 2rem;
-            background: var(--paper-dark);
-            border: 1px solid var(--rule);
-            border-radius: 4px;
-            text-align: center;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.85rem;
-        }
-
-        .arch-row {
-            padding: 0.6rem 0;
-            color: var(--muted);
-        }
-
-        .arch-row.highlight {
-            color: var(--accent);
-            font-weight: 500;
-            font-size: 0.95rem;
-            padding: 0.8rem 0;
-            margin: 0.3rem auto;
-            max-width: 400px;
-            background: rgba(179, 58, 26, 0.06);
-            border: 1px dashed var(--accent);
-            border-radius: 3px;
-        }
-
-        .arch-arrow {
-            color: var(--rule);
-            font-size: 1.1rem;
-            padding: 0.2rem 0;
-        }
-
-        /* ---- SECTION HEADINGS ---- */
-        .section-label {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.72rem;
-            font-weight: 500;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--accent);
-            margin-bottom: 0.75rem;
-        }
-
-        .section-heading {
-            font-family: 'DM Serif Display', serif;
-            font-size: 2rem;
-            line-height: 1.2;
-            margin-bottom: 1rem;
-        }
-
-        .section-body {
-            font-size: 1rem;
-            color: var(--muted);
-            max-width: 620px;
-            line-height: 1.75;
-        }
-
-        /* ---- DOMAINS ---- */
-        .domains {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.6rem;
-            margin-top: 2rem;
-        }
-
-        .domain-tag {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.78rem;
-            font-weight: 400;
-            padding: 0.45rem 1rem;
-            border: 1px solid var(--rule);
-            border-radius: 2px;
-            color: var(--muted);
-            transition: all 0.2s;
-        }
-
-        .domain-tag:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-
-        /* ---- PROPERTIES ---- */
-        .properties {
-            margin-top: 2rem;
-        }
-
-        .property {
-            padding: 1.2rem 0;
-            border-bottom: 1px solid var(--rule);
-            display: grid;
-            grid-template-columns: 220px 1fr;
-            gap: 1rem;
-            align-items: baseline;
-        }
-
-        @media (max-width: 640px) {
-            .property {
-                grid-template-columns: 1fr;
-                gap: 0.25rem;
-            }
-        }
-
-        .property:last-child {
-            border-bottom: none;
-        }
-
-        .property-name {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--ink);
-        }
-
-        .property-desc {
-            font-size: 0.92rem;
-            color: var(--muted);
-        }
-
-        /* ---- CREDENTIALS ---- */
-        .credentials-section {
-            background: var(--paper-dark);
-            border-top: 1px solid var(--rule);
-            border-bottom: 1px solid var(--rule);
-        }
-
-        .credential-items {
-            margin-top: 1.5rem;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-
-        @media (max-width: 640px) {
-            .credential-items {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .credential-item {
-            padding: 1.25rem;
-            background: var(--paper);
-            border: 1px solid var(--rule);
-            border-radius: 3px;
-        }
-
-        .credential-item h4 {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.8rem;
-            font-weight: 500;
-            letter-spacing: 0.04em;
-            margin-bottom: 0.4rem;
-        }
-
-        .credential-item p {
-            font-size: 0.88rem;
-            color: var(--muted);
-            line-height: 1.55;
-        }
-
-        /* ---- PUBLICATION ---- */
-        .pub-card {
-            margin-top: 2rem;
-            padding: 1.5rem;
-            background: var(--paper-dark);
-            border: 1px solid var(--rule);
-            border-radius: 3px;
-        }
-
-        .pub-card h4 {
-            font-family: 'DM Serif Display', serif;
-            font-size: 1.15rem;
-            margin-bottom: 0.5rem;
-            line-height: 1.35;
-        }
-
-        .pub-card .pub-meta {
-            font-size: 0.85rem;
-            color: var(--muted);
-            margin-bottom: 0.75rem;
-        }
-
-        .pub-card a {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.82rem;
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .pub-card a:hover {
-            text-decoration: underline;
-        }
-
-        /* ---- CTA / CONTACT ---- */
-        .cta-section {
-            text-align: center;
-            padding: 5rem 0;
-        }
-
-        .cta-heading {
-            font-family: 'DM Serif Display', serif;
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        .cta-body {
-            font-size: 1rem;
-            color: var(--muted);
-            max-width: 500px;
-            margin: 0 auto 2rem;
-            line-height: 1.65;
-        }
-
-        .cta-links {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .cta-link {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--accent);
-            text-decoration: none;
-            padding: 0.7rem 1.5rem;
-            border: 1.5px solid var(--accent);
-            border-radius: 3px;
-            transition: all 0.2s;
-        }
-
-        .cta-link:hover {
-            background: var(--accent);
-            color: var(--paper);
-        }
-
-        .cta-link.secondary {
-            border-color: var(--rule);
-            color: var(--muted);
-        }
-
-        .cta-link.secondary:hover {
-            border-color: var(--muted);
-            background: var(--muted);
-            color: var(--paper);
-        }
-
-        /* ---- FOOTER ---- */
-        footer {
-            padding: 2rem 0;
-            border-top: 1px solid var(--rule);
-            text-align: center;
-        }
-
-        footer p {
-            font-size: 0.8rem;
-            color: var(--rule);
-            line-height: 1.6;
-        }
-
-        footer a {
-            color: var(--muted);
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            color: var(--accent);
-        }
-
-        /* ---- SEPARATOR ---- */
-        .sep {
-            width: 40px;
-            height: 2px;
-            background: var(--accent);
-            margin: 2rem 0;
-        }
-
-        /* ---- ANIMATION ---- */
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(16px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .reveal {
-            opacity: 0;
-            transform: translateY(12px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* ---- RESPONSIVE ---- */
-        @media (max-width: 640px) {
-            html { font-size: 16px; }
-            .hero-problem { font-size: 2rem; }
-            .section-heading { font-size: 1.6rem; }
-            .container { padding: 0 1.25rem; }
-            .topbar { flex-direction: column; gap: 0.5rem; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Governance — Aurora-Lens</title>
+  <meta name="description" content="Why admissibility matters at inference time: Lens determines admissibility, the Governor determines lawful continuation, and the audit layer preserves the record.">
+  <meta property="og:title" content="Governance — Aurora-Lens">
+  <meta property="og:description" content="Fluent output is not the same thing as licensed output. Aurora-Lens explains why admissibility comes first.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://milamba.com/governance/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink:#141210; --paper:#f4f0ea; --panel:#fbf9f5; --muted:#615b56; --rule:#d1c7bb; --accent:#b03d1f; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'IBM Plex Sans',sans-serif; background:var(--paper); color:var(--ink); line-height:1.75; -webkit-font-smoothing:antialiased; }
+    .container { max-width:980px; margin:0 auto; padding:0 1.5rem; }
+    header { position:sticky; top:0; z-index:10; background:rgba(244,240,234,0.95); backdrop-filter:blur(8px); border-bottom:1px solid var(--rule); }
+    .nav { min-height:68px; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+    .brand { font-family:'IBM Plex Mono',monospace; font-size:0.82rem; text-transform:uppercase; letter-spacing:0.08em; text-decoration:none; color:var(--ink); }
+    .nav-links { display:flex; flex-wrap:wrap; gap:1.1rem; }
+    .nav-links a { text-decoration:none; color:var(--muted); font-size:0.82rem; }
+    .nav-links a.active, .nav-links a:hover { color:var(--accent); }
+    .hero { padding:6rem 0 4rem; border-bottom:1px solid var(--rule); background:linear-gradient(180deg,rgba(176,61,31,0.07),transparent 38%); }
+    .eyebrow { font-family:'IBM Plex Mono',monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--accent); margin-bottom:1.2rem; }
+    h1 { font-family:'DM Serif Display',serif; font-size:clamp(2.8rem,6vw,4.7rem); line-height:1.06; font-weight:400; margin-bottom:1.2rem; max-width:10ch; }
+    .hero p { max-width:62ch; color:var(--muted); font-size:1.04rem; margin-bottom:1rem; }
+    section { border-bottom:1px solid var(--rule); }
+    .section-inner { padding:4rem 0; }
+    .section-label { font-family:'IBM Plex Mono',monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); margin-bottom:0.8rem; }
+    h2 { font-family:'DM Serif Display',serif; font-size:clamp(2rem,4vw,3rem); line-height:1.15; font-weight:400; margin-bottom:1rem; }
+    p { color:var(--muted); font-size:1rem; margin-bottom:1rem; }
+    .distinction-grid, .outcome-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; margin-top:1.4rem; }
+    .card { background:var(--panel); border:1px solid var(--rule); padding:1.2rem; }
+    .card-label { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--accent); margin-bottom:0.45rem; }
+    .card h3 { font-size:1.05rem; margin-bottom:0.55rem; }
+    .card p { font-size:0.95rem; margin-bottom:0; }
+    .formula { margin:1.3rem 0; padding:1rem 1.15rem; background:var(--panel); border:1px solid var(--rule); font-family:'IBM Plex Mono',monospace; font-size:0.9rem; color:var(--ink); }
+    .outcome-grid .card h3 { font-family:'DM Serif Display',serif; font-size:1.35rem; font-weight:400; }
+    .cta-row { display:flex; flex-wrap:wrap; gap:0.8rem; margin-top:1rem; }
+    .button { display:inline-flex; align-items:center; justify-content:center; padding:0.85rem 1.15rem; text-decoration:none; font-family:'IBM Plex Mono',monospace; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; border:1px solid var(--ink); color:var(--ink); transition:0.2s ease; }
+    .button:hover { border-color:var(--accent); color:var(--accent); background:white; }
+    .pub-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0.75rem; margin-top:1rem; }
+    .pub-item { background:var(--panel); border:1px solid var(--rule); padding:1rem 1.1rem; }
+    .pub-item .plabel { font-family:'IBM Plex Mono',monospace; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:4px; }
+    .pub-item a { font-size:0.85rem; color:var(--accent); text-decoration:none; }
+    .pub-item a:hover { text-decoration:underline; }
+    .pub-item p { font-size:0.82rem; color:var(--muted); margin-top:2px; margin-bottom:0; }
+    footer { padding:1.5rem 0 3rem; color:var(--muted); font-size:0.9rem; }
+    footer a { color:inherit; }
+    @media (max-width:760px) { .distinction-grid,.outcome-grid,.pub-grid { grid-template-columns:1fr; } }
+  </style>
 </head>
 <body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="/">Margaret Stokes</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/aurora-lens.html">Aurora-Lens</a>
+        <a href="/governance/" class="active">Governance</a>
+        <a href="/writing/">Writing</a>
+        <a href="/about/">About</a>
+        <a href="mailto:margaret.stokes.ai@gmail.com">Contact</a>
+      </nav>
+    </div>
+  </header>
 
-<header>
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="eyebrow">Governance</div>
+        <h1>Why admissibility matters at inference time</h1>
+        <p>Fluent output is not the same thing as licensed output.</p>
+        <p>Aurora-Lens is built around a simple claim: model output should not become consequence simply because a model can say it smoothly. Admissibility must be decided explicitly. Clarification, refusal, and stop are valid outcomes. When output cannot pass, the continuation should still be lawful, controlled, and auditable.</p>
+        <p>The question Lens asks is not whether the model was right. It is whether the model was authorized to make that determination in that context for that user.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="container section-inner">
+        <div class="section-label">Core distinction</div>
+        <h2>Three layers, three jobs</h2>
+        <div class="distinction-grid">
+          <article class="card">
+            <div class="card-label">Lens</div>
+            <h3>Determines admissibility</h3>
+            <p>Lens answers one question: may this candidate output pass? It evaluates authorization, not accuracy.</p>
+          </article>
+          <article class="card">
+            <div class="card-label">Governor</div>
+            <h3>Determines lawful continuation</h3>
+            <p>The Governor answers the next question: since the candidate may not pass, what is still lawful to say or do now? It cannot widen what Lens has closed.</p>
+          </article>
+          <article class="card">
+            <div class="card-label">Audit layer</div>
+            <h3>Preserves evidence</h3>
+            <p>The audit layer records what happened in a form that can later be checked, replayed, and verified rather than merely described.</p>
+          </article>
+          <article class="card">
+            <div class="card-label">Result</div>
+            <h3>Generation is not sovereignty</h3>
+            <p>The model may generate. It does not decide by itself whether what it generated may become consequence.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container section-inner">
+        <div class="section-label">Runtime structure</div>
+        <h2>The machine in one pass</h2>
+        <p>A model produces candidate output. Lens checks that output against session-scoped state and governance rules. If it is admissible, it may pass. If it is not, the Governor determines the lawful continuation path instead. The audit layer records the governed outcome.</p>
+        <div class="formula">model proposes → Lens checks admissibility → Governor determines lawful continuation → audit records the event</div>
+        <p>This is not a generic guardrail and not a replacement model. It is a runtime governance layer over existing models.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="container section-inner">
+        <div class="section-label">Outcome classes</div>
+        <h2>Governed outcomes</h2>
+        <p>Aurora-Lens works with four constitutional outcome classes. These are not cosmetic UI states. They are governed outcomes with deterministic forensic consequences.</p>
+        <div class="outcome-grid">
+          <article class="card">
+            <div class="card-label">ADMIT</div>
+            <h3>May pass</h3>
+            <p>The candidate output is admissible and may become consequence.</p>
+          </article>
+          <article class="card">
+            <div class="card-label">ASK</div>
+            <h3>Clarify</h3>
+            <p>Clarification or missing structure is required before consequence may be allowed.</p>
+          </article>
+          <article class="card">
+            <div class="card-label">REFUSE</div>
+            <h3>Boundary with continuation</h3>
+            <p>The candidate may not pass, but the interaction can continue within a lawful boundary.</p>
+          </article>
+          <article class="card">
+            <div class="card-label">STOP</div>
+            <h3>Stop or escalate</h3>
+            <p>The candidate may not pass and the continuation corridor is tightly constrained or closed.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container section-inner">
+        <div class="section-label">Why it matters</div>
+        <h2>Current systems blur what should stay separate</h2>
+        <p>Many systems let generation, authority, fallback, and audit collapse into one thing. Aurora-Lens separates them. A model may generate. That does not mean it has earned the right to decide what may become consequence.</p>
+        <p>That separation matters in any setting where output needs to be checked before release, where blocked content must not be smuggled back through fallback language, and where the system must later be able to show what was blocked, what was shown, and why.</p>
+        <p>LLM liability does not arise only from false answers. It arises when a system continues an interaction down a foreseeable harmful path that should have been stopped, constrained, clarified, routed, or escalated. Aurora-Lens prevents that commitment from occurring — not by evaluating the answer, but by evaluating the authorization to answer.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="container section-inner">
+        <div class="section-label">Forensic audit</div>
+        <h2>What the record is for</h2>
+        <p>When output is governed rather than passed, Aurora-Lens emits a versioned forensic envelope and writes tamper-evident, hash-chained audit entries. That makes it possible to verify what was blocked, what was shown, and which pathway was used — auditable and defensible under adversarial scrutiny.</p>
+        <div class="cta-row">
+          <a class="button" href="/aurora-lens.html">See the product page</a>
+          <a class="button" href="/docs/evidence/live-e2e-streaming-verification.html">View live evidence</a>
+          <a class="button" href="/docs/system-capabilities.html">System capabilities</a>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container section-inner">
+        <div class="section-label">Publications and record</div>
+        <h2>Prior art</h2>
+        <p>The conceptual architecture, IP chain, and publication record are public, dated, and independently verifiable.</p>
+        <div class="pub-grid">
+          <div class="pub-item">
+            <p class="plabel">PyPI</p>
+            <a href="https://pypi.org/project/aurora-lens/" target="_blank" rel="noopener">aurora-lens</a>
+            <p>pip install aurora-lens</p>
+          </div>
+          <div class="pub-item">
+            <p class="plabel">ORCID</p>
+            <a href="https://orcid.org/0009-0004-6422-4174" target="_blank" rel="noopener">0009-0004-6422-4174</a>
+          </div>
+          <div class="pub-item">
+            <p class="plabel">Zenodo — PCCM preprint</p>
+            <a href="https://zenodo.org/records/18976303" target="_blank" rel="noopener">10.5281/zenodo.18976303</a>
+            <p>Present-Centered Cognition Model</p>
+          </div>
+          <div class="pub-item">
+            <p class="plabel">Zenodo — Epistemic governance</p>
+            <a href="https://zenodo.org/records/18653120" target="_blank" rel="noopener">10.5281/zenodo.18653120</a>
+            <p>Epistemic Legitimacy as a Governance Layer for LLMs</p>
+          </div>
+          <div class="pub-item">
+            <p class="plabel">Zenodo — OECD alignment</p>
+            <a href="https://zenodo.org/records/18719033" target="_blank" rel="noopener">10.5281/zenodo.18719033</a>
+            <p>Operational Alignment with OECD Due Diligence Guidance</p>
+          </div>
+          <div class="pub-item">
+            <p class="plabel">SSRN</p>
+            <a href="https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=10385176" target="_blank" rel="noopener">Author page</a>
+          </div>
+          <div class="pub-item">
+            <p class="plabel">OSF</p>
+            <a href="https://osf.io/86bxj" target="_blank" rel="noopener">osf.io/86bxj</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
     <div class="container">
-        <div class="topbar">
-            <a class="topbar-name" href="/" style="text-decoration:none; color:inherit;">Margaret Stokes</a>
-            <nav class="topbar-links">
-                <a href="#problem">The Problem</a>
-                <a href="#how">How It Works</a>
-                <a href="runtime-governance.html">Runtime Governance</a>
-                <a href="/aurora-lens.html" class="nav-highlight">Aurora-Lens</a>
-                <a href="#research">Research</a>
-                <a href="#contact">Contact</a>
-            </nav>
-        </div>
+      <p>&copy; 2026 Margaret Stokes · <a href="/aurora-lens.html">Aurora-Lens</a> · <a href="mailto:margaret.stokes.ai@gmail.com">Contact</a></p>
     </div>
-</header>
-
-<section class="hero">
-    <div class="container">
-        <h1 class="hero-problem">Your AI can't prove why it said what it said. In regulated industries, that's not a quality problem — it's <em>a liability.</em></h1>
-        <p class="hero-sub">Current LLM systems guess when they should refuse, commit when they should wait, and leave no auditable trace of why. Aurora-Lens is the governance layer that changes this.</p>
-        <p class="hero-answer">Deterministic governance infrastructure for AI in regulated environments.</p>
-    </div>
-</section>
-
-<!-- PROCESS FLOW DIAGRAM -->
-<div style="border-bottom: 1px solid var(--rule); padding: 3rem 0;">
-<div class="container">
-
-<style>
-  .flow-diagram {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-    width: 100%;
-    max-width: 640px;
-    margin: 0 auto;
-    font-family: inherit;
-  }
-  .flow-node {
-    width: 100%;
-    border: 1px solid var(--rule);
-    padding: 1rem 1.25rem;
-    position: relative;
-    background: transparent;
-  }
-  .flow-node.narrow   { max-width: 280px; text-align: center; }
-  .flow-node.gate     { border-color: var(--muted); }
-  .flow-node.admit    { max-width: 290px; border-color: #2d7a3a; }
-  .flow-node.refuse   { max-width: 290px; border-color: var(--accent); }
-  .flow-node.engine   { max-width: 290px; }
-  .flow-node.ledger   { max-width: 290px; border-color: var(--accent); opacity: 0.8; }
-  .flow-node.output   { max-width: 280px; text-align: center; border-color: #2d7a3a; }
-  .flow-node-sub {
-    font-size: 0.65rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.3rem;
-  }
-  .flow-node-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--ink);
-  }
-  .flow-node.gate   .flow-node-title { color: var(--ink); }
-  .flow-node.admit  .flow-node-title { color: #2d7a3a; }
-  .flow-node.refuse .flow-node-title { color: var(--accent); }
-  .flow-node.output .flow-node-title { color: #2d7a3a; }
-  .flow-node-items {
-    margin-top: 0.6rem;
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-  .flow-node-items li {
-    font-size: 0.8rem;
-    color: var(--muted);
-    padding-left: 1rem;
-    position: relative;
-  }
-  .flow-node-items li::before {
-    content: '–';
-    position: absolute;
-    left: 0;
-    color: var(--muted);
-  }
-  .flow-arrow {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .flow-arrow-line {
-    width: 1px;
-    height: 28px;
-    background: var(--rule);
-  }
-  .flow-arrow-head {
-    width: 0; height: 0;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 6px solid var(--muted);
-  }
-  .flow-split {
-    display: flex;
-    width: 100%;
-    justify-content: center;
-  }
-  .flow-branch {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex: 1;
-    max-width: 320px;
-  }
-  .flow-split-line {
-    height: 28px;
-    width: 100%;
-    position: relative;
-    display: flex;
-    justify-content: center;
-  }
-  .flow-split-line::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    height: 1px;
-    background: var(--rule);
-  }
-  .flow-branch:first-child .flow-split-line::before { left: 50%; right: 0; }
-  .flow-branch:last-child  .flow-split-line::before { left: 0; right: 50%; }
-  .flow-split-line::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 50%;
-    transform: translateX(-50%);
-    width: 1px;
-    height: 100%;
-    background: var(--rule);
-  }
-  .flow-split-arrowhead {
-    width: 0; height: 0;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 6px solid var(--muted);
-  }
-  .flow-branch-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    margin-bottom: 0.4rem;
-  }
-  .flow-branch-label.admit-lbl  { color: #2d7a3a; }
-  .flow-branch-label.refuse-lbl { color: var(--accent); }
-</style>
-
-<figure class="flow-diagram" aria-label="Epistemic Governance Process Flow">
-
-  <div class="flow-node narrow">
-    <div class="flow-node-sub">Entry Point</div>
-    <div class="flow-node-title">User Input</div>
-  </div>
-
-  <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
-
-  <div class="flow-node">
-    <div class="flow-node-sub">Layer 01 — Structure Extraction</div>
-    <div class="flow-node-title">Interpretation Layer</div>
-    <ul class="flow-node-items">
-      <li>Roles</li>
-      <li>Domains</li>
-      <li>Spans</li>
-    </ul>
-  </div>
-
-  <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
-
-  <div class="flow-node gate">
-    <div class="flow-node-sub">Spine — Epistemic Governance</div>
-    <div class="flow-node-title">Admissibility Gate</div>
-    <ul class="flow-node-items">
-      <li>Structural validity</li>
-      <li>Domain authority</li>
-      <li>Constraint satisfaction</li>
-      <li>Ambiguity resolution</li>
-    </ul>
-  </div>
-
-  <div class="flow-split">
-
-    <div class="flow-branch">
-      <div class="flow-split-line"></div>
-      <div class="flow-split-arrowhead"></div>
-      <div class="flow-branch-label admit-lbl">Admit</div>
-      <div class="flow-node admit">
-        <div class="flow-node-sub">Resolution</div>
-        <div class="flow-node-title">Admit</div>
-        <ul class="flow-node-items"><li>Resolution permitted</li></ul>
-      </div>
-      <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
-      <div class="flow-node engine">
-        <div class="flow-node-sub">Layer 02</div>
-        <div class="flow-node-title">Expression Engine</div>
-        <ul class="flow-node-items">
-          <li>LLM / Generator</li>
-          <li>Controlled output</li>
-        </ul>
-      </div>
-      <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
-      <div class="flow-node output">
-        <div class="flow-node-sub">Result</div>
-        <div class="flow-node-title">Final Output</div>
-      </div>
-    </div>
-
-    <div class="flow-branch">
-      <div class="flow-split-line"></div>
-      <div class="flow-split-arrowhead"></div>
-      <div class="flow-branch-label refuse-lbl">Stop / Refuse</div>
-      <div class="flow-node refuse">
-        <div class="flow-node-sub">Blocked Action</div>
-        <div class="flow-node-title">Stop / Refuse</div>
-        <ul class="flow-node-items"><li>Blocked action</li></ul>
-      </div>
-      <div class="flow-arrow"><div class="flow-arrow-line"></div><div class="flow-arrow-head"></div></div>
-      <div class="flow-node ledger">
-        <div class="flow-node-sub">Audit Trail</div>
-        <div class="flow-node-title">Forensic Ledger</div>
-        <ul class="flow-node-items">
-          <li>trace_id</li>
-          <li>failed rules</li>
-          <li>state_hash</li>
-          <li>timestamp</li>
-        </ul>
-      </div>
-    </div>
-
-  </div>
-
-</figure>
-
-</div>
-</div>
-
-<!-- SCENARIO -->
-<div class="scenario-section">
-    <div class="container">
-        <div class="scenario-label">Why This Matters</div>
-        <h2 class="scenario-title">A patient presents with chest pain and elevated troponin.</h2>
-        <p class="scenario-body">The attending physician asks the AI clinical decision support system for a differential diagnosis. Two conditions remain structurally admissible given the available evidence. The AI must not collapse to a single answer — and it must be able to prove it didn't.</p>
-
-        <div class="scenario-comparison">
-            <div class="scenario-box without">
-                <div class="scenario-box-label">Standard LLM</div>
-                <div class="scenario-output">
-                    "Based on the presentation, this is most consistent with acute myocardial infarction."<br><br>
-                    No audit trail. No record of eliminated alternatives. No proof the conclusion was warranted by the evidence.<br><br>
-                    <span class="tag-stop">Liability created.</span>
-                </div>
-            </div>
-            <div class="scenario-box with">
-                <div class="scenario-box-label">With Aurora-Lens</div>
-                <div class="scenario-output">
-                    Two interpretations remain admissible: MI and pulmonary embolism. Insufficient constraint to collapse.<br><br>
-                    <span class="tag-admit">→ STOP</span> — additional evidence required.<br><br>
-                    Decision logged. Hash-chained. Deterministically replayable. Audit-ready.
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- THE PROBLEM -->
-<section id="problem">
-    <div class="container reveal">
-        <div class="section-label">The Problem</div>
-        <h2 class="section-heading">AI systems deployed in regulated domains have a structural deficiency.</h2>
-        <p class="section-body">They cannot distinguish between having enough evidence to commit and not having enough. They default to an answer regardless. In medicine, law, finance, and government, this is not a usability issue. It is an architectural failure with legal and regulatory consequences.</p>
-
-        <div class="problem-grid">
-            <div class="problem-number">1</div>
-            <div class="problem-text">
-                <h3>They collapse ambiguity prematurely</h3>
-                <p>When multiple interpretations remain valid, LLMs pick one and present it as definitive. No trace of the alternatives. No justification for the selection.</p>
-            </div>
-            <div class="problem-number">2</div>
-            <div class="problem-text">
-                <h3>They cannot refuse</h3>
-                <p>Saying "I don't have enough information" is trained behaviour, not architectural constraint. It can be overridden, fine-tuned away, or simply not triggered.</p>
-            </div>
-            <div class="problem-number">3</div>
-            <div class="problem-text">
-                <h3>They leave no forensic trail</h3>
-                <p>There is no auditable record of what was considered, what was eliminated, and why a particular output was permitted. Regulators cannot verify what they cannot trace.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- HOW IT WORKS -->
-<section id="how">
-    <div class="container reveal">
-        <div class="section-label">The Architecture</div>
-        <h2 class="section-heading">Aurora-Lens sits between your application and the LLM. It governs what gets through.</h2>
-        <p class="section-body">Aurora-Lens is a <em>deterministic admissibility layer</em> that sits outside the model. The LLM generates language; Aurora-Lens decides whether that language is permitted to reach the user. It evaluates outputs against persistent state and domain constraints, then enforces exactly one outcome: <strong>ADMIT</strong>, <strong>STOP</strong>, or <strong>REFUSE</strong> — with a tamper-evident audit record of the decision path.</p>
-
-
-
-        <div class="arch-diagram">
-            <div class="arch-row">Your Application</div>
-            <div class="arch-arrow">↓</div>
-            <div class="arch-row highlight">Aurora-Lens — Governance Proxy</div>
-            <div class="arch-arrow">↓</div>
-            <div class="arch-row">LLM Provider (OpenAI / Anthropic / Other)</div>
-            <div class="arch-arrow">↓</div>
-            <div class="arch-row highlight">Tamper-Evident Audit Ledger</div>
-        </div>
-
-        <p class="section-body">Three outcomes. Nothing else.</p>
-
-        <div class="properties">
-            <div class="property">
-                <div class="property-name" style="color: var(--admit);">ADMIT</div>
-                <div class="property-desc">The output is permitted. Sufficient constraint exists to warrant commitment. Decision is logged with full provenance.</div>
-            </div>
-            <div class="property">
-                <div class="property-name" style="color: var(--stop);">STOP</div>
-                <div class="property-desc">Insufficient evidence to commit. Multiple interpretations remain admissible. The system suspends judgment and requests additional constraint.</div>
-            </div>
-            <div class="property">
-                <div class="property-name" style="color: var(--refuse);">REFUSE</div>
-                <div class="property-desc">The query violates domain governance policy. The system will not proceed. The refusal is logged as a legitimate governance outcome.</div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- CORE PROPERTIES -->
-<section>
-    <div class="container reveal">
-        <div class="section-label">Core Properties</div>
-        <h2 class="section-heading">What makes this different from guardrails.</h2>
-        <p class="section-body">
-        Aurora-Lens is a <em>deterministic admissibility layer</em> that sits outside the model.
-        The LLM generates language; Aurora-Lens decides whether that language is permitted to reach the user.
-        It evaluates outputs against persistent state and domain constraints, then enforces exactly one outcome:
-        <strong>ADMIT</strong>, <strong>STOP</strong>, or <strong>REFUSE</strong> — with a tamper-evident audit record of the decision path.
-</p>
-
-
-        <div class="properties">
-            <div class="property">
-                <div class="property-name">Parallel Interpretations</div>
-                <div class="property-desc">Maintains multiple admissible interpretations simultaneously until evidence forces collapse. Does not guess.</div>
-            </div>
-            <div class="property">
-                <div class="property-name">Constraint-Only Collapse</div>
-                <div class="property-desc">Interpretations are eliminated only by binding evidence, never by heuristic, probability, or default.</div>
-            </div>
-            <div class="property">
-                <div class="property-name">Refusal Is Valid</div>
-                <div class="property-desc">Suspended judgment is a correct governance outcome, not an error state. The system is designed to say no.</div>
-            </div>
-            <div class="property">
-                <div class="property-name">Deterministic Replay</div>
-                <div class="property-desc">Every decision can be reproduced from the same inputs. No stochastic variation. Identical inputs produce identical governance decisions.</div>
-            </div>
-            <div class="property">
-                <div class="property-name">Forensic Audit Trail</div>
-                <div class="property-desc">Hash-chained event records in AFL-JSONL-1 format. Every admit, stop, and refuse is logged with cryptographic integrity.</div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- DOMAINS -->
-<section>
-    <div class="container reveal">
-        <div class="section-label">Deployment Domains</div>
-        <h2 class="section-heading">Built for environments where wrong answers have consequences.</h2>
-        <p class="section-body">Aurora-Lens targets regulated industries where AI outputs carry legal, financial, or clinical liability — and where audit requirements are not optional.</p>
-
-        <div class="domains">
-            <span class="domain-tag">Healthcare &amp; Clinical AI</span>
-            <span class="domain-tag">Legal Research &amp; Advisory</span>
-            <span class="domain-tag">Financial Services &amp; Compliance</span>
-            <span class="domain-tag">Government &amp; Defence</span>
-            <span class="domain-tag">GRC Platforms</span>
-            <span class="domain-tag">Insurance &amp; Actuarial</span>
-        </div>
-    </div>
-</section>
-
-<!-- CREDENTIALS -->
-<section class="credentials-section" id="research">
-    <div class="container reveal">
-        <div class="section-label">Research &amp; IP</div>
-        <h2 class="section-heading">40 years of pattern recognition. 5 patents. Working code.</h2>
-        <p class="section-body">This is not a whitepaper or a framework deck. Aurora-Lens is implemented, tested, and produces real forensic audit output. The underlying research spans four decades of work in compositional reasoning and cognitive architecture.</p>
-
-        <div class="credential-items">
-            <div class="credential-item">
-                <h4>5 Provisional Patents</h4>
-                <p>Covering admissibility-controlled commitment, audit-grade state transitions, ambiguity preservation, epistemic refusal, and non-temporal reasoning substrates.</p>
-            </div>
-            <div class="credential-item">
-                <h4>Working Implementation</h4>
-                <p>Production-grade governance proxy with deterministic admissibility control, cryptographic audit trails, and full integration test coverage.</p>
-
-                <p><strong>Minimal runtime demo (policy refusal + audit log capture):</strong>
-                <a href="https://github.com/milarien/aurora-governor-demo">aurora-governor-demo</a>
-                · <a href="https://github.com/milarien/aurora-governor-demo/tree/main/demo_runs">example run + audit</a>
-                
-                </p>
-            </div>
-            <div class="credential-item">
-                <h4>Published Research</h4>
-                <p>Two preprints published on Zenodo. Empirical evidence, architectural specification, and regulatory alignment. Open data and replication materials on OSF.</p>
-            </div>
-            <div class="credential-item">
-                <h4>Independent Researcher</h4>
-                <p>Melbourne, Australia. Background in philosophy, cognitive architecture, and structured reasoning systems since the 1980s.</p>
-            </div>
-        </div>
-
-        <div class="pub-card">
-            <h4>Epistemic Legitimacy as a Governance Layer for Large Language Models: Architecture and Implementation</h4>
-            <p class="pub-meta">Stokes, M. (2026). Preprint. &nbsp;·&nbsp; ORCID: <a href="https://orcid.org/0009-0004-6422-4174">0009-0004-6422-4174</a></p>
-            <a href="https://doi.org/10.5281/zenodo.18653120">Read on Zenodo →</a>
-            &nbsp;·&nbsp; <a href="https://osf.io/86bxj/">Data &amp; code on OSF →</a>
-        </div>
-
-        <div class="pub-card">
-            <h4>Operational Alignment of Aurora-Lens with OECD Due Diligence Guidance for Responsible AI (2026)</h4>
-            <p class="pub-meta">Stokes, M. (2026). Preprint. &nbsp;·&nbsp; ORCID: <a href="https://orcid.org/0009-0004-6422-4174">0009-0004-6422-4174</a></p>
-            <a href="https://doi.org/10.5281/zenodo.18719033">Read on Zenodo →</a>
-        </div>
-
-        <div class="pub-card">
-            <h4>Empirical Demonstration of LLM Failure Modes in Pronoun Ambiguity Resolution</h4>
-            <p class="pub-meta">Stokes, M. (2025). Raw model outputs, replication protocol, and working implementation. &nbsp;·&nbsp; ORCID: <a href="https://orcid.org/0009-0004-6422-4174">0009-0004-6422-4174</a></p>
-            <a href="https://osf.io/pv84s/">Data &amp; code on OSF →</a>
-        </div>
-
-        <div class="pub-card">
-            <h4>Present-Centered Cognition Model (PCCM): A Cross-Substrate Framework for Understanding Consciousness, Presence, and Latent States in Humans and Machines</h4>
-            <p class="pub-meta">Stokes, M. (2026). Preprint. &nbsp;·&nbsp; ORCID: <a href="https://orcid.org/0009-0004-6422-4174">0009-0004-6422-4174</a></p>
-            <a href="https://doi.org/10.5281/zenodo.18976303">Read on Zenodo →</a>
-        </div>
-
-        <div style="margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--rule);">
-            <p class="section-body" style="margin-bottom: 1.5rem;">Aurora-Lens is the implementation of these principles — deterministic runtime governance for regulated LLM systems.</p>
-            <a href="/aurora-lens.html" style="display: inline-block; background: var(--ink); color: var(--paper); font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; padding: 0.85rem 1.75rem; transition: background 0.2s;">See Aurora-Lens →</a>
-        </div>
-    </div>
-</section>
-
-<!-- CTA -->
-<section class="cta-section" id="contact">
-    <div class="container reveal">
-        <h2 class="cta-heading">Let's talk about your compliance problem.</h2>
-        <p class="cta-body">If you're deploying AI in a regulated environment and need governance that actually works — deterministic, auditable, and architecturally sound — I'd like to hear from you.</p>
-        <div class="cta-links">
-            <a href="mailto:margaret.stokes.ai@gmail.com" class="cta-link">Email me</a>
-            <a href="https://www.linkedin.com/in/margaret-s-12830614/" class="cta-link secondary">LinkedIn</a>
-            <a href="https://github.com/milarien" class="cta-link secondary">GitHub</a>
-        </div>
-    </div>
-</section>
-
-<footer>
-    <div class="container">
-        <p>&copy; 2026 Margaret Stokes &nbsp;·&nbsp; Melbourne, Australia &nbsp;·&nbsp; <a href="https://orcid.org/0009-0004-6422-4174">ORCID</a></p>
-    </div>
-</footer>
-
-<script>
-    // Scroll reveal
-    const reveals = document.querySelectorAll('.reveal');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
-        });
-    }, { threshold: 0.1 });
-    reveals.forEach(el => observer.observe(el));
-</script>
-
+  </footer>
 </body>
 </html>

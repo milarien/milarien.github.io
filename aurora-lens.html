@@ -1,1293 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aurora Lens — Inference-time governance for large language models</title>
-<meta property="og:url" content="https://milamba.com/aurora-lens.html">
-<meta property="og:title" content="Aurora Lens — Inference-time governance for large language models">
-<meta property="og:description" content="A runtime governance asset that determines whether model output is admissible before it reaches the application, and records the outcome in a deterministic audit trail.">
-<meta property="og:image" content="https://milamba.com/logo.png">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --ink: #0c0c0e;
-    --paper: #f4f1eb;
-    --accent: #c8391a;
-    --muted: #6b6660;
-    --rule: #d4cfc8;
-    --code-bg: #1a1916;
-    --code-text: #e8e4dc;
-    --green: #1a6b3a;
-    --green-bg: #eef5f1;
-    --border-strong: #0c0c0e;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: 'Instrument Sans', sans-serif;
-    background: var(--paper);
-    color: var(--ink);
-    font-size: 17px;
-    line-height: 1.65;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* ── NAV ── */
-  nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    background: var(--paper);
-    border-bottom: 1.5px solid var(--border-strong);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 3rem;
-    height: 60px;
-  }
-
-  .nav-logo {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.85rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink);
-    text-decoration: none;
-  }
-
-  .nav-links {
-    display: flex;
-    gap: 2.5rem;
-    list-style: none;
-  }
-
-  .nav-links a {
-    font-size: 0.8rem;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .nav-links a:hover { color: var(--ink); }
-
-  /* ── HERO ── */
-  .hero {
-    min-height: 100vh;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    border-bottom: 1.5px solid var(--border-strong);
-    padding-top: 60px;
-  }
-
-  .hero-left {
-    padding: 8rem 4rem 6rem 3rem;
-    border-right: 1.5px solid var(--border-strong);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .eyebrow {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
-    font-weight: 400;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 2rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .eyebrow::before {
-    content: '';
-    display: inline-block;
-    width: 2rem;
-    height: 1.5px;
-    background: var(--accent);
-  }
-
-  h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: clamp(3rem, 5vw, 4.5rem);
-    line-height: 1.08;
-    font-weight: 400;
-    letter-spacing: -0.02em;
-    margin-bottom: 1.25rem;
-    color: var(--ink);
-  }
-
-  h1 em {
-    font-style: italic;
-    color: var(--accent);
-  }
-
-  .hero-sub {
-    font-size: 1.1rem;
-    color: var(--muted);
-    max-width: 44ch;
-    line-height: 1.7;
-    margin-bottom: 3rem;
-  }
-
-  .hero-ctas {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-    align-items: flex-start;
-  }
-
-  .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: var(--ink);
-    color: var(--paper);
-    text-decoration: none;
-    padding: 0.9rem 2rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    transition: background 0.2s;
-  }
-
-  .btn-primary:hover { background: var(--accent); }
-
-  .btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: transparent;
-    color: var(--ink);
-    text-decoration: none;
-    padding: 0.9rem 2rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    border: 1.5px solid var(--ink);
-    transition: background 0.2s, color 0.2s;
-  }
-
-  .btn-secondary:hover { background: var(--ink); color: var(--paper); }
-
-  .hero-right {
-    padding: 8rem 3rem 6rem 4rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 0;
-  }
-
-  .statement-block {
-    border-top: 1.5px solid var(--border-strong);
-    padding: 2.5rem 0;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeUp 0.6s forwards;
-  }
-
-  .statement-block:nth-child(1) { animation-delay: 0.2s; }
-  .statement-block:nth-child(2) { animation-delay: 0.4s; }
-  .statement-block:nth-child(3) { animation-delay: 0.6s; }
-  .statement-block:last-child { border-bottom: 1.5px solid var(--border-strong); }
-
-  .statement-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.6rem;
-  }
-
-  .statement-text {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.4rem;
-    line-height: 1.35;
-    color: var(--ink);
-  }
-
-  @keyframes fadeUp {
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ── SECTIONS ── */
-  section {
-    border-bottom: 1.5px solid var(--border-strong);
-  }
-
-  .section-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 6rem 3rem;
-  }
-
-  .section-header {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 4rem;
-    margin-bottom: 4rem;
-    align-items: start;
-  }
-
-  .section-number {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--muted);
-    padding-top: 0.4rem;
-  }
-
-  h2 {
-    font-family: 'DM Serif Display', serif;
-    font-size: clamp(2rem, 3.5vw, 2.8rem);
-    font-weight: 400;
-    line-height: 1.2;
-    letter-spacing: -0.01em;
-  }
-
-  /* ── PROSE GRID ── */
-  .prose-grid {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 4rem;
-  }
-
-  .prose-body {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    max-width: 68ch;
-  }
-
-  .prose-body p {
-    font-size: 0.975rem;
-    color: var(--muted);
-    line-height: 1.78;
-  }
-
-  .prose-body p.lead {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.35rem;
-    color: var(--ink);
-    line-height: 1.45;
-  }
-
-  /* ── CAPABILITIES / PROPERTIES ── */
-  .cap-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .cap-item {
-    border-top: 1.5px solid var(--rule);
-    padding: 1.8rem 0;
-    display: grid;
-    grid-template-columns: 1.5rem 1fr;
-    gap: 1.2rem;
-    align-items: start;
-  }
-
-  .cap-item:last-child { border-bottom: 1.5px solid var(--rule); }
-
-  .cap-num {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--muted);
-    padding-top: 0.2rem;
-  }
-
-  .cap-text strong {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 0.3rem;
-    font-size: 0.95rem;
-  }
-
-  .cap-text span {
-    color: var(--muted);
-    font-size: 0.9rem;
-  }
-
-  /* ── WHY IT MATTERS (dark) ── */
-  .contrast-section {
-    background: var(--ink);
-    color: var(--paper);
-  }
-
-  .contrast-section .section-number { color: #6b6660; }
-  .contrast-section h2 { color: var(--paper); }
-  .contrast-section .prose-body p { color: #8a8580; }
-  .contrast-section .prose-body p.lead { color: var(--paper); }
-
-  /* ── EVIDENCE / TEST RESULTS ── */
-  .results-grid {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 4rem;
-  }
-
-  .results-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-  }
-
-  .stat-block {
-    border-top: 3px solid var(--accent);
-    padding-top: 1.5rem;
-  }
-
-  .stat-number {
-    font-family: 'DM Serif Display', serif;
-    font-size: 3.5rem;
-    line-height: 1;
-    margin-bottom: 0.5rem;
-    color: var(--ink);
-  }
-
-  .stat-label {
-    font-size: 0.85rem;
-    color: var(--muted);
-    line-height: 1.5;
-  }
-
-  .audit-box {
-    background: var(--code-bg);
-    color: var(--code-text);
-    padding: 2rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.78rem;
-    line-height: 1.8;
-    grid-column: 1 / -1;
-  }
-
-  .audit-comment { color: #5a5750; }
-  .audit-key { color: #7ab8f5; }
-  .audit-val { color: #a8e6b4; }
-  .audit-red { color: #f07070; }
-  .audit-yellow { color: #f0c070; }
-
-  .body-text {
-    font-size: 0.95rem;
-    color: var(--muted);
-    max-width: 58ch;
-    line-height: 1.75;
-  }
-
-  .proof-callout {
-    grid-column: 1 / -1;
-    border-left: 3px solid var(--ink);
-    padding: 1.5rem 1.75rem;
-    margin-top: 0.5rem;
-  }
-
-  .proof-callout-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.75rem;
-  }
-
-  .proof-callout p {
-    font-size: 0.9rem;
-    color: var(--ink);
-    line-height: 1.75;
-    max-width: 60ch;
-  }
-
-  .proof-callout p + p {
-    margin-top: 0.5rem;
-  }
-
-  /* ── WHAT IS INCLUDED ── */
-  .included-grid {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 4rem;
-  }
-
-  .included-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .included-item {
-    border-top: 1.5px solid var(--rule);
-    padding: 1.25rem 0;
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    font-size: 0.925rem;
-    color: var(--ink);
-  }
-
-  .included-item:last-child { border-bottom: 1.5px solid var(--rule); }
-
-  .included-marker {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--accent);
-    padding-top: 0.15rem;
-    flex-shrink: 0;
-  }
-
-  /* ── STRATEGIC FIT ── */
-  .positioning-section {
-    background: var(--green-bg);
-  }
-
-  .positioning-grid {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 4rem;
-  }
-
-  .positioning-content {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  .lead-text {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.6rem;
-    line-height: 1.45;
-    color: var(--ink);
-    max-width: 60ch;
-  }
-
-  .target-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    margin-top: 1rem;
-  }
-
-  .target-item {
-    border-top: 1.5px solid var(--rule);
-    padding: 1.2rem 0;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    font-size: 0.9rem;
-    font-weight: 500;
-  }
-
-  .target-item:last-child { border-bottom: 1.5px solid var(--rule); }
-
-  .target-dot {
-    width: 8px;
-    height: 8px;
-    background: var(--green);
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  /* ── CTA / CONTACT ── */
-  .contact-section {
-    background: var(--ink);
-    color: var(--paper);
-  }
-
-  .contact-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 8rem 3rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6rem;
-    align-items: start;
-  }
-
-  .contact-left h2 {
-    font-family: 'DM Serif Display', serif;
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 400;
-    line-height: 1.2;
-    color: var(--paper);
-    margin-bottom: 1.5rem;
-  }
-
-  .contact-left p {
-    font-size: 0.95rem;
-    color: #8a8580;
-    line-height: 1.75;
-    max-width: 44ch;
-    margin-bottom: 1.5rem;
-  }
-
-  .contact-left .origin-note {
-    font-size: 0.875rem;
-    color: #6b6660;
-    line-height: 1.75;
-    max-width: 48ch;
-    margin-bottom: 2.5rem;
-    border-left: 2px solid #333;
-    padding-left: 1.25rem;
-  }
-
-  .contact-ctas {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-    align-items: flex-start;
-  }
-
-  .contact-cta-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: var(--accent);
-    color: var(--paper);
-    text-decoration: none;
-    padding: 1rem 2rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    transition: opacity 0.2s;
-  }
-
-  .contact-cta-primary:hover { opacity: 0.85; }
-
-  .contact-cta-secondary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: transparent;
-    color: var(--paper);
-    text-decoration: none;
-    padding: 1rem 2rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    border: 1.5px solid #444;
-    transition: border-color 0.2s;
-  }
-
-  .contact-cta-secondary:hover { border-color: var(--paper); }
-
-  .contact-right {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .contact-detail {
-    border-top: 1.5px solid #222;
-    padding: 1.5rem 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-
-  .contact-detail:last-child { border-bottom: 1.5px solid #222; }
-
-  .detail-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #5a5750;
-  }
-
-  .detail-value {
-    font-size: 0.95rem;
-    color: var(--paper);
-  }
-
-  .detail-value a {
-    color: var(--paper);
-    text-decoration: none;
-    border-bottom: 1.5px solid #444;
-    padding-bottom: 1px;
-    transition: border-color 0.2s;
-  }
-
-  .detail-value a:hover { border-color: var(--accent); }
-
-  /* ── CONTACT FORM ── */
-  .form-section {
-    background: #111110;
-    border-top: 1.5px solid #222;
-  }
-
-  .form-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 5rem 3rem 6rem;
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 4rem;
-  }
-
-  .form-label-col {
-    padding-top: 0.4rem;
-  }
-
-  .form-section-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #5a5750;
-  }
-
-  .form-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .form-row {
-    border-top: 1.5px solid #222;
-    padding: 1.5rem 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-  }
-
-  .form-row.full {
-    grid-template-columns: 1fr;
-  }
-
-  .form-row:last-of-type {
-    border-bottom: 1.5px solid #222;
-  }
-
-  .field-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .field-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #5a5750;
-  }
-
-  .field-input,
-  .field-select,
-  .field-textarea {
-    background: transparent;
-    border: none;
-    border-bottom: 1.5px solid #333;
-    color: var(--paper);
-    font-family: 'Instrument Sans', sans-serif;
-    font-size: 0.95rem;
-    padding: 0.6rem 0;
-    outline: none;
-    transition: border-color 0.2s;
-    width: 100%;
-  }
-
-  .field-input:focus,
-  .field-select:focus,
-  .field-textarea:focus {
-    border-bottom-color: var(--accent);
-  }
-
-  .field-input::placeholder,
-  .field-textarea::placeholder {
-    color: #3a3935;
-  }
-
-  .field-select {
-    appearance: none;
-    cursor: pointer;
-    color: #8a8580;
-  }
-
-  .field-select option {
-    background: #1a1916;
-    color: var(--paper);
-  }
-
-  .field-textarea {
-    resize: none;
-    height: 100px;
-    line-height: 1.6;
-  }
-
-  .form-submit-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 2rem;
-    gap: 2rem;
-  }
-
-  .form-note {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: #5a5750;
-    letter-spacing: 0.04em;
-    max-width: 36ch;
-    line-height: 1.6;
-  }
-
-  .form-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: var(--accent);
-    color: var(--paper);
-    border: none;
-    padding: 1rem 2rem;
-    font-family: 'Instrument Sans', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: opacity 0.2s;
-    flex-shrink: 0;
-  }
-
-  .form-btn:hover { opacity: 0.85; }
-  .form-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .form-status {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
-    letter-spacing: 0.06em;
-    padding-top: 1rem;
-    min-height: 1.5rem;
-  }
-
-  .form-status.success { color: #6abf8a; }
-  .form-status.error { color: var(--accent); }
-
-  /* ── REFERENCES ── */
-  .references-section {
-    background: #111110;
-    border-top: 1.5px solid #222;
-  }
-
-  .references-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 4rem 3rem;
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 4rem;
-  }
-
-  .ref-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #5a5750;
-    padding-top: 0.4rem;
-  }
-
-  .ref-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .ref-item {
-    border-top: 1.5px solid #222;
-    padding: 1.25rem 0;
-    display: grid;
-    grid-template-columns: 160px 1fr;
-    gap: 2rem;
-    align-items: baseline;
-  }
-
-  .ref-item:last-child { border-bottom: 1.5px solid #222; }
-
-  .ref-type {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #5a5750;
-  }
-
-  .ref-link {
-    font-size: 0.9rem;
-    color: #8a8580;
-    text-decoration: none;
-    border-bottom: 1.5px solid #333;
-    padding-bottom: 1px;
-    transition: color 0.2s, border-color 0.2s;
-    word-break: break-all;
-  }
-
-  .ref-link:hover { color: var(--paper); border-color: var(--accent); }
-
-  /* ── FOOTER ── */
-  footer {
-    border-top: 1.5px solid #222;
-    background: var(--ink);
-    color: #5a5750;
-    padding: 1.5rem 3rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.06em;
-  }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 900px) {
-    nav { padding: 0 1.5rem; }
-    .nav-links { display: none; }
-
-    .hero { grid-template-columns: 1fr; }
-    .hero-left { border-right: none; border-bottom: 1.5px solid var(--border-strong); padding: 6rem 1.5rem 4rem; }
-    .hero-right { padding: 4rem 1.5rem; }
-
-    .section-header { grid-template-columns: 1fr; gap: 1rem; }
-    .section-inner { padding: 4rem 1.5rem; }
-
-    .prose-grid,
-    .results-grid,
-    .included-grid,
-    .positioning-grid { grid-template-columns: 1fr; gap: 2rem; }
-
-    .results-content { grid-template-columns: 1fr 1fr; }
-
-    .contact-inner { grid-template-columns: 1fr; gap: 3rem; padding: 5rem 1.5rem; }
-
-    .form-inner { grid-template-columns: 1fr; gap: 2rem; padding: 4rem 1.5rem; }
-    .form-row { grid-template-columns: 1fr; }
-    .form-submit-row { flex-direction: column; align-items: flex-start; }
-
-    .references-inner { grid-template-columns: 1fr; gap: 2rem; padding: 3rem 1.5rem; }
-    .ref-item { grid-template-columns: 1fr; gap: 0.5rem; }
-
-    footer { flex-direction: column; gap: 0.5rem; text-align: center; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aurora-Lens — Runtime governance for LLMs</title>
+  <meta name="description" content="Aurora-Lens is a deterministic governance layer for LLMs: admissibility before consequence, lawful continuation through the Governor, and replayable forensic audit.">
+  <meta property="og:title" content="Aurora-Lens — Runtime governance for LLMs">
+  <meta property="og:description" content="Deterministic admissibility, lawful continuation through the Governor, and tamper-evident forensic audit for LLMs.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://milamba.com/aurora-lens.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink:#121110; --paper:#f5f1ea; --panel:#fcfaf6; --rule:#d0c7bb; --muted:#635d58; --accent:#b13d1f; --accent-soft:rgba(177,61,31,0.08); }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'IBM Plex Sans',sans-serif; background:var(--paper); color:var(--ink); line-height:1.7; -webkit-font-smoothing:antialiased; }
+    .container { max-width:1140px; margin:0 auto; padding:0 1.5rem; }
+    header { position:sticky; top:0; z-index:20; background:rgba(245,241,234,0.94); backdrop-filter:blur(8px); border-bottom:1px solid var(--rule); }
+    .nav { min-height:68px; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+    .brand { font-family:'IBM Plex Mono',monospace; font-size:0.82rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink); text-decoration:none; }
+    .nav-links { display:flex; flex-wrap:wrap; gap:1.1rem; }
+    .nav-links a { color:var(--muted); font-size:0.82rem; text-decoration:none; }
+    .nav-links a.active, .nav-links a:hover { color:var(--accent); }
+    .hero { padding:5.5rem 0 4rem; border-bottom:1px solid var(--rule); background:linear-gradient(180deg,transparent,var(--accent-soft)); }
+    .eyebrow { font-family:'IBM Plex Mono',monospace; font-size:0.72rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--accent); margin-bottom:1.2rem; }
+    .hero-grid { display:grid; grid-template-columns:1.15fr 0.85fr; gap:2.5rem; align-items:start; }
+    h1 { font-family:'DM Serif Display',serif; font-size:clamp(2.8rem,6vw,4.8rem); line-height:1.05; font-weight:400; margin-bottom:1rem; max-width:11ch; }
+    .subhead { font-family:'DM Serif Display',serif; font-size:1.5rem; line-height:1.3; color:var(--accent); margin-bottom:1.25rem; }
+    .hero-copy p { color:var(--muted); font-size:1.03rem; max-width:62ch; margin-bottom:1rem; }
+    .cta-row { display:flex; flex-wrap:wrap; gap:0.8rem; margin-top:1.2rem; }
+    .button { display:inline-flex; align-items:center; justify-content:center; padding:0.85rem 1.15rem; text-decoration:none; font-family:'IBM Plex Mono',monospace; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; border:1px solid var(--ink); transition:0.2s ease; }
+    .button.primary { background:var(--ink); color:var(--paper); }
+    .button.secondary { color:var(--ink); background:transparent; }
+    .button:hover { border-color:var(--accent); color:var(--accent); background:white; }
+    .button.primary:hover { background:var(--accent); color:white; }
+    .pillar-list { border-left:1px solid var(--rule); padding-left:1.5rem; }
+    .pillar { padding:1rem 0; border-bottom:1px solid var(--rule); }
+    .pillar:last-child { border-bottom:none; }
+    .pillar-label { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); margin-bottom:0.35rem; }
+    .pillar-title { font-family:'DM Serif Display',serif; font-size:1.3rem; line-height:1.25; margin-bottom:0.35rem; }
+    .pillar p { color:var(--muted); font-size:0.95rem; }
+    section { border-bottom:1px solid var(--rule); }
+    .section-inner { padding:4rem 0; }
+    .section-grid { display:grid; grid-template-columns:220px 1fr; gap:2rem; align-items:start; }
+    .section-label { font-family:'IBM Plex Mono',monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); padding-top:0.25rem; }
+    h2 { font-family:'DM Serif Display',serif; font-size:clamp(2rem,4vw,3rem); line-height:1.15; font-weight:400; margin-bottom:1.1rem; }
+    .body-copy p { color:var(--muted); font-size:1rem; }
+    .body-copy p + p { margin-top:0.9rem; }
+    .steps { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; margin-top:1.5rem; }
+    .step { background:var(--panel); border:1px solid var(--rule); padding:1.2rem; }
+    .step-number { font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:0.45rem; }
+    .step h3 { font-size:1rem; margin-bottom:0.45rem; }
+    .step p { color:var(--muted); font-size:0.95rem; }
+    .evidence-list { margin-top:1rem; display:grid; gap:0.9rem; }
+    .evidence-item { background:var(--panel); border:1px solid var(--rule); padding:1rem 1.1rem; }
+    .evidence-item strong { color:var(--ink); }
+    .evidence-item p { color:var(--muted); font-size:0.95rem; }
+    .boundary-box { margin-top:1.2rem; padding:1.2rem; background:var(--panel); border:1px solid var(--rule); }
+    .boundary-box ul { margin-left:1rem; color:var(--muted); }
+    .boundary-box li + li { margin-top:0.4rem; }
+    .pub-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0.75rem; margin-top:1rem; }
+    .pub-item { background:var(--panel); border:1px solid var(--rule); padding:1rem 1.1rem; }
+    .pub-item .plabel { font-family:'IBM Plex Mono',monospace; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:4px; }
+    .pub-item a { font-size:0.85rem; color:var(--accent); text-decoration:none; }
+    .pub-item a:hover { text-decoration:underline; }
+    .pub-item p { font-size:0.82rem; color:var(--muted); margin-top:2px; }
+    footer { padding:1.5rem 0 3rem; color:var(--muted); font-size:0.9rem; }
+    footer a { color:inherit; }
+    @media (max-width:900px) { .hero-grid,.section-grid,.steps { grid-template-columns:1fr; } .pillar-list { border-left:none; padding-left:0; border-top:1px solid var(--rule); padding-top:1rem; } .pub-grid { grid-template-columns:1fr; } }
+  </style>
 </head>
 <body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="/">Margaret Stokes</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/aurora-lens.html" class="active">Aurora-Lens</a>
+        <a href="/governance/">Governance</a>
+        <a href="/writing/">Writing</a>
+        <a href="/about/">About</a>
+        <a href="mailto:margaret.stokes.ai@gmail.com">Contact</a>
+      </nav>
+    </div>
+  </header>
 
-<!-- NAV -->
-<nav>
-  <a class="nav-logo" href="#">Aurora Lens</a>
-  <ul class="nav-links">
-    <li><a href="/">milamba.com</a></li>
-    <li><a href="#why">Why it matters</a></li>
-    <li><a href="#different">What's different</a></li>
-    <li><a href="#evidence">Evidence</a></li>
-    <li><a href="#strategic-fit">Strategic fit</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-</nav>
-
-<!-- HERO -->
-<div class="hero">
-  <div class="hero-left">
-    <div class="eyebrow">Runtime Governance Asset</div>
-    <h1>Aurora Lens</h1>
-    <p class="hero-sub">Inference-time governance for large language models. Aurora Lens evaluates whether model output is admissible before it reaches the application, and records the outcome in a deterministic audit trail.</p>
-    <div class="hero-ctas">
-      <a href="mailto:margaret.stokes.ai@gmail.com?subject=Technical Brief Request — Aurora Lens" class="btn-primary">Request Technical Brief →</a>
-      <a href="mailto:margaret.stokes.ai@gmail.com?subject=Strategic Interest — Aurora Lens" class="btn-secondary">Email Regarding Strategic Interest →</a>
-    </div>
-  </div>
-  <div class="hero-right">
-    <div class="statement-block">
-      <div class="statement-label">The gap</div>
-      <div class="statement-text">Most AI controls sit before deployment or after failure.</div>
-    </div>
-    <div class="statement-block">
-      <div class="statement-label">The interval</div>
-      <div class="statement-text">Aurora Lens governs the live interval in which model output becomes <em>operational action.</em></div>
-    </div>
-    <div class="statement-block">
-      <div class="statement-label">The consequence</div>
-      <div class="statement-text">Admissibility is determined before delivery. Not described afterward.</div>
-    </div>
-  </div>
-</div>
-
-<!-- WHY THIS ASSET MATTERS -->
-<section id="why">
-  <div class="section-inner">
-    <div class="section-header">
-      <div class="section-number">01 — The gap</div>
-      <h2>Why this asset matters</h2>
-    </div>
-    <div class="prose-grid">
-      <div></div>
-      <div class="prose-body">
-        <p class="lead">Aurora Lens addresses a structural gap in deployed AI systems.</p>
-        <p>Benchmarks, red-teaming, and monitoring can reveal risk. They do not govern what the model is permitted to say at the moment of output. Aurora Lens does.</p>
-        <p>This matters wherever unsupported or illegitimate output creates operational, legal, regulatory, or safety exposure.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- WHAT MAKES IT DIFFERENT -->
-<section id="different" class="contrast-section">
-  <div class="section-inner">
-    <div class="section-header">
-      <div class="section-number">02 — Distinction</div>
-      <h2>What makes Aurora Lens different</h2>
-    </div>
-    <div class="prose-grid">
-      <div></div>
-      <div class="prose-body">
-        <p class="lead">Aurora Lens is not a benchmark, not a dashboard, and not a prompt wrapper.</p>
-        <p>It was built to address a persistent failure in deployed language systems: fluent output presented as legitimate knowledge under uncertainty, ambiguity, or missing evidence.</p>
-      </div>
-    </div>
-    <div class="prose-grid" style="margin-top: 4rem;">
-      <div></div>
-      <ul class="cap-list" style="border-top: none;">
-        <li class="cap-item" style="border-top-color: #333;">
-          <span class="cap-num" style="color:#5a5750;">01</span>
-          <div class="cap-text">
-            <strong style="color:var(--paper);">Deterministic admissibility enforcement</strong>
-            <span>Same input, same enforcement outcome. Not probabilistic scoring.</span>
-          </div>
-        </li>
-        <li class="cap-item" style="border-top-color: #333;">
-          <span class="cap-num" style="color:#5a5750;">02</span>
-          <div class="cap-text">
-            <strong style="color:var(--paper);">Refusal as a valid terminal outcome</strong>
-            <span>Non-answers are governed correct outcomes, not system failures.</span>
-          </div>
-        </li>
-        <li class="cap-item" style="border-top-color: #333;">
-          <span class="cap-num" style="color:#5a5750;">03</span>
-          <div class="cap-text">
-            <strong style="color:var(--paper);">Explicit handling of ambiguity and insufficient evidence</strong>
-            <span>The system names what it cannot resolve, rather than collapsing to a guess.</span>
-          </div>
-        </li>
-        <li class="cap-item" style="border-top-color: #333;">
-          <span class="cap-num" style="color:#5a5750;">04</span>
-          <div class="cap-text">
-            <strong style="color:var(--paper);">Structured intervention outcomes</strong>
-            <span>Every enforcement action is typed, recorded, and traceable.</span>
-          </div>
-        </li>
-        <li class="cap-item" style="border-top-color: #333;">
-          <span class="cap-num" style="color:#5a5750;">05</span>
-          <div class="cap-text">
-            <strong style="color:var(--paper);">Forensic audit records for governed inference</strong>
-            <span>Hash-chained, HMAC-sealed, tamper-evident by construction. Suitable for regulatory review.</span>
-          </div>
-        </li>
-        <li class="cap-item" style="border-top-color: #333; border-bottom-color: #333;">
-          <span class="cap-num" style="color:#5a5750;">06</span>
-          <div class="cap-text">
-            <strong style="color:var(--paper);">Model-agnostic deployment surface</strong>
-            <span>Works in front of any existing LLM API. No model retraining. No SDK changes.</span>
-          </div>
-        </li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<!-- EVIDENCE OF REALITY -->
-<section id="evidence">
-  <div class="section-inner">
-    <div class="section-header">
-      <div class="section-number">03 — Validation</div>
-      <h2>Evidence of reality</h2>
-    </div>
-    <div class="results-grid">
-      <div></div>
-      <div class="results-content">
-        <div class="stat-block">
-          <div class="stat-number">237/237</div>
-          <div class="stat-label">Stress scenarios passed under adversarial, mixed streaming and concurrent load conditions</div>
-        </div>
-        <div class="stat-block">
-          <div class="stat-number">465+</div>
-          <div class="stat-label">Full test suite passing, including malformed payload resilience and mid-stream cancellation</div>
-        </div>
-        <div class="stat-block">
-          <div class="stat-number">5/5</div>
-          <div class="stat-label">Live integration tests passing against real LLM endpoints</div>
-        </div>
-        <div class="stat-block">
-          <div class="stat-number">Zero</div>
-          <div class="stat-label">Silent integrity failures — audit verification distinguishes anchored chains from unanchored slices explicitly</div>
-        </div>
-
-        <div class="audit-box">
-<span class="audit-comment">// Sample audit chain entry — tamper-evident, hash-linked</span>
-{
-  <span class="audit-key">"record_id"</span>:           <span class="audit-val">"rec_8f3a2c..."</span>,
-  <span class="audit-key">"timestamp"</span>:           <span class="audit-val">"2025-11-29T14:32:07.881Z"</span>,
-  <span class="audit-key">"model"</span>:                <span class="audit-val">"gpt-4o"</span>,
-  <span class="audit-key">"admissible"</span>:          <span class="audit-red">false</span>,
-  <span class="audit-key">"refusal_reason"</span>:      <span class="audit-val">"policy_violation:contradictory_claim"</span>,
-  <span class="audit-key">"original_preserved"</span>: <span class="audit-red">true</span>,
-  <span class="audit-key">"chain_integrity"</span>:    <span class="audit-val">"anchored"</span>,
-  <span class="audit-key">"hmac"</span>:                <span class="audit-yellow">"sha256:d4e9f1..."</span>,
-  <span class="audit-key">"prev_hash"</span>:           <span class="audit-yellow">"sha256:a1b2c3..."</span>
-}
-        </div>
-
-        <p class="body-text">Stokes, M. (2026). <em>Epistemic Legitimacy as a Governance Layer for Large Language Models.</em> SSRN. <a href="https://ssrn.com/abstract=6244239" target="_blank" style="color:inherit;">ssrn.com/abstract=6244239</a></p>
-        <p class="body-text">Stokes, M. (2026). <em>Operational Alignment of Aurora-Lens with OECD Due Diligence Guidance for Responsible AI.</em> Zenodo. <a href="https://doi.org/10.5281/zenodo.18719033" target="_blank" style="color:inherit;">doi:10.5281/zenodo.18719033</a></p>
-
-        <div class="audit-box" style="margin-top: 0.5rem;">
-<span class="audit-comment">// Implementation proof — runs without an API key</span>
-pip install aurora-lens
-aurora-lens demo healthcare
-<span class="audit-comment">// Four clinical governance scenarios in-process.
-// Tamper-evident forensic audit log written to disk.</span>
-        </div>
-
-        <div class="proof-callout">
-          <div class="proof-callout-label">Controlled proof session — 2026-03-10</div>
-          <p>A live integration walkthrough against claude-sonnet-4-5-20250929 via the running proxy. Five scenarios across four domains: medical, legal, financial, and epistemic. Five distinct governance boundaries. Five matched outcomes.</p>
-          <p>The session identified three lexical coverage gaps in the financial and directive checkers. All were resolved during the session. The architecture held.</p>
-          <p style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--muted);">Full session record available on request.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- WHAT IS INCLUDED -->
-<section id="included">
-  <div class="section-inner">
-    <div class="section-header">
-      <div class="section-number">04 — Asset surface</div>
-      <h2>What is included</h2>
-    </div>
-    <div class="included-grid">
-      <div>
-        <p class="body-text" style="padding-top: 0.4rem;">This is an acquisition-ready technical asset, not a speculative proposal.</p>
-      </div>
-      <ul class="included-list">
-        <li class="included-item"><span class="included-marker">—</span>Runtime implementation</li>
-        <li class="included-item"><span class="included-marker">—</span>Evaluation package on PyPI</li>
-        <li class="included-item"><span class="included-marker">—</span>Technical documentation</li>
-        <li class="included-item"><span class="included-marker">—</span>Empirical evidence materials</li>
-        <li class="included-item"><span class="included-marker">—</span>Research papers and public references</li>
-        <li class="included-item"><span class="included-marker">—</span>Website and acquisition-facing overview materials</li>
-        <li class="included-item"><span class="included-marker">—</span>Founder-originated architecture</li>
-        <li class="included-item"><span class="included-marker">—</span>Patent-positioned supporting intellectual property</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<!-- STRATEGIC FIT -->
-<section id="strategic-fit" class="positioning-section">
-  <div class="section-inner">
-    <div class="section-header">
-      <div class="section-number">05 — Strategic fit</div>
-      <h2>Where Aurora Lens belongs</h2>
-    </div>
-    <div class="positioning-grid">
-      <div></div>
-      <div class="positioning-content">
-        <p class="lead-text">Aurora Lens is relevant to organisations operating where runtime output legitimacy matters.</p>
-        <ul class="target-list">
-          <li class="target-item"><span class="target-dot"></span>Enterprise AI governance and compliance vendors</li>
-          <li class="target-item"><span class="target-dot"></span>AI assurance and model security vendors</li>
-          <li class="target-item"><span class="target-dot"></span>Regulated workflow platforms</li>
-          <li class="target-item"><span class="target-dot"></span>Clinical and pharmaceutical AI infrastructure</li>
-          <li class="target-item"><span class="target-dot"></span>Audit and risk technology providers</li>
-          <li class="target-item"><span class="target-dot"></span>Foundation model companies requiring runtime control</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- CONTACT / TRANSACTION -->
-<section id="contact" class="contact-section">
-  <div class="contact-inner">
-    <div class="contact-left">
-      <h2>Transaction</h2>
-      <p>Aurora Lens is a founder-controlled asset.</p>
-      <p>Serious strategic interest is welcome by email. The intended endpoint is acquisition or placement within a larger platform where inference-time governance, admissibility control, refusal, and deterministic audit can become part of production AI infrastructure.</p>
-      <p class="origin-note">Aurora Lens was designed and built by Margaret Stokes in direct response to persistent failure modes in deployed language systems: fabricated certainty, premature ambiguity collapse, unsupported claims, and absent runtime accountability.</p>
-      <div class="contact-ctas">
-        <a href="mailto:margaret.stokes.ai@gmail.com?subject=Technical Brief Request — Aurora Lens" class="contact-cta-primary">Request Technical Brief →</a>
-        <a href="mailto:margaret.stokes.ai@gmail.com?subject=Strategic Interest — Aurora Lens" class="contact-cta-secondary">Email Regarding Strategic Interest →</a>
-      </div>
-    </div>
-    <div class="contact-right">
-      <div class="contact-detail">
-        <span class="detail-label">Contact</span>
-        <span class="detail-value">Margaret Stokes</span>
-      </div>
-      <div class="contact-detail">
-        <span class="detail-label">Email</span>
-        <span class="detail-value"><a href="mailto:margaret.stokes.ai@gmail.com">margaret.stokes.ai@gmail.com</a></span>
-      </div>
-      <div class="contact-detail">
-        <span class="detail-label">For</span>
-        <span class="detail-value">Serious technical or strategic interest</span>
-      </div>
-      <div class="contact-detail">
-        <span class="detail-label">ORCID</span>
-        <span class="detail-value"><a href="https://orcid.org/0009-0004-6422-4174" target="_blank">0009-0004-6422-4174</a></span>
-      </div>
-      <div class="contact-detail">
-        <span class="detail-label">IP status</span>
-        <span class="detail-value">Five provisional patent applications filed.</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ENQUIRY FORM -->
-<section id="enquiry" class="form-section">
-  <div class="form-inner">
-    <div class="form-label-col">
-      <div class="form-section-label">06 — Enquiry</div>
-    </div>
-    <div class="form-wrapper">
-      <form id="contact-form" action="https://formspree.io/f/xbdavbna" method="POST">
-        <div class="form-row">
-          <div class="field-group">
-            <label class="field-label" for="name">Name</label>
-            <input class="field-input" type="text" id="name" name="name" placeholder="Your name" required>
-          </div>
-          <div class="field-group">
-            <label class="field-label" for="org">Organisation</label>
-            <input class="field-input" type="text" id="org" name="organisation" placeholder="Company or institution" required>
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow">Aurora-Lens</div>
+          <h1>Runtime governance for LLMs</h1>
+          <div class="subhead">Admissibility before consequence. Lawful continuation through the Governor. Replayable forensic audit.</div>
+          <p>Aurora-Lens governs what high-risk AI may lawfully do next. It differentiates continuation permissions by authority class and policy version, and produces cryptographically verifiable evidence of what the model tried to say, what the system allowed through, and why.</p>
+          <p>It does not replace the model's reasoning engine. It governs whether model output may pass, what happens when it may not, and how the decision can later be verified.</p>
+          <div class="cta-row">
+            <a class="button primary" href="https://pypi.org/project/aurora-lens/" target="_blank" rel="noopener">pip install aurora-lens</a>
+            <a class="button secondary" href="#evidence">Live evidence</a>
+            <a class="button secondary" href="/governance/">Governance notes</a>
           </div>
         </div>
-        <div class="form-row">
-          <div class="field-group">
-            <label class="field-label" for="email">Email</label>
-            <input class="field-input" type="email" id="email" name="email" placeholder="you@organisation.com" required>
+        <div class="pillar-list">
+          <div class="pillar">
+            <div class="pillar-label">Pillar 01</div>
+            <div class="pillar-title">Admissibility before consequence</div>
+            <p>Candidate output is checked before it reaches the caller. Fluency is not sufficient — authorization is required.</p>
           </div>
-          <div class="field-group">
-            <label class="field-label" for="enquiry-type">Enquiry type</label>
-            <select class="field-select" id="enquiry-type" name="enquiry_type">
-              <option value="" disabled selected>Select one</option>
-              <option value="technical">Technical brief request</option>
-              <option value="acquisition">Strategic acquisition</option>
-              <option value="licensing">Licensing discussion</option>
-              <option value="integration">Deep integration partnership</option>
-              <option value="other">Other</option>
-            </select>
+          <div class="pillar">
+            <div class="pillar-label">Pillar 02</div>
+            <div class="pillar-title">Lawful continuation through the Governor</div>
+            <p>When output cannot pass, the Governor routes the interaction into clarification, refusal, escalation, or stop — without leaking blocked content.</p>
           </div>
-        </div>
-        <div class="form-row full">
-          <div class="field-group">
-            <label class="field-label" for="message">Message</label>
-            <textarea class="field-textarea" id="message" name="message" placeholder="What would you like to discuss?"></textarea>
+          <div class="pillar">
+            <div class="pillar-label">Pillar 03</div>
+            <div class="pillar-title">Replayable forensic audit</div>
+            <p>Governed outcomes are logged, hashed, chained, and verifiable. Auditable and defensible under adversarial scrutiny.</p>
           </div>
         </div>
-        <div class="form-submit-row">
-          <p class="form-note">Responses within one business day. Full source-level documentation available under NDA on request.</p>
-          <button type="submit" class="form-btn" id="submit-btn">Send Enquiry →</button>
+      </div>
+    </section>
+
+    <section>
+      <div class="container section-inner section-grid">
+        <div class="section-label">How it works</div>
+        <div class="body-copy">
+          <h2>A governance layer over model output</h2>
+          <p>The model proposes a response. Lens checks admissibility. If the candidate may not pass, the Governor determines the lawful continuation path. The audit layer records what happened.</p>
+          <div class="steps">
+            <article class="step">
+              <div class="step-number">Step 1</div>
+              <h3>The model proposes a response</h3>
+              <p>The LLM produces candidate output. That output is not yet consequence.</p>
+            </article>
+            <article class="step">
+              <div class="step-number">Step 2</div>
+              <h3>Lens checks admissibility</h3>
+              <p>Candidate output is checked against session-scoped state and governance rules. The question is not whether the model was right — it is whether the model was authorized to make that determination.</p>
+            </article>
+            <article class="step">
+              <div class="step-number">Step 3</div>
+              <h3>The Governor handles non-admit outcomes</h3>
+              <p>If the candidate cannot pass, the Governor returns clarification, refusal, escalation, or stop. Blocked content is never leaked into the continuation.</p>
+            </article>
+            <article class="step">
+              <div class="step-number">Step 4</div>
+              <h3>The audit layer records the outcome</h3>
+              <p>Governed events are written to a tamper-evident, hash-chained ledger with replayable forensic artifacts. Signed and verifiable.</p>
+            </article>
+          </div>
         </div>
-        <div class="form-status" id="form-status"></div>
-      </form>
+      </div>
+    </section>
+
+    <section id="evidence">
+      <div class="container section-inner section-grid">
+        <div class="section-label">Evidence</div>
+        <div class="body-copy">
+          <h2>Live end-to-end verification</h2>
+          <p>Aurora-Lens has been live-tested across admitted, ambiguous, refusal, stop, provider-abort, and client-disconnect scenarios. 6/6 passed. Raw model output is suppressed on governed paths, lawful continuation is deterministic, and audit records capture what was blocked, what was shown, and why.</p>
+          <div class="evidence-list">
+            <div class="evidence-item"><strong>ADMIT</strong> — <p>Ordinary responses pass and are released after governance. Audit confirms no suppressed candidate.</p></div>
+            <div class="evidence-item"><strong>ASK</strong> — <p>Ambiguous references are contained before the LLM is called. The model receives nothing. The user receives a structurally accurate clarification request.</p></div>
+            <div class="evidence-item"><strong>REFUSE</strong> — <p>Buffered model output is suppressed and replaced with a governed refusal. Blocked and governed hashes both recorded.</p></div>
+            <div class="evidence-item"><strong>STOP</strong> — <p>Buffered model output is suppressed and replaced with a governed stop or escalation. Forensic envelope emitted.</p></div>
+            <div class="evidence-item"><strong>Provider abort</strong> — <p>No user-visible content escapes during internal buffering. Abort is logged as a provider-side event.</p></div>
+            <div class="evidence-item"><strong>Client disconnect after release</strong> — <p>Governance remains committed. Post-release disconnect is not mislogged as provider abort.</p></div>
+          </div>
+          <div class="cta-row" style="margin-top:1.4rem;">
+            <a class="button secondary" href="/docs/evidence/live-e2e-streaming-verification.html">View live verification</a>
+            <a class="button secondary" href="/docs/streaming-governance.html">Streaming governance</a>
+            <a class="button secondary" href="/docs/system-capabilities.html">System capabilities</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container section-inner section-grid">
+        <div class="section-label">Boundary</div>
+        <div class="body-copy">
+          <h2>What Aurora-Lens is not</h2>
+          <p>Aurora-Lens is a governance layer over existing LLMs. It does not attempt to build a new model, guess unresolved references, or make professional clinical, legal, or financial determinations.</p>
+          <div class="boundary-box">
+            <ul>
+              <li>It governs whether output may pass.</li>
+              <li>It determines lawful continuation when output may not pass.</li>
+              <li>It preserves a cryptographically verifiable record of what happened.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container section-inner section-grid">
+        <div class="section-label">Publications and record</div>
+        <div class="body-copy">
+          <h2>Prior art and public record</h2>
+          <p>The conceptual architecture, IP chain, and publication record are public, dated, and independently verifiable.</p>
+          <div class="pub-grid">
+            <div class="pub-item">
+              <p class="plabel">PyPI</p>
+              <a href="https://pypi.org/project/aurora-lens/" target="_blank" rel="noopener">aurora-lens</a>
+              <p>pip install aurora-lens</p>
+            </div>
+            <div class="pub-item">
+              <p class="plabel">ORCID</p>
+              <a href="https://orcid.org/0009-0004-6422-4174" target="_blank" rel="noopener">0009-0004-6422-4174</a>
+            </div>
+            <div class="pub-item">
+              <p class="plabel">Zenodo — PCCM preprint</p>
+              <a href="https://zenodo.org/records/18976303" target="_blank" rel="noopener">10.5281/zenodo.18976303</a>
+              <p>Present-Centered Cognition Model</p>
+            </div>
+            <div class="pub-item">
+              <p class="plabel">Zenodo — Epistemic governance</p>
+              <a href="https://zenodo.org/records/18653120" target="_blank" rel="noopener">10.5281/zenodo.18653120</a>
+              <p>Epistemic Legitimacy as a Governance Layer for LLMs</p>
+            </div>
+            <div class="pub-item">
+              <p class="plabel">Zenodo — OECD alignment</p>
+              <a href="https://zenodo.org/records/18719033" target="_blank" rel="noopener">10.5281/zenodo.18719033</a>
+              <p>Operational Alignment with OECD Due Diligence Guidance</p>
+            </div>
+            <div class="pub-item">
+              <p class="plabel">SSRN</p>
+              <a href="https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=10385176" target="_blank" rel="noopener">Author page</a>
+            </div>
+            <div class="pub-item">
+              <p class="plabel">OSF</p>
+              <a href="https://osf.io/86bxj" target="_blank" rel="noopener">osf.io/86bxj</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 Margaret Stokes · <a href="/governance/">Governance</a> · <a href="https://pypi.org/project/aurora-lens/">PyPI</a> · <a href="mailto:margaret.stokes.ai@gmail.com">Contact</a></p>
     </div>
-  </div>
-</section>
-
-<!-- PUBLIC REFERENCES -->
-<section class="references-section">
-  <div class="references-inner">
-    <div class="ref-label">Public references</div>
-    <div class="ref-list">
-      <div class="ref-item">
-        <span class="ref-type">PyPI</span>
-        <a class="ref-link" href="https://pypi.org/project/aurora-lens/" target="_blank">pypi.org/project/aurora-lens/</a>
-      </div>
-      <div class="ref-item">
-        <span class="ref-type">Research</span>
-        <a class="ref-link" href="https://zenodo.org/records/18719033" target="_blank">zenodo.org/records/18719033</a>
-      </div>
-      <div class="ref-item">
-        <span class="ref-type">SSRN</span>
-        <a class="ref-link" href="https://ssrn.com/abstract=6244239" target="_blank">ssrn.com/abstract=6244239</a>
-      </div>
-      <div class="ref-item">
-        <span class="ref-type">GitHub</span>
-        <a class="ref-link" href="https://github.com/aurora-assets" target="_blank">github.com/aurora-assets</a>
-      </div>
-      <div class="ref-item">
-        <span class="ref-type">Technical overview</span>
-        <a class="ref-link" href="https://github.com/aurora-assets/acquisition-overview" target="_blank">github.com/aurora-assets/acquisition-overview</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <span>Aurora Lens — Inference-time governance for large language models</span>
-  <span>Five provisional patents filed · margaret.stokes.ai@gmail.com</span>
-</footer>
-
-<script>
-  const form = document.getElementById('contact-form');
-  const btn = document.getElementById('submit-btn');
-  const status = document.getElementById('form-status');
-
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    btn.disabled = true;
-    btn.textContent = 'Sending...';
-    status.textContent = '';
-    status.className = 'form-status';
-
-    try {
-      const response = await fetch(form.action, {
-        method: 'POST',
-        body: new FormData(form),
-        headers: { 'Accept': 'application/json' }
-      });
-
-      if (response.ok) {
-        status.textContent = '— Enquiry received. You will hear back within one business day.';
-        status.className = 'form-status success';
-        form.reset();
-        btn.textContent = 'Sent ✓';
-      } else {
-        throw new Error('Server error');
-      }
-    } catch (err) {
-      status.textContent = '— Something went wrong. Email directly: margaret.stokes.ai@gmail.com';
-      status.className = 'form-status error';
-      btn.disabled = false;
-      btn.textContent = 'Send Enquiry →';
-    }
-});
-  </script>
-
-  <!-- Cloudflare Web Analytics -->
-  <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b0d0fd61319d4784b8c1ae9f3cd37be4"}'></script>
-  <!-- End Cloudflare Web Analytics -->
-
+  </footer>
 </body>
 </html>
