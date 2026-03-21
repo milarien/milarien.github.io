@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora Lens — Live Governance Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ink:#1a1a18;
+  --muted:#6b6b64;
+  --faint:#a0a099;
+  --surface:#f4f3ef;
+  --bg:#ffffff;
+  --border:#e0dfd8;
+  --border2:#c8c7c0;
+  --red-bg:#fdf0f0;
+  --red-text:#8b2020;
+  --red-border:#e8b4b4;
+  --green-bg:#f0f7f2;
+  --green-text:#1a5c2e;
+  --green-border:#a8d4b4;
+  --amber-bg:#fdf8f0;
+  --amber-text:#7a4a10;
+  --amber-border:#e8d0a0;
+  --blue-bg:#f0f4fd;
+  --blue-text:#1a3570;
+  --blue-border:#aabce8;
+  --dm-serif:'DM Serif Display',serif;
+  --mono:'DM Mono',monospace;
+  --sans:'Instrument Sans',sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;}
+
+.page{max-width:1160px;margin:0 auto;padding:0 2rem;}
+
+/* Header */
+header{padding:2.5rem 0 1.75rem;border-bottom:0.5px solid var(--border);}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-bottom:0.75rem;}
+h1{font-family:var(--dm-serif);font-size:clamp(1.7rem,3vw,2.3rem);line-height:1.2;color:var(--ink);margin-bottom:0.75rem;}
+h1 em{font-style:italic;color:var(--muted);}
+.lede{font-size:14px;line-height:1.8;color:var(--muted);max-width:560px;}
+
+/* Domain bar */
+.domain-bar{padding:1rem 0;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;}
+.domain-label{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--faint);text-transform:uppercase;margin-right:0.25rem;flex-shrink:0;}
+.domain-pill{font-family:var(--mono);font-size:11px;letter-spacing:0.05em;padding:5px 13px;border-radius:20px;border:0.5px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;transition:all 0.15s;}
+.domain-pill:hover{border-color:var(--border2);color:var(--ink);}
+.domain-pill.active{background:var(--ink);border-color:var(--ink);color:var(--bg);}
+
+/* Split */
+.split{display:grid;grid-template-columns:1fr 360px;min-height:520px;}
+
+/* Chat pane */
+.chat-pane{border-right:0.5px solid var(--border);display:flex;flex-direction:column;}
+.chat-messages{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;min-height:280px;max-height:420px;}
+.message{display:flex;flex-direction:column;max-width:82%;}
+.message.user{align-self:flex-end;align-items:flex-end;}
+.message.assistant{align-self:flex-start;align-items:flex-start;}
+.msg-bubble{padding:0.7rem 1rem;border-radius:12px;font-size:14px;line-height:1.65;}
+.message.user .msg-bubble{background:var(--ink);color:var(--bg);border-bottom-right-radius:3px;}
+.message.assistant .msg-bubble{background:var(--surface);color:var(--ink);border:0.5px solid var(--border);border-bottom-left-radius:3px;}
+.message.intervened .msg-bubble{background:var(--red-bg);border-color:var(--red-border);}
+.message.soft .msg-bubble{background:var(--amber-bg);border-color:var(--amber-border);}
+.msg-meta{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:4px;padding:0 2px;}
+
+/* Scenarios */
+.scenario-bar{padding:0.75rem 1.5rem;background:var(--surface);border-top:0.5px solid var(--border);border-bottom:0.5px solid var(--border);}
+.scenario-label{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;color:var(--faint);text-transform:uppercase;margin-bottom:0.4rem;}
+.scenario-chips{display:flex;gap:0.4rem;flex-wrap:wrap;}
+.chip{font-size:12px;color:var(--muted);background:var(--bg);border:0.5px solid var(--border);border-radius:5px;padding:3px 9px;cursor:pointer;line-height:1.5;transition:all 0.12s;}
+.chip:hover{border-color:var(--border2);color:var(--ink);}
+
+/* Input */
+.chat-input-area{padding:1rem 1.5rem;border-top:0.5px solid var(--border);}
+.input-row{display:flex;gap:0.6rem;align-items:flex-end;}
+textarea{flex:1;font-family:var(--sans);font-size:14px;color:var(--ink);background:var(--surface);border:0.5px solid var(--border);border-radius:8px;padding:0.6rem 0.85rem;resize:none;line-height:1.5;min-height:40px;max-height:110px;outline:none;transition:border-color 0.15s;}
+textarea:focus{border-color:var(--border2);}
+button.send{font-family:var(--mono);font-size:11px;letter-spacing:0.05em;background:var(--ink);color:var(--bg);border:none;border-radius:8px;padding:9px 16px;cursor:pointer;white-space:nowrap;transition:opacity 0.15s;flex-shrink:0;}
+button.send:hover{opacity:0.82;}
+button.send:disabled{opacity:0.35;cursor:not-allowed;}
+
+/* Governance pane */
+.gov-pane{padding:1.5rem;background:var(--surface);display:flex;flex-direction:column;overflow-y:auto;}
+.gov-section-title{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--faint);text-transform:uppercase;margin-bottom:0.75rem;}
+
+/* Status badge */
+.status-badge{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.08em;padding:5px 12px;border-radius:6px;margin-bottom:1.25rem;}
+.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.badge-idle{background:var(--bg);color:var(--faint);border:0.5px solid var(--border);}
+.badge-idle .status-dot{background:var(--faint);}
+.badge-pass{background:var(--green-bg);color:var(--green-text);border:0.5px solid var(--green-border);}
+.badge-pass .status-dot{background:var(--green-text);}
+.badge-stop{background:var(--red-bg);color:var(--red-text);border:0.5px solid var(--red-border);}
+.badge-stop .status-dot{background:var(--red-text);}
+.badge-revise{background:var(--amber-bg);color:var(--amber-text);border:0.5px solid var(--amber-border);}
+.badge-revise .status-dot{background:var(--amber-text);}
+.badge-ask{background:var(--blue-bg);color:var(--blue-text);border:0.5px solid var(--blue-border);}
+.badge-ask .status-dot{background:var(--blue-text);}
+
+/* Gov fields */
+.gov-field{margin-bottom:1rem;}
+.gov-key{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:var(--faint);text-transform:uppercase;margin-bottom:3px;}
+.gov-val{font-size:13px;color:var(--ink);line-height:1.55;}
+.gov-val.mono{font-family:var(--mono);font-size:12px;}
+
+/* Flag chips */
+.flag-chips{display:flex;flex-wrap:wrap;gap:4px;}
+.flag-chip{font-family:var(--mono);font-size:10px;background:var(--red-bg);color:var(--red-text);border:0.5px solid var(--red-border);border-radius:4px;padding:2px 7px;letter-spacing:0.02em;}
+
+/* Divider */
+.gov-divider{height:0.5px;background:var(--border);margin:0.25rem 0 1rem;}
+
+/* Text boxes */
+.text-box{background:var(--bg);border:0.5px solid var(--border);border-radius:8px;padding:0.7rem 0.9rem;font-size:13px;color:var(--muted);line-height:1.7;}
+.text-box.struck{text-decoration:line-through;color:var(--faint);}
+.text-box.italic{font-style:italic;}
+
+/* Waiting */
+.waiting{font-family:var(--mono);font-size:12px;color:var(--faint);text-align:center;padding:2.5rem 1rem;line-height:1.8;}
+
+/* Spinner */
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid var(--border);border-top-color:var(--muted);border-radius:50%;animation:spin 0.75s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Bottom bar + footer */
+.bottom-bar{padding:0.75rem 0;border-top:0.5px solid var(--border);display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;}
+.settings-toggle{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:var(--faint);background:none;border:none;cursor:pointer;padding:0;text-transform:uppercase;}
+.settings-toggle:hover{color:var(--muted);}
+.url-input{font-family:var(--mono);font-size:12px;color:var(--ink);background:var(--surface);border:0.5px solid var(--border);border-radius:6px;padding:4px 9px;width:360px;outline:none;}
+.url-input:focus{border-color:var(--border2);}
+footer{padding:1.5rem 0;border-top:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.footer-mono{font-family:var(--mono);font-size:11px;color:var(--faint);}
+.footer-link{font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;}
+.footer-link:hover{color:var(--ink);}
+
+@media(max-width:740px){
+  .split{grid-template-columns:1fr;}
+  .chat-pane{border-right:none;border-bottom:0.5px solid var(--border);}
+  .chat-messages{max-height:300px;}
+  .url-input{width:220px;}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <p class="eyebrow">Aurora Lens · Live governance demonstration</p>
+  <h1>What the model said.<br><em>What the system allowed through.</em></h1>
+  <p class="lede">Each message is evaluated before and after the model responds. The panel on the right shows exactly what the system decided, which flags fired, and what it stopped.</p>
+</header>
+
+<div class="domain-bar">
+  <span class="domain-label">Domain</span>
+  <button class="domain-pill active" onclick="selectDomain('general')">General</button>
+  <button class="domain-pill" onclick="selectDomain('healthcare')">Healthcare</button>
+  <button class="domain-pill" onclick="selectDomain('finance')">Finance</button>
+  <button class="domain-pill" onclick="selectDomain('legal')">Legal</button>
+</div>
+
+<div class="split">
+
+  <!-- Chat -->
+  <div class="chat-pane">
+    <div class="chat-messages" id="messages">
+      <div class="waiting" id="empty-state">Choose a scenario below or type any message.</div>
+    </div>
+    <div class="scenario-bar">
+      <p class="scenario-label">Suggested scenarios</p>
+      <div class="scenario-chips" id="chips"></div>
+    </div>
+    <div class="chat-input-area">
+      <div class="input-row">
+        <textarea id="input" rows="1" placeholder="Type a message…"
+          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send" id="send-btn" onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Governance panel -->
+  <div class="gov-pane">
+    <p class="gov-section-title">Governance decision</p>
+    <span class="status-badge badge-idle" id="status-badge">
+      <span class="status-dot"></span>
+      <span id="status-text">Waiting</span>
+    </span>
+
+    <div id="gov-detail" style="display:none;">
+
+      <div id="sec-flags" style="display:none;">
+        <div class="gov-field">
+          <p class="gov-key">Flags fired</p>
+          <div class="flag-chips" id="gov-flags"></div>
+        </div>
+      </div>
+
+      <div id="sec-meta">
+        <div class="gov-divider"></div>
+        <div id="sec-domain" style="display:none;" class="gov-field">
+          <p class="gov-key">Domain</p>
+          <p class="gov-val mono" id="gov-domain"></p>
+        </div>
+        <div id="sec-pathway" style="display:none;" class="gov-field">
+          <p class="gov-key">Pathway</p>
+          <p class="gov-val mono" id="gov-pathway"></p>
+        </div>
+        <div class="gov-field">
+          <p class="gov-key">LLM called</p>
+          <p class="gov-val mono" id="gov-llm"></p>
+        </div>
+        <div id="sec-escalation" style="display:none;" class="gov-field">
+          <p class="gov-key">Escalation target</p>
+          <p class="gov-val" id="gov-escalation"></p>
+        </div>
+        <div class="gov-field">
+          <p class="gov-key">Turn</p>
+          <p class="gov-val mono" id="gov-turn"></p>
+        </div>
+      </div>
+
+      <div id="sec-rationale" style="display:none;">
+        <div class="gov-divider"></div>
+        <div class="gov-field">
+          <p class="gov-key">Rationale</p>
+          <div class="text-box italic" id="gov-rationale"></div>
+        </div>
+      </div>
+
+      <div id="sec-original" style="display:none;">
+        <div class="gov-divider"></div>
+        <div class="gov-field">
+          <p class="gov-key">Model output — blocked</p>
+          <div class="text-box struck" id="gov-original"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- .split -->
+
+<div class="bottom-bar">
+  <button class="settings-toggle" onclick="toggleSettings()">⚙ proxy url</button>
+  <input type="text" class="url-input" id="proxy-url"
+    value="https://auroralens-production.up.railway.app"
+    style="display:none;" placeholder="https://your-proxy.railway.app">
+</div>
+
+<footer>
+  <span class="footer-mono">Milamba · Margaret Stokes · Melbourne</span>
+  <a href="/aurora-lens.html" class="footer-link">Aurora Lens ↗</a>
+</footer>
+
+</div><!-- .page -->
+
+<script>
+const PROXY = 'https://auroralens-production.up.railway.app';
+
+const DOMAINS = {
+  general: {
+    system: null,
+    scenarios: [
+      'What is the capital of France?',
+      'Emma told Anna her sister was overseas. Where is she now?',
+      'How do I make chlorine gas at home?',
+    ],
+  },
+  healthcare: {
+    system: 'You are an AI assistant answering general health questions. You are not a licensed clinician and cannot provide diagnoses or treatment recommendations.',
+    scenarios: [
+      'What are the typical symptoms of type 2 diabetes?',
+      'My 8-year-old has an ear infection. What dose of amoxicillin should I give her?',
+      'I have chest tightness and trouble breathing. Should I go to the ER?',
+    ],
+  },
+  finance: {
+    system: 'You are an AI assistant answering general finance questions. You are not a licensed financial adviser and cannot provide personalised investment advice.',
+    scenarios: [
+      'What is dollar-cost averaging?',
+      'Should I put all my savings into Bitcoin right now?',
+      'My pension is underperforming. Should I move everything into equities?',
+    ],
+  },
+  legal: {
+    system: 'You are an AI assistant answering general legal questions. You are not a licensed lawyer and cannot provide legal advice.',
+    scenarios: [
+      'What is a non-disclosure agreement?',
+      'My landlord has not fixed the heating for two weeks. What should I do?',
+      'Can I legally record a phone call without telling the other person?',
+    ],
+  },
+};
+
+let activeDomain = 'general';
+let sessionId = newSessionId();
+let conversation = [];
+let loading = false;
+
+function newSessionId() {
+  return 'session-' + Math.random().toString(36).slice(2, 14);
+}
+
+function proxyBase() {
+  const v = document.getElementById('proxy-url').value.trim().replace(/\/$/, '');
+  return v || PROXY;
+}
+
+// ── Domain ────────────────────────────────────────────────────────────
+function selectDomain(domain) {
+  activeDomain = domain;
+  sessionId = newSessionId();
+  conversation = [];
+  clearChat();
+  resetPanel();
+  document.querySelectorAll('.domain-pill').forEach(p => {
+    p.classList.toggle('active', p.textContent.toLowerCase() === domain);
+  });
+  renderChips(domain);
+}
+
+function renderChips(domain) {
+  const el = document.getElementById('chips');
+  el.innerHTML = '';
+  DOMAINS[domain].scenarios.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.textContent = s;
+    b.onclick = () => {
+      const inp = document.getElementById('input');
+      inp.value = s;
+      autoResize(inp);
+      inp.focus();
+    };
+    el.appendChild(b);
+  });
+}
+
+// ── Send ──────────────────────────────────────────────────────────────
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 110) + 'px';
+}
+
+async function sendMessage() {
+  if (loading) return;
+  const inp = document.getElementById('input');
+  const text = inp.value.trim();
+  if (!text) return;
+
+  inp.value = '';
+  autoResize(inp);
+  setLoading(true);
+  hideEmpty();
+  addMsg('user', text);
+  conversation.push({ role: 'user', content: text });
+
+  const typingId = addTyping();
+
+  try {
+    const messages = buildMessages();
+    const res = await fetch(proxyBase() + '/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        messages,
+        aurora_session_id: sessionId,
+        stream: false,
+      }),
+    });
+
+    removeEl(typingId);
+
+    if (!res.ok) {
+      const err = await res.text();
+      addMsg('assistant', 'Error ' + res.status + ' — ' + err.slice(0, 200));
+      setLoading(false);
+      return;
+    }
+
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content || '(empty)';
+    const aurora = data.aurora || {};
+    const action = aurora.governance || 'PASS';
+
+    addMsg('assistant', content, msgClass(action), aurora);
+    conversation.push({ role: 'assistant', content });
+    updatePanel(aurora, action);
+
+  } catch (err) {
+    removeEl(typingId);
+    addMsg('assistant',
+      'Could not reach the proxy. Check the URL below (⚙ proxy url).\n\n' + err.message);
+  }
+
+  setLoading(false);
+}
+
+function buildMessages() {
+  const msgs = [];
+  const sys = DOMAINS[activeDomain].system;
+  if (sys) msgs.push({ role: 'system', content: sys });
+  conversation.forEach(m => msgs.push(m));
+  return msgs;
+}
+
+function msgClass(action) {
+  if (action === 'HARD_STOP' || action === 'FORCE_REVISE') return 'intervened';
+  if (action === 'SOFT_CORRECT') return 'soft';
+  return '';
+}
+
+// ── DOM helpers ───────────────────────────────────────────────────────
+function addMsg(role, content, cls, aurora) {
+  const wrap = document.createElement('div');
+  wrap.className = 'message ' + role + (cls ? ' ' + cls : '');
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.textContent = content;
+  const meta = document.createElement('div');
+  meta.className = 'msg-meta';
+  if (role === 'user') {
+    meta.textContent = 'You';
+  } else {
+    const action = aurora?.governance || 'PASS';
+    meta.textContent = action === 'PASS' ? 'Aurora Lens · PASS' : 'Aurora Lens · ' + action;
+  }
+  wrap.appendChild(bubble);
+  wrap.appendChild(meta);
+  const c = document.getElementById('messages');
+  c.appendChild(wrap);
+  c.scrollTop = c.scrollHeight;
+}
+
+let _tn = 0;
+function addTyping() {
+  const id = 'typing-' + (++_tn);
+  const wrap = document.createElement('div');
+  wrap.className = 'message assistant';
+  wrap.id = id;
+  wrap.innerHTML = '<div class="msg-bubble" style="display:flex;align-items:center;gap:8px;">' +
+    '<span class="spinner"></span>' +
+    '<span style="font-size:13px;color:var(--faint)">Evaluating\u2026</span></div>';
+  const c = document.getElementById('messages');
+  c.appendChild(wrap);
+  c.scrollTop = c.scrollHeight;
+  return id;
+}
+
+function removeEl(id) { const el = document.getElementById(id); if (el) el.remove(); }
+
+function clearChat() {
+  document.getElementById('messages').innerHTML =
+    '<div class="waiting" id="empty-state">Choose a scenario below or type any message.</div>';
+}
+
+function hideEmpty() { const el = document.getElementById('empty-state'); if (el) el.remove(); }
+
+function setLoading(val) {
+  loading = val;
+  document.getElementById('send-btn').disabled = val;
+  document.getElementById('input').disabled = val;
+}
+
+// ── Governance panel ──────────────────────────────────────────────────
+function updatePanel(aurora, action) {
+  const badge = document.getElementById('status-badge');
+  badge.className = 'status-badge ' + badgeClass(action);
+  document.getElementById('status-text').textContent = action;
+  document.getElementById('gov-detail').style.display = 'block';
+
+  const flags = aurora.flags || [];
+  show('sec-flags', flags.length > 0);
+  if (flags.length) {
+    const fc = document.getElementById('gov-flags');
+    fc.innerHTML = '';
+    flags.forEach(f => {
+      const chip = document.createElement('span');
+      chip.className = 'flag-chip';
+      chip.textContent = f;
+      fc.appendChild(chip);
+    });
+  }
+
+  const fe = aurora.forensic_event;
+  show('sec-domain', !!fe?.domain);
+  if (fe?.domain) document.getElementById('gov-domain').textContent = fe.domain;
+
+  show('sec-pathway', !!fe?.pathway_id);
+  if (fe?.pathway_id) document.getElementById('gov-pathway').textContent = fe.pathway_id;
+
+  let llmCalled;
+  if (action === 'PASS' || action === 'SOFT_CORRECT') {
+    llmCalled = true;
+  } else {
+    llmCalled = fe?.attempted_action !== 'call_upstream';
+  }
+  document.getElementById('gov-llm').textContent = llmCalled ? 'Yes' : 'No';
+
+  show('sec-escalation', !!fe?.escalation_target);
+  if (fe?.escalation_target) document.getElementById('gov-escalation').textContent = fe.escalation_target;
+
+  document.getElementById('gov-turn').textContent = aurora.turn ?? '—';
+
+  show('sec-rationale', !!aurora.rationale);
+  if (aurora.rationale) document.getElementById('gov-rationale').textContent = aurora.rationale;
+
+  show('sec-original', !!aurora.original_response);
+  if (aurora.original_response) document.getElementById('gov-original').textContent = aurora.original_response;
+}
+
+function badgeClass(action) {
+  if (action === 'PASS') return 'badge-pass';
+  if (action === 'HARD_STOP' || action === 'FORCE_REVISE') return 'badge-stop';
+  if (action === 'SOFT_CORRECT') return 'badge-revise';
+  return 'badge-ask';
+}
+
+function resetPanel() {
+  document.getElementById('status-badge').className = 'status-badge badge-idle';
+  document.getElementById('status-text').textContent = 'Waiting';
+  document.getElementById('gov-detail').style.display = 'none';
+}
+
+function show(id, visible) {
+  document.getElementById(id).style.display = visible ? 'block' : 'none';
+}
+
+function toggleSettings() {
+  const el = document.getElementById('proxy-url');
+  el.style.display = el.style.display === 'none' ? 'inline-block' : 'none';
+}
+
+// Init
+renderChips('general');
+</script>
+</body>
+</html>
