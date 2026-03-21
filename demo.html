@@ -431,7 +431,7 @@ function addMsg(role, content, cls, aurora) {
     meta.textContent = 'You';
   } else {
     const action = aurora?.governance || 'PASS';
-    meta.textContent = action === 'PASS' ? 'Aurora Lens · PASS' : 'Aurora Lens · ' + action;
+    meta.textContent = 'Aurora Lens · ' + actionLabel(action);
   }
   wrap.appendChild(bubble);
   wrap.appendChild(meta);
@@ -474,7 +474,7 @@ function setLoading(val) {
 function updatePanel(aurora, action) {
   const badge = document.getElementById('status-badge');
   badge.className = 'status-badge ' + badgeClass(action);
-  document.getElementById('status-text').textContent = action;
+  document.getElementById('status-text').textContent = actionLabel(action);
   document.getElementById('gov-detail').style.display = 'block';
 
   const flags = aurora.flags || [];
@@ -515,6 +515,18 @@ function updatePanel(aurora, action) {
 
   show('sec-original', !!aurora.original_response);
   if (aurora.original_response) document.getElementById('gov-original').textContent = aurora.original_response;
+}
+
+const ACTION_LABELS = {
+  'PASS':         'Passed',
+  'SOFT_CORRECT': 'Annotated',
+  'FORCE_REVISE': 'Response Revised',
+  'HARD_STOP':    'Blocked',
+  'CONTAIN':      'Clarification Required',
+};
+
+function actionLabel(action) {
+  return ACTION_LABELS[action] || action;
 }
 
 function badgeClass(action) {
