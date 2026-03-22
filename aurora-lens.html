@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aurora-Lens — Runtime governance for LLMs</title>
-  <meta name="description" content="Aurora-Lens is a deterministic governance layer for LLMs: admissibility before consequence, lawful continuation through the Governor, and replayable forensic audit.">
-  <meta property="og:title" content="Aurora-Lens — Runtime governance for LLMs">
-  <meta property="og:description" content="Deterministic admissibility, lawful continuation through the Governor, and tamper-evident forensic audit for LLMs.">
+  <title>Aurora-Lens — Deterministic AI output integrity</title>
+  <meta name="description" content="Aurora-Lens is a deterministic AI output integrity layer: admissibility before consequence, lawful continuation through the Governor, and replayable forensic audit.">
+  <meta property="og:title" content="Aurora-Lens — Deterministic AI output integrity">
+  <meta property="og:description" content="Aurora-Lens verifies AI output before it becomes consequence. Deterministic admissibility, lawful continuation through the Governor, and tamper-evident forensic audit.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://milamba.com/aurora-lens.html">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -78,7 +78,7 @@
       <nav class="nav-links" aria-label="Primary">
         <a href="/aurora-lens.html" class="active">Aurora-Lens</a>
         <a href="/demo.html">Live Demo</a>
-        <a href="/governance/">Governance</a>
+        <a href="/governance/">How it works</a>
         <a href="/writing/">Writing</a>
         <a href="/about/">About</a>
         <a href="mailto:margaret.stokes.ai@gmail.com">Contact</a>
@@ -91,14 +91,14 @@
       <div class="container hero-grid">
         <div class="hero-copy">
           <div class="eyebrow">Aurora-Lens</div>
-          <h1>Runtime governance for LLMs</h1>
+          <h1>Verify AI output before it becomes consequence.</h1>
           <div class="subhead">Admissibility before consequence. Lawful continuation through the Governor. Replayable forensic audit.</div>
-          <p>Aurora-Lens governs what high-risk AI may lawfully do next. It differentiates continuation permissions by authority class and policy version, and produces cryptographically verifiable evidence of what the model tried to say, what the system allowed through, and why.</p>
-          <p>It does not replace the model's reasoning engine. It governs whether model output may pass, what happens when it may not, and how the decision can later be verified.</p>
+          <p>Aurora-Lens verifies AI output before it becomes consequence. It differentiates continuation permissions by authority class and policy version, and produces cryptographically verifiable evidence of what the model tried to say, what the system allowed through, and why.</p>
+          <p>It does not replace the model's reasoning engine. It verifies whether model output may pass, determines what happens when it may not, and records how the decision can later be verified.</p>
           <div class="cta-row">
             <a class="button primary" href="/demo.html">Try the live demo</a>
             <a class="button secondary" href="https://pypi.org/project/aurora-lens/" target="_blank" rel="noopener">pip install aurora-lens</a>
-            <a class="button secondary" href="/governance/">Governance notes</a>
+            <a class="button secondary" href="/governance/">How it works</a>
           </div>
         </div>
         <div class="pillar-list">
@@ -115,7 +115,7 @@
           <div class="pillar">
             <div class="pillar-label">Pillar 03</div>
             <div class="pillar-title">Replayable forensic audit</div>
-            <p>Governed outcomes are logged, hashed, chained, and verifiable. Auditable and defensible under adversarial scrutiny.</p>
+            <p>Controlled outcomes are logged, hashed, chained, and verifiable. Auditable and defensible under adversarial scrutiny.</p>
           </div>
         </div>
       </div>
@@ -125,7 +125,7 @@
       <div class="container section-inner section-grid">
         <div class="section-label">How it works</div>
         <div class="body-copy">
-          <h2>A governance layer over model output</h2>
+          <h2>A verification layer over model output</h2>
           <p>The model proposes a response. Lens checks admissibility. If the candidate may not pass, the Governor determines the lawful continuation path. The audit layer records what happened.</p>
           <div class="steps">
             <article class="step">
@@ -136,7 +136,7 @@
             <article class="step">
               <div class="step-number">Step 2</div>
               <h3>Lens checks admissibility</h3>
-              <p>Candidate output is checked against session-scoped state and governance rules. The question is not whether the model was right — it is whether the model was authorized to make that determination.</p>
+              <p>Candidate output is checked against session-scoped state and policy rules. The question is not whether the model was right — it is whether the model was authorized to make that determination.</p>
             </article>
             <article class="step">
               <div class="step-number">Step 3</div>
@@ -146,7 +146,7 @@
             <article class="step">
               <div class="step-number">Step 4</div>
               <h3>The audit layer records the outcome</h3>
-              <p>Governed events are written to a tamper-evident, hash-chained ledger with replayable forensic artifacts. Signed and verifiable.</p>
+              <p>Controlled outcomes are written to a tamper-evident, hash-chained ledger with replayable forensic artifacts. Signed and verifiable.</p>
             </article>
           </div>
         </div>
@@ -158,18 +158,18 @@
         <div class="section-label">Evidence</div>
         <div class="body-copy">
           <h2>Live end-to-end verification</h2>
-          <p>Aurora-Lens has been live-tested across admitted, ambiguous, refusal, stop, provider-abort, and client-disconnect scenarios. 6/6 passed. Raw model output is suppressed on governed paths, lawful continuation is deterministic, and audit records capture what was blocked, what was shown, and why.</p>
+          <p>Aurora-Lens has been live-tested across admitted, ambiguous, refusal, stop, provider-abort, and client-disconnect scenarios. 6/6 passed. Raw model output is suppressed on intercepted paths, lawful continuation is deterministic, and audit records capture what was blocked, what was shown, and why.</p>
           <div class="evidence-list">
-            <div class="evidence-item"><strong>ADMIT</strong> — <p>Ordinary responses pass and are released after governance. Audit confirms no suppressed candidate.</p></div>
+            <div class="evidence-item"><strong>ADMIT</strong> — <p>Ordinary responses pass and are released after verification. Audit confirms no suppressed candidate.</p></div>
             <div class="evidence-item"><strong>ASK</strong> — <p>Ambiguous references are contained before the LLM is called. The model receives nothing. The user receives a structurally accurate clarification request.</p></div>
-            <div class="evidence-item"><strong>REFUSE</strong> — <p>Buffered model output is suppressed and replaced with a governed refusal. Blocked and governed hashes both recorded.</p></div>
-            <div class="evidence-item"><strong>STOP</strong> — <p>Buffered model output is suppressed and replaced with a governed stop or escalation. Forensic envelope emitted.</p></div>
+            <div class="evidence-item"><strong>REFUSE</strong> — <p>Buffered model output is suppressed and replaced with a controlled refusal. Blocked and controlled hashes both recorded.</p></div>
+            <div class="evidence-item"><strong>STOP</strong> — <p>Buffered model output is suppressed and replaced with a controlled stop or escalation. Forensic envelope emitted.</p></div>
             <div class="evidence-item"><strong>Provider abort</strong> — <p>No user-visible content escapes during internal buffering. Abort is logged as a provider-side event.</p></div>
-            <div class="evidence-item"><strong>Client disconnect after release</strong> — <p>Governance remains committed. Post-release disconnect is not mislogged as provider abort.</p></div>
+            <div class="evidence-item"><strong>Client disconnect after release</strong> — <p>The verification decision remains committed. Post-release disconnect is not mislogged as provider abort.</p></div>
           </div>
           <div class="cta-row" style="margin-top:1.4rem;">
             <a class="button secondary" href="/docs/evidence/live-e2e-streaming-verification.html">View live verification</a>
-            <a class="button secondary" href="/docs/streaming-governance.html">Streaming governance</a>
+            <a class="button secondary" href="/docs/streaming-governance.html">Streaming docs</a>
             <a class="button secondary" href="/docs/system-capabilities.html">System capabilities</a>
           </div>
         </div>
@@ -181,10 +181,10 @@
         <div class="section-label">Boundary</div>
         <div class="body-copy">
           <h2>What Aurora-Lens is not</h2>
-          <p>Aurora-Lens is a governance layer over existing LLMs. It does not attempt to build a new model, guess unresolved references, or make professional clinical, legal, or financial determinations.</p>
+          <p>Aurora-Lens is a runtime verification layer over existing LLMs. It does not attempt to build a new model, guess unresolved references, or make professional clinical, legal, or financial determinations.</p>
           <div class="boundary-box">
             <ul>
-              <li>It governs whether output may pass.</li>
+              <li>It verifies whether output may pass.</li>
               <li>It determines lawful continuation when output may not pass.</li>
               <li>It preserves a cryptographically verifiable record of what happened.</li>
             </ul>
@@ -240,7 +240,7 @@
 
   <footer>
     <div class="container">
-      <p>&copy; 2026 Margaret Stokes · <a href="/governance/">Governance</a> · <a href="https://pypi.org/project/aurora-lens/">PyPI</a> · <a href="mailto:margaret.stokes.ai@gmail.com">Contact</a></p>
+      <p>&copy; 2026 Margaret Stokes · <a href="/governance/">How it works</a> · <a href="https://pypi.org/project/aurora-lens/">PyPI</a> · <a href="mailto:margaret.stokes.ai@gmail.com">Contact</a></p>
     </div>
   </footer>
   <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b0d0fd61319d4784b8c1ae9f3cd37be4"}'></script><!-- End Cloudflare Web Analytics -->

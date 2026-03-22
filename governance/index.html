@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Governance — Aurora-Lens</title>
+  <title>Architecture — Aurora-Lens</title>
   <meta name="description" content="Why admissibility matters at inference time: Lens determines admissibility, the Governor determines lawful continuation, and the audit layer preserves the record.">
-  <meta property="og:title" content="Governance — Aurora-Lens">
-  <meta property="og:description" content="Fluent output is not the same thing as licensed output. Aurora-Lens explains why admissibility comes first.">
+  <meta property="og:title" content="Architecture — Aurora-Lens">
+  <meta property="og:description" content="Fluent output is not the same thing as licensed output. Aurora-Lens explains why admissibility comes first."
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://milamba.com/governance/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -59,7 +59,7 @@
       <a class="brand" href="/">Margaret Stokes</a>
       <nav class="nav-links" aria-label="Primary">
         <a href="/aurora-lens.html">Aurora-Lens</a>
-        <a href="/governance/" class="active">Governance</a>
+        <a href="/governance/" class="active">How it works</a>
         <a href="/writing/">Writing</a>
         <a href="/about/">About</a>
         <a href="mailto:margaret.stokes.ai@gmail.com">Contact</a>
@@ -70,7 +70,7 @@
   <main>
     <section class="hero">
       <div class="container">
-        <div class="eyebrow">Governance</div>
+        <div class="eyebrow">Architecture</div>
         <h1>Why admissibility matters at inference time</h1>
         <p>Fluent output is not the same thing as licensed output.</p>
         <p>Aurora-Lens is built around a simple claim: model output should not become consequence simply because a model can say it smoothly. Admissibility must be decided explicitly. Clarification, refusal, and stop are valid outcomes. When output cannot pass, the continuation should still be lawful, controlled, and auditable.</p>
@@ -111,17 +111,17 @@
       <div class="container section-inner">
         <div class="section-label">Runtime structure</div>
         <h2>The machine in one pass</h2>
-        <p>A model produces candidate output. Lens checks that output against session-scoped state and governance rules. If it is admissible, it may pass. If it is not, the Governor determines the lawful continuation path instead. The audit layer records the governed outcome.</p>
+        <p>A model produces candidate output. Lens checks that output against session-scoped state and policy rules. If it is admissible, it may pass. If it is not, the Governor determines the lawful continuation path instead. The audit layer records the controlled outcome.</p>
         <div class="formula">model proposes → Lens checks admissibility → Governor determines lawful continuation → audit records the event</div>
-        <p>This is not a generic guardrail and not a replacement model. It is a runtime governance layer over existing models.</p>
+        <p>This is not a generic guardrail and not a replacement model. It is a runtime verification layer over existing models.</p>
       </div>
     </section>
 
     <section>
       <div class="container section-inner">
         <div class="section-label">Outcome classes</div>
-        <h2>Governed outcomes</h2>
-        <p>Aurora-Lens works with four constitutional outcome classes. These are not cosmetic UI states. They are governed outcomes with deterministic forensic consequences.</p>
+        <h2>Controlled outcomes</h2>
+        <p>Aurora-Lens works with four constitutional outcome classes. These are not cosmetic UI states. They are controlled outcomes with deterministic forensic consequences.</p>
         <div class="outcome-grid">
           <article class="card">
             <div class="card-label">ADMIT</div>
@@ -161,7 +161,7 @@
       <div class="container section-inner">
         <div class="section-label">Forensic audit</div>
         <h2>What the record is for</h2>
-        <p>When output is governed rather than passed, Aurora-Lens emits a versioned forensic envelope and writes tamper-evident, hash-chained audit entries. That makes it possible to verify what was blocked, what was shown, and which pathway was used — auditable and defensible under adversarial scrutiny.</p>
+        <p>When output is intercepted rather than passed, Aurora-Lens emits a versioned forensic envelope and writes tamper-evident, hash-chained audit entries. That makes it possible to verify what was blocked, what was shown, and which pathway was used — auditable and defensible under adversarial scrutiny.</p>
         <div class="cta-row">
           <a class="button" href="/aurora-lens.html">See the product page</a>
           <a class="button" href="/docs/evidence/live-e2e-streaming-verification.html">View live evidence</a>
