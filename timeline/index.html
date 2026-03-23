@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Public Timeline — Aurora-Lens</title>
+  <meta name="description" content="Dated public chronology of the Aurora / Lens work from formal filing through public packaging and live deployment.">
+  <meta property="og:title" content="Public Timeline — Aurora-Lens">
+  <meta property="og:description" content="The dated external record of the Aurora / Lens work: provisional filings, research record, public packaging, and live deployment.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://milamba.com/timeline/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/logo.png">
+  <style>
+    :root { --ink:#141210; --paper:#f4f0ea; --panel:#fbf9f5; --muted:#615b56; --rule:#d1c7bb; --accent:#b03d1f; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'IBM Plex Sans',sans-serif; background:var(--paper); color:var(--ink); line-height:1.75; -webkit-font-smoothing:antialiased; }
+    .container { max-width:860px; margin:0 auto; padding:0 1.5rem; }
+    header { position:sticky; top:0; z-index:10; background:rgba(244,240,234,0.95); backdrop-filter:blur(8px); border-bottom:1px solid var(--rule); }
+    .nav { min-height:68px; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+    .brand { font-family:'IBM Plex Mono',monospace; font-size:0.82rem; text-transform:uppercase; letter-spacing:0.08em; text-decoration:none; color:var(--ink); }
+    .nav-links { display:flex; flex-wrap:wrap; gap:1.1rem; }
+    .nav-links a { text-decoration:none; color:var(--muted); font-size:0.82rem; }
+    .nav-links a.active, .nav-links a:hover { color:var(--accent); }
+    .hero { padding:5rem 0 3.5rem; border-bottom:1px solid var(--rule); }
+    .eyebrow { font-family:'IBM Plex Mono',monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--accent); margin-bottom:1.2rem; }
+    h1 { font-family:'DM Serif Display',serif; font-size:clamp(2.4rem,5vw,3.8rem); line-height:1.1; font-weight:400; margin-bottom:1.1rem; }
+    .hero p { max-width:60ch; color:var(--muted); font-size:1.03rem; margin-bottom:0.9rem; }
+    .summary-box { margin-top:1.5rem; padding:1.1rem 1.3rem; background:var(--panel); border:1px solid var(--rule); border-left:3px solid var(--accent); }
+    .summary-box p { color:var(--muted); font-size:0.97rem; margin-bottom:0.5rem; }
+    .summary-box p:last-child { margin-bottom:0; font-size:0.9rem; }
+    .summary-box strong { color:var(--ink); }
+    section { border-bottom:1px solid var(--rule); }
+    .section-inner { padding:4rem 0; }
+    .section-label { font-family:'IBM Plex Mono',monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); margin-bottom:1.4rem; }
+    h2 { font-family:'DM Serif Display',serif; font-size:clamp(1.6rem,3vw,2.2rem); line-height:1.2; font-weight:400; margin-bottom:1.2rem; }
+    .timeline { display:grid; gap:0; }
+    .item { padding:1.4rem 0; border-bottom:1px solid var(--rule); display:grid; grid-template-columns:200px 1fr; gap:1.5rem; align-items:baseline; }
+    .item:last-child { border-bottom:none; }
+    .date { font-family:'IBM Plex Mono',monospace; font-size:0.82rem; color:var(--accent); font-weight:500; padding-top:0.1rem; }
+    .item p { color:var(--muted); font-size:0.97rem; margin:0; }
+    .item p strong { color:var(--ink); font-weight:600; }
+    code { font-family:'IBM Plex Mono',monospace; background:var(--panel); border:1px solid var(--rule); padding:0.1rem 0.35rem; font-size:0.9em; }
+    .note { padding:3rem 0; }
+    .note p { color:var(--muted); font-size:0.97rem; max-width:60ch; }
+    footer { padding:1.5rem 0 3rem; color:var(--muted); font-size:0.9rem; }
+    footer a { color:inherit; }
+    @media (max-width:640px) { .item { grid-template-columns:1fr; gap:0.4rem; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="/">Margaret Stokes</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/aurora-lens.html">Aurora-Lens</a>
+        <a href="/demo.html">Live Demo</a>
+        <a href="/governance/">How it works</a>
+        <a href="/writing/">Writing</a>
+        <a href="/about/">About</a>
+        <a href="mailto:margaret.stokes.ai@gmail.com">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="eyebrow">Prior art and public record</div>
+        <h1>Public Timeline</h1>
+        <p>The dated public chronology of the Aurora / Lens work from formal filing through public packaging and live deployment.</p>
+        <p>It begins at the point where the work entered externally legible, dateable record. The underlying research and architectural development predate these filings, but this timeline is limited to milestones that can be publicly anchored.</p>
+        <div class="summary-box">
+          <p><strong>Summary:</strong> The filing sequence records the formal emergence of the architecture across substrate, integration, compositional reasoning, and governing admissibility.</p>
+          <p><strong>Progression:</strong> formal filing &rarr; formal demonstration &rarr; public research record &rarr; public package history &rarr; live deployment</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container section-inner">
+        <div class="section-label">Chronology</div>
+        <div class="timeline">
+
+          <div class="item">
+            <div class="date">27 November 2025</div>
+            <p>Provisional patent application <strong>2025905835</strong> filed. <strong>AURORA — Autonomous Conceptual Reasoning Architecture</strong>.</p>
+          </div>
+
+          <div class="item">
+            <div class="date">28 November 2025</div>
+            <p>Provisional patent application <strong>2025905860</strong> filed. <strong>PEF Specification</strong>.</p>
+          </div>
+
+          <div class="item">
+            <div class="date">29 November 2025</div>
+            <p>Provisional patent application <strong>2025905885</strong> filed. <strong>Autonomous Compositional Reasoning Architecture Integrated with Persistent Existence Frame (Aurora + PEF)</strong>.</p>
+          </div>
+
+          <div class="item">
+            <div class="date">1 December 2025</div>
+            <p>An empirical demonstration document dated <strong>1 December 2025</strong> records the architecture in formalized comparative form and ties it to the early filed provisional applications.</p>
+          </div>
+
+          <div class="item">
+            <div class="date">8 December 2025</div>
+            <p>Provisional patent application <strong>2025906132</strong> filed. <strong>Systems and Methods for Explicit Compositional Reasoning in a Continuous-Present Cognitive Architecture</strong>.</p>
+          </div>
+
+          <div class="item">
+            <div class="date">19 December 2025</div>
+            <p>Provisional patent application <strong>2025906680</strong> filed. <strong>SPINE SPECIFICATION — Admissibility-Controlled Epistemic Governance for Machine Reasoning</strong>.</p>
+          </div>
+
+          <div class="item">
+            <div class="date">2026</div>
+            <p>The work entered public research record through ORCID-linked materials and Zenodo publication.</p>
+          </div>
+
+          <div class="item">
+            <div class="date">27 February 2026</div>
+            <p><code>aurora-lens</code> enters public PyPI release history with version <strong>0.1.1</strong>.</p>
+          </div>
+
+          <div class="item">
+            <div class="date">1–10 March 2026</div>
+            <p>Rapid public release sequence continues through versions <strong>0.1.2</strong> to <strong>0.1.9</strong>.</p>
+          </div>
+
+          <div class="item">
+            <div class="date">19 March 2026</div>
+            <p><code>aurora-lens</code> version <strong>2.0.0</strong> released publicly on PyPI.</p>
+          </div>
+
+          <div class="item">
+            <div class="date">22 March 2026</div>
+            <p>Aurora-Lens live deployment online, producing runtime admissibility decisions with forensic audit output.</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <div class="container note">
+      <p>This page is a chronology, not a technical specification. It establishes the dated external record of the work without disclosing internal implementation detail beyond what is necessary to identify the milestones.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 Margaret Stokes · <a href="/aurora-lens.html">Aurora-Lens</a> · <a href="https://pypi.org/project/aurora-lens/">PyPI</a> · <a href="mailto:margaret.stokes.ai@gmail.com">Contact</a></p>
+    </div>
+  </footer>
+  <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b0d0fd61319d4784b8c1ae9f3cd37be4"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
