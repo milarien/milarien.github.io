@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Output Integrity: The Decision Boundary AI Still Lacks</title>
+  <meta name="description" content="AI output integrity is the discipline of separating fluency from authorization. Before output becomes consequence, was the determination admissible? Aurora-Lens enforces that boundary at inference time.">
+  <meta property="og:title" content="AI Output Integrity: The Decision Boundary AI Still Lacks">
+  <meta property="og:description" content="Fluency is not authorization. A system that sounds certain is not the same as a system permitted to make that determination. AI output integrity is the discipline of separating them.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://milamba.com/writing/ai-output-integrity/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/logo.png">
+  <style>
+    :root {
+      --ink: #171513;
+      --paper: #f5f1ea;
+      --rule: #cfc6ba;
+      --muted: #645d57;
+      --accent: #b23e1f;
+      --accent-soft: rgba(178,62,31,0.08);
+      --card: #faf7f2;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'IBM Plex Sans', sans-serif; background: var(--paper); color: var(--ink); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 720px; margin: 0 auto; padding: 0 1.5rem; }
+    header { border-bottom: 1px solid var(--rule); position: sticky; top: 0; background: rgba(245,241,234,0.94); backdrop-filter: blur(8px); z-index: 20; }
+    .nav { min-height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .brand { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; text-decoration: none; color: var(--ink); }
+    .nav-links { display: flex; flex-wrap: wrap; gap: 1.1rem; }
+    .nav-links a { font-size: 0.82rem; text-decoration: none; color: var(--muted); letter-spacing: 0.03em; }
+    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+    .article-header { padding: 4rem 0 2.5rem; border-bottom: 1px solid var(--rule); }
+    .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 1.2rem; }
+    h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2rem,5vw,3.2rem); line-height: 1.1; font-weight: 400; margin-bottom: 1.2rem; }
+    .byline { font-size: 0.88rem; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+    .article-body { padding: 3rem 0 5rem; }
+    .article-body p { font-size: 1.08rem; color: #2a2520; margin-bottom: 1.4rem; max-width: 68ch; }
+    .pull-quote { margin: 2.5rem 0; padding: 1.2rem 1.5rem; border-left: 3px solid var(--accent); background: var(--accent-soft); }
+    .pull-quote p { font-family: 'DM Serif Display', serif; font-size: 1.3rem; line-height: 1.4; color: var(--ink); margin: 0; }
+    .cta-block { margin-top: 3rem; padding: 1.5rem; background: var(--card); border: 1px solid var(--rule); }
+    .cta-block p { color: var(--muted); font-size: 0.96rem; margin-bottom: 1rem; }
+    .button { display: inline-flex; align-items: center; padding: 0.8rem 1.1rem; border: 1px solid var(--ink); text-decoration: none; color: var(--ink); font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; transition: 0.2s ease; background: transparent; margin-right: 0.6rem; margin-bottom: 0.5rem; }
+    .button.primary { background: var(--ink); color: var(--paper); }
+    .button:hover { border-color: var(--accent); color: var(--accent); background: white; }
+    .button.primary:hover { background: var(--accent); color: white; }
+    footer { border-top: 1px solid var(--rule); padding: 1.5rem 0 3rem; color: var(--muted); font-size: 0.9rem; }
+    footer a { color: inherit; }
+    @media (max-width: 640px) { h1 { font-size: 2rem; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="/">Margaret Stokes</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/aurora-lens.html">Aurora-Lens</a>
+        <a href="/demo.html">Live Demo</a>
+        <a href="/governance/">How it works</a>
+        <a href="/writing/" class="active">Writing</a>
+        <a href="/about/">About</a>
+        <a href="mailto:margaret.stokes.ai@gmail.com">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="article-header">
+        <div class="eyebrow">Essay — AI Output Integrity</div>
+        <h1>AI Output Integrity: The Decision Boundary AI Still Lacks</h1>
+        <div class="byline">Margaret Stokes &nbsp;·&nbsp; March 2026</div>
+      </div>
+
+      <div class="article-body">
+        <p>Large language models have no concept of consequence. They generate the next plausible token, fluent, confident, and structurally indifferent to whether the output should reach the person asking at all.</p>
+
+        <p>That gap matters far more than most people realise. In regulated environments such as healthcare, legal, and financial services, the person on the other end of an LLM interaction is rarely a researcher stress-testing edge cases. More often, it is someone prepared to treat the answer as authoritative. Someone looking for a reason not to see a doctor. Someone hoping for a shortcut through a legal problem they do not fully understand.</p>
+
+        <div class="pull-quote">
+          <p>Fluency is not authorization. A system that sounds certain is not the same as a system permitted to make that determination.</p>
+        </div>
+
+        <p>Those are different questions, and current AI infrastructure collapses them into one.</p>
+
+        <p>AI output integrity is the discipline of separating them.</p>
+
+        <p>It asks, before output becomes consequence: was this determination admissible? Was the system authorized to make it? If not, what is the lawful continuation — refusal, clarification, escalation, or stop?</p>
+
+        <p>Most AI policy frameworks operate after the fact. Logs, audits, explainability dashboards, retrospective review. These things may help reconstruct what happened. They do not stop an inadmissible output from becoming action in the first place.</p>
+
+        <p>Aurora-Lens intercepts output at inference time, before the response reaches the caller, before it becomes action, before it becomes harm. It enforces admissibility at the decision boundary itself.</p>
+
+        <p>When output is not admissible, the system does not merely warn. It refuses, stops, or routes to the next lawful path. Every non-admit outcome produces a cryptographically signed forensic record of what the model attempted to say, what the system permitted, and why.</p>
+
+        <p>That is what survives adversarial scrutiny.</p>
+
+        <p>Not the existence of a log. The existence of a controlled decision, made at the right moment, under the right authority, and sealed.</p>
+
+        <div class="cta-block">
+          <p>Aurora-Lens is a live, deployable implementation of AI output integrity infrastructure. The prior art chain is public and dated.</p>
+          <a class="button primary" href="/aurora-lens.html">Explore Aurora-Lens</a>
+          <a class="button" href="/timeline/">Prior art timeline</a>
+          <a class="button" href="/demo.html">Live demo</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Margaret Stokes · Melbourne, Australia · <a href="mailto:margaret.stokes.ai@gmail.com">margaret.stokes.ai@gmail.com</a> · <a href="https://orcid.org/0009-0004-6422-4174">ORCID</a></p>
+    </div>
+  </footer>
+  <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b0d0fd61319d4784b8c1ae9f3cd37be4"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
