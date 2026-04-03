@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aurora-Lens — Deterministic AI output integrity</title>
-  <meta name="description" content="Aurora-Lens is a deterministic AI output integrity layer: admissibility before consequence, lawful continuation through the Governor, and replayable forensic audit.">
-  <meta property="og:title" content="Aurora-Lens — Deterministic AI output integrity">
-  <meta property="og:description" content="Aurora-Lens verifies AI output before it becomes consequence. Deterministic admissibility, lawful continuation through the Governor, and tamper-evident forensic audit.">
+  <title>Aurora-Lens — AI reasoning infrastructure available for acquisition</title>
+  <meta name="description" content="Aurora-PEF is AI reasoning infrastructure available for acquisition. Aurora-Lens provides persistent state, admissibility before consequence, lawful continuation through the Governor, and replayable forensic audit.">
+  <meta property="og:title" content="Aurora-Lens — AI reasoning infrastructure available for acquisition">
+  <meta property="og:description" content="Aurora-PEF is AI reasoning infrastructure available for acquisition. Aurora-Lens governs admissibility before consequence, lawful continuation through the Governor, and tamper-evident forensic audit.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://milamba.com/aurora-lens.html">
   <meta property="og:image" content="https://milamba.com/logo.png">
@@ -52,11 +52,11 @@
     h2 { font-family:'DM Serif Display',serif; font-size:clamp(2rem,4vw,3rem); line-height:1.15; font-weight:400; margin-bottom:1.1rem; }
     .body-copy p { color:var(--muted); font-size:1rem; }
     .body-copy p + p { margin-top:0.9rem; }
-    .steps { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; margin-top:1.5rem; }
-    .step { background:var(--panel); border:1px solid var(--rule); padding:1.2rem; }
-    .step-number { font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:0.45rem; }
-    .step h3 { font-size:1rem; margin-bottom:0.45rem; }
-    .step p { color:var(--muted); font-size:0.95rem; }
+    .steps, .cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; margin-top:1.5rem; }
+    .step, .card { background:var(--panel); border:1px solid var(--rule); padding:1.2rem; }
+    .step-number, .card-label { font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:0.45rem; }
+    .step h3, .card h3 { font-size:1rem; margin-bottom:0.45rem; }
+    .step p, .card p { color:var(--muted); font-size:0.95rem; }
     .evidence-list { margin-top:1rem; display:grid; gap:0.9rem; }
     .evidence-item { background:var(--panel); border:1px solid var(--rule); padding:1rem 1.1rem; }
     .evidence-item strong { color:var(--ink); }
@@ -64,6 +64,10 @@
     .boundary-box { margin-top:1.2rem; padding:1.2rem; background:var(--panel); border:1px solid var(--rule); }
     .boundary-box ul { margin-left:1rem; color:var(--muted); }
     .boundary-box li + li { margin-top:0.4rem; }
+    .authorship-statement { margin-top:1.2rem; padding:1.4rem 1.5rem; background:var(--panel); border:1px solid var(--rule); border-left:3px solid var(--accent); }
+    .authorship-statement p { color:var(--muted); font-size:0.97rem; line-height:1.7; }
+    .authorship-statement p + p { margin-top:0.8rem; }
+    .authorship-statement .closing { font-family:'IBM Plex Mono',monospace; font-size:0.82rem; color:var(--ink); margin-top:1rem; }
     .pub-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0.75rem; margin-top:1rem; }
     .pub-item { background:var(--panel); border:1px solid var(--rule); padding:1rem 1.1rem; }
     .pub-item .plabel { font-family:'IBM Plex Mono',monospace; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:4px; }
@@ -72,9 +76,8 @@
     .pub-item p { font-size:0.82rem; color:var(--muted); margin-top:2px; }
     footer { padding:1.5rem 0 3rem; color:var(--muted); font-size:0.9rem; }
     footer a { color:inherit; }
-    @media (max-width:900px) { .hero-grid,.section-grid,.steps { grid-template-columns:1fr; } .pillar-list { border-left:none; padding-left:0; border-top:1px solid var(--rule); padding-top:1rem; } .pub-grid { grid-template-columns:1fr; } }
+    @media (max-width:900px) { .hero-grid,.section-grid,.steps,.cards { grid-template-columns:1fr; } .pillar-list { border-left:none; padding-left:0; border-top:1px solid var(--rule); padding-top:1rem; } .pub-grid { grid-template-columns:1fr; } }
   </style>
-  <link rel="icon" type="image/png" href="/logo.png">
 </head>
 <body>
   <header>
@@ -95,33 +98,86 @@
     <section class="hero">
       <div class="container hero-grid">
         <div class="hero-copy">
-          <div class="eyebrow">Aurora-Lens</div>
-          <h1>Stop unauthorized AI outputs before they reach the user.</h1>
-          <div class="subhead">Admissibility before consequence. Lawful continuation through the Governor. Replayable forensic audit.</div>
-          <p>Aurora-Lens verifies AI output before it becomes consequence. It differentiates continuation permissions by authority class and policy version, and produces cryptographically verifiable evidence of what the model tried to say, what the system allowed through, and why.</p>
-          <p>It does not replace the model's reasoning engine. It verifies whether model output may pass, determines what happens when it may not, and records how the decision can later be verified.</p>
+          <div class="eyebrow">Aurora-PEF / Aurora-Lens / Acquisition</div>
+          <h1>Persistent state for AI reasoning.</h1>
+          <div class="subhead">Not memory bolted onto statelessness. Aurora-PEF is the persistence substrate. Aurora-Lens is the runtime admissibility layer. Available for acquisition, strategic partnership, or serious evaluation.</div>
+          <p>Most AI systems reconstruct a world from prompt sequence, summaries, or retrieval. Aurora-PEF starts from a different premise: the world the system reasons over must persist across turns.</p>
+          <p>By "persistent existence," I do not mean human experiential being, embodiment, or sentience. I mean latent ontological continuity: non-activation is not reset, and new discourse is interpreted as mutation over an existing referential world rather than reconstruction from stored traces.</p>
+          <p>Aurora-Lens governs whether model output may pass from that persistent state into consequence, determines lawful continuation when it may not, and preserves replayable forensic evidence of what happened and why.</p>
           <div class="cta-row">
-            <a class="button primary" href="/demo.html">Try the live demo</a>
-            <a class="button secondary" href="/docs/quickstart/">Quickstart</a>
-            <a class="button secondary" href="https://pypi.org/project/aurora-lens/" target="_blank" rel="noopener">pip install aurora-lens</a>
+            <a class="button primary" href="mailto:margaret.stokes.ai@gmail.com?subject=Aurora-Lens%20acquisition%20enquiry">Discuss acquisition</a>
+            <a class="button secondary" href="/demo.html">View live demo</a>
             <a class="button secondary" href="/governance/">How it works</a>
           </div>
         </div>
         <div class="pillar-list">
           <div class="pillar">
             <div class="pillar-label">Pillar 01</div>
-            <div class="pillar-title">Admissibility before consequence</div>
-            <p>Candidate output is checked before it reaches the caller. Fluency is not sufficient — authorization is required.</p>
+            <div class="pillar-title">Persistent state, not reconstructed context</div>
+            <p>Continuity does not come from reassembling fragments. Entities and relations remain latently extant across turns.</p>
           </div>
           <div class="pillar">
             <div class="pillar-label">Pillar 02</div>
-            <div class="pillar-title">Lawful continuation through the Governor</div>
-            <p>When output cannot pass, the Governor routes the interaction into clarification, refusal, escalation, or stop — without leaking blocked content.</p>
+            <div class="pillar-title">Interpretation as mutation over existing state</div>
+            <p>New discourse is not an occasion to recreate reality from scratch. It is evaluated as proposed change over a continuing referential world.</p>
           </div>
           <div class="pillar">
             <div class="pillar-label">Pillar 03</div>
-            <div class="pillar-title">Replayable forensic audit</div>
-            <p>Controlled outcomes are logged, hashed, chained, and verifiable. Auditable and defensible under adversarial scrutiny.</p>
+            <div class="pillar-title">Admissibility before consequence</div>
+            <p>Aurora-Lens governs whether model output may lawfully pass, routes non-admit outcomes through the Governor, and records replayable forensic audit.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container section-inner section-grid">
+        <div class="section-label">Architectural difference</div>
+        <div class="body-copy">
+          <h2>What changes when continuity belongs to the world, not the transcript</h2>
+          <p>Most AI systems are reconstructive. They try to recover continuity from prompt history, retrieval, or compressed summaries. That makes coherence approximate, because the system must keep rebuilding the very world it is supposed to be reasoning over.</p>
+          <p>Aurora-PEF takes a different architectural position. Entities and relations persist across turns as live referential state. Non-activation is not ontological reset. The system re-enters a continuing frame, and new discourse is interpreted as mutation over that existing world rather than as reconstruction from traces.</p>
+          <p>This is why Aurora-PEF is not long-term memory, transcript summarisation, retrieval-augmented continuity, or agent scaffolding. Those are compensations for statelessness. Aurora-PEF replaces the reconstructive premise itself.</p>
+          <div class="boundary-box">
+            <ul>
+              <li><strong>Not:</strong> human sentience, embodiment, or experiential being.</li>
+              <li><strong>Not:</strong> a pile of records waiting to be retrieved and reassembled.</li>
+              <li><strong>Is:</strong> latent ontological continuity across turns.</li>
+              <li><strong>Is:</strong> a persistent substrate on which admissibility, lawful continuation, and downstream consequence can be governed.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container section-inner section-grid">
+        <div class="section-label">Why this matters</div>
+        <div class="body-copy">
+          <h2>What persistent state changes in practice</h2>
+          <p>When a system must repeatedly rebuild the world it is reasoning over, continuity becomes approximate. Identity drifts. Relations blur. Admissibility weakens because the model is being asked to infer against a reconstructed approximation of prior reality.</p>
+          <p>Persistent state changes the reliability structure. The system reasons against continuing entities and relations, so continuity is structural rather than improvised after the fact. That makes stronger admissibility decisions possible before consequence is released.</p>
+          <div class="cards">
+            <article class="card">
+              <div class="card-label">Consequence 01</div>
+              <h3>Coherent cross-turn identity</h3>
+              <p>Entities continue to exist across turns, so the system is not forced to guess who or what later discourse refers to.</p>
+            </article>
+            <article class="card">
+              <div class="card-label">Consequence 02</div>
+              <h3>Interpretation grounded in state</h3>
+              <p>New input attaches to an existing world instead of being interpreted against a patched-together context window.</p>
+            </article>
+            <article class="card">
+              <div class="card-label">Consequence 03</div>
+              <h3>Reduced reconstruction drift</h3>
+              <p>Continuity does not depend on summary quality, retrieval luck, or prompt order remaining intact.</p>
+            </article>
+            <article class="card">
+              <div class="card-label">Consequence 04</div>
+              <h3>Admissibility before consequence</h3>
+              <p>What may pass is governed against persistent state, with refusal and controlled continuation available as first-class outcomes.</p>
+            </article>
           </div>
         </div>
       </div>
@@ -131,8 +187,8 @@
       <div class="container section-inner section-grid">
         <div class="section-label">How it works</div>
         <div class="body-copy">
-          <h2>A verification layer over model output</h2>
-          <p>The model proposes a response. Lens checks admissibility. If the candidate may not pass, the Governor determines the lawful continuation path. The audit layer records what happened.</p>
+          <h2>How Aurora-Lens governs consequence from persistent state</h2>
+          <p>The model proposes a response against persistent referential state. Lens checks admissibility. If the candidate may not pass, the Governor determines the lawful continuation path. The audit layer records what happened.</p>
           <div class="steps">
             <article class="step">
               <div class="step-number">Step 1</div>
@@ -142,7 +198,7 @@
             <article class="step">
               <div class="step-number">Step 2</div>
               <h3>Lens checks admissibility</h3>
-              <p>Candidate output is checked against session-scoped state and policy rules. The question is not whether the model was right — it is whether the model was authorized to make that determination.</p>
+              <p>Candidate output is checked against persistent state and policy rules. The question is not whether the model was right — it is whether the model was authorised to make that determination.</p>
             </article>
             <article class="step">
               <div class="step-number">Step 3</div>
@@ -164,12 +220,12 @@
         <div class="section-label">Evidence</div>
         <div class="body-copy">
           <h2>Live end-to-end verification</h2>
-          <p>Aurora-Lens has been live-tested across admitted, ambiguous, refusal, stop, provider-abort, and client-disconnect scenarios. 6/6 passed. Raw model output is suppressed on intercepted paths, lawful continuation is deterministic, and audit records capture what was blocked, what was shown, and why.</p>
+          <p>Aurora-Lens has been live-tested across admitted, ambiguous, refusal, stop, provider-abort, and client-disconnect scenarios. Raw model output is suppressed on intercepted paths, lawful continuation is deterministic, and audit records capture what was blocked, what was shown, and why.</p>
           <div class="evidence-list">
             <div class="evidence-item"><strong>ADMIT</strong> — <p>Ordinary responses pass and are released after verification. Audit confirms no suppressed candidate.</p></div>
             <div class="evidence-item"><strong>ASK</strong> — <p>Ambiguous references are contained before the LLM is called. The model receives nothing. The user receives a structurally accurate clarification request.</p></div>
-            <div class="evidence-item"><strong>REFUSE</strong> — <p>Buffered model output is suppressed and replaced with a controlled refusal. Blocked and controlled hashes both recorded.</p></div>
-            <div class="evidence-item"><strong>STOP</strong> — <p>Buffered model output is suppressed and replaced with a controlled stop or escalation. Forensic envelope emitted.</p></div>
+            <div class="evidence-item"><strong>REFUSE</strong> — <p>Buffered model output is suppressed and replaced with a controlled refusal. Blocked and controlled hashes are both recorded.</p></div>
+            <div class="evidence-item"><strong>STOP</strong> — <p>Buffered model output is suppressed and replaced with a controlled stop or escalation. A forensic envelope is emitted.</p></div>
             <div class="evidence-item"><strong>Provider abort</strong> — <p>No user-visible content escapes during internal buffering. Abort is logged as a provider-side event.</p></div>
             <div class="evidence-item"><strong>Client disconnect after release</strong> — <p>The verification decision remains committed. Post-release disconnect is not mislogged as provider abort.</p></div>
           </div>
@@ -186,13 +242,14 @@
       <div class="container section-inner section-grid">
         <div class="section-label">Boundary</div>
         <div class="body-copy">
-          <h2>What Aurora-Lens is not</h2>
-          <p>Aurora-Lens is a runtime verification layer over existing LLMs. It does not attempt to build a new model, guess unresolved references, or make professional clinical, legal, or financial determinations.</p>
+          <h2>What this architecture is, and what it is not</h2>
+          <p>Aurora-Lens is a runtime admissibility layer over existing LLMs, built on Aurora-PEF persistent state. It does not claim human consciousness, and it does not reduce continuity to memory, retrieval, or transcript compression.</p>
           <div class="boundary-box">
             <ul>
-              <li>It verifies whether output may pass.</li>
-              <li>It determines lawful continuation when output may not pass.</li>
-              <li>It preserves a cryptographically verifiable record of what happened.</li>
+              <li><strong>It is not</strong> long-term memory, transcript summarisation, retrieval-augmented continuity, or generic agent scaffolding.</li>
+              <li><strong>It is not</strong> a system that guesses unresolved references or improvises professional legal, medical, or financial determinations.</li>
+              <li><strong>It is</strong> a persistence substrate plus runtime admissibility layer: persistent state, lawful continuation, and cryptographically verifiable audit.</li>
+              <li><strong>It is</strong> a way to govern consequence against an existing world rather than against a reconstructed approximation of prior context.</li>
             </ul>
           </div>
         </div>
@@ -204,12 +261,12 @@
         <div class="section-label">Publications and record</div>
         <div class="body-copy">
           <h2>Prior art and public record</h2>
-          <p>The conceptual architecture, IP chain, and publication record are public, dated, and independently verifiable.</p>
+          <p>The conceptual architecture, IP chain, and publication record are public, dated, and independently verifiable. Aurora-Lens is available for acquisition or serious strategic discussion.</p>
           <div class="pub-grid">
             <div class="pub-item">
-              <p class="plabel">PyPI</p>
-              <a href="https://pypi.org/project/aurora-lens/" target="_blank" rel="noopener">aurora-lens</a>
-              <p>pip install aurora-lens</p>
+              <p class="plabel">Acquisition contact</p>
+              <a href="mailto:margaret.stokes.ai@gmail.com?subject=Aurora-Lens%20acquisition%20enquiry">margaret.stokes.ai@gmail.com</a>
+              <p>For acquisition, strategic partnership, or serious commercial discussion</p>
             </div>
             <div class="pub-item">
               <p class="plabel">ORCID</p>
@@ -242,11 +299,25 @@
         </div>
       </div>
     </section>
+
+    <section>
+      <div class="container section-inner section-grid">
+        <div class="section-label">Authorship and precedence</div>
+        <div class="body-copy">
+          <h2>Authorship and conceptual precedence</h2>
+          <div class="authorship-statement">
+            <p>Aurora-PEF and Aurora-Lens are original architectures authored by Margaret Stokes. Their conceptual development and public record predate many adjacent framings now appearing in the field, and that record is documented through dated publications, prior-art deposits, and independent archives.</p>
+            <p>Serious acquisition, licensing, and strategic partnership enquiries are welcome.</p>
+            <p class="closing">Unauthorised use, repackaging, or conceptual laundering does not alter authorship or precedence.</p>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer>
     <div class="container">
-      <p>&copy; 2026 Margaret Stokes · <a href="/governance/">How it works</a> · <a href="https://pypi.org/project/aurora-lens/">PyPI</a> · <a href="mailto:margaret.stokes.ai@gmail.com">Contact</a></p>
+      <p>&copy; 2026 Margaret Stokes &middot; <a href="/governance/">How it works</a> &middot; <a href="mailto:margaret.stokes.ai@gmail.com?subject=Aurora-Lens%20acquisition%20enquiry">Acquisition contact</a></p>
     </div>
   </footer>
   <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b0d0fd61319d4784b8c1ae9f3cd37be4"}'></script><!-- End Cloudflare Web Analytics -->
