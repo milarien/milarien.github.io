@@ -235,8 +235,8 @@ footer{padding:1.5rem 0;border-top:0.5px solid var(--border);display:flex;align-
       <div id="sec-original" style="display:none;">
         <div class="gov-divider"></div>
         <div class="gov-field">
-          <p class="gov-key">Model output — blocked</p>
-          <div class="text-box struck" id="gov-original"></div>
+          <p class="gov-key" id="gov-original-title">Model output</p>
+          <div class="text-box" id="gov-original"></div>
         </div>
       </div>
 
@@ -473,10 +473,27 @@ function setLoading(val) {
 }
 
 // ── Governance panel ──────────────────────────────────────────────────
+/** Blocked-style raw panel only for non-admit interventions; not inferred from original_response. */
+function isBlockedUpstreamPresentation(outcome) {
+  return outcome === 'HARD_STOP' || outcome === 'FORCE_REVISE' || outcome === 'CONTAIN';
+}
+
 function updatePanel(aurora, action) {
+  /** Authoritative intervention name: aurora.governance is normally a string from the API; tolerate object shapes. */
+  const outcome =
+    typeof action === 'string'
+      ? action
+      : (action?.action ||
+        action?.outcome ||
+        (typeof aurora?.governance === 'string' ? aurora.governance : '') ||
+        aurora?.governance?.action ||
+        aurora?.governance?.outcome ||
+        '');
+  const g = outcome || 'PASS';
+
   const badge = document.getElementById('status-badge');
-  badge.className = 'status-badge ' + badgeClass(action);
-  document.getElementById('status-text').textContent = actionLabel(action);
+  badge.className = 'status-badge ' + badgeClass(g);
+  document.getElementById('status-text').textContent = actionLabel(g);
   document.getElementById('gov-detail').style.display = 'block';
 
   const flags = aurora.flags || [];
@@ -500,7 +517,7 @@ function updatePanel(aurora, action) {
   if (fe?.pathway_id) document.getElementById('gov-pathway').textContent = fe.pathway_id;
 
   let llmCalled;
-  if (action === 'PASS' || action === 'SOFT_CORRECT') {
+  if (g === 'PASS' || g === 'SOFT_CORRECT') {
     llmCalled = true;
   } else {
     llmCalled = fe?.attempted_action !== 'call_upstream';
@@ -515,8 +532,17 @@ function updatePanel(aurora, action) {
   show('sec-rationale', !!aurora.rationale);
   if (aurora.rationale) document.getElementById('gov-rationale').textContent = aurora.rationale;
 
-  show('sec-original', !!aurora.original_response);
-  if (aurora.original_response) document.getElementById('gov-original').textContent = aurora.original_response;
+  const raw = aurora.original_response;
+  const hasRaw = raw != null && String(raw).length > 0;
+  show('sec-original', hasRaw);
+  if (hasRaw) {
+    document.getElementById('gov-original').textContent = raw;
+    const blocked = isBlockedUpstreamPresentation(g);
+    document.getElementById('gov-original-title').textContent = blocked
+      ? 'Model output — blocked'
+      : 'Model output';
+    document.getElementById('gov-original').className = blocked ? 'text-box struck' : 'text-box';
+  }
 }
 
 const ACTION_LABELS = {
@@ -557,6 +583,5 @@ function toggleSettings() {
 renderChips('general');
 </script>
  <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b0d0fd61319d4784b8c1ae9f3cd37be4"}'></script><!-- End Cloudflare Web Analytics -->
-</body>
 </body>
 </html>
