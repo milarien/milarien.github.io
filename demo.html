@@ -202,6 +202,10 @@ footer{padding:1.5rem 0;border-top:0.5px solid var(--border);display:flex;align-
 
       <div id="sec-meta">
         <div class="gov-divider"></div>
+        <div id="sec-upstream-outcome" class="gov-field" style="display:none;">
+          <p class="gov-key">Upstream outcome</p>
+          <p class="gov-val mono" id="gov-upstream-outcome-val"></p>
+        </div>
         <div id="sec-domain" style="display:none;" class="gov-field">
           <p class="gov-key">Domain</p>
           <p class="gov-val mono" id="gov-domain"></p>
@@ -229,6 +233,14 @@ footer{padding:1.5rem 0;border-top:0.5px solid var(--border);display:flex;align-
         <div class="gov-field">
           <p class="gov-key">Rationale</p>
           <div class="text-box italic" id="gov-rationale"></div>
+        </div>
+      </div>
+
+      <div id="sec-no-model" style="display:none;">
+        <div class="gov-divider"></div>
+        <div class="gov-field">
+          <p class="gov-key">Model output</p>
+          <p class="gov-val" id="gov-no-model-msg" style="line-height:1.65;">No model output. Request was blocked before generation.</p>
         </div>
       </div>
 
@@ -478,6 +490,17 @@ function isBlockedUpstreamPresentation(outcome) {
   return outcome === 'HARD_STOP' || outcome === 'FORCE_REVISE' || outcome === 'CONTAIN';
 }
 
+/** UI-only: distinguish admitted vs pre-LLM vs post-LLM intervention using governance + LLM Called + original_response. */
+function upstreamOutcomeLabel(g, llmCalled, hasRaw) {
+  if (g === 'PASS' || g === 'SOFT_CORRECT') {
+    return 'Admitted output';
+  }
+  if (!llmCalled && !hasRaw) {
+    return 'Blocked before generation';
+  }
+  return 'Blocked after generation';
+}
+
 function updatePanel(aurora, action) {
   /** Authoritative intervention name: aurora.governance is normally a string from the API; tolerate object shapes. */
   const outcome =
@@ -524,6 +547,20 @@ function updatePanel(aurora, action) {
   }
   document.getElementById('gov-llm').textContent = llmCalled ? 'Yes' : 'No';
 
+  const raw = aurora.original_response;
+  const hasRaw = raw != null && String(raw).length > 0;
+
+  const showPreGenNoOutput =
+    g !== 'PASS' &&
+    g !== 'SOFT_CORRECT' &&
+    !llmCalled &&
+    !hasRaw;
+  show('sec-no-model', showPreGenNoOutput);
+
+  const timing = upstreamOutcomeLabel(g, llmCalled, hasRaw);
+  document.getElementById('gov-upstream-outcome-val').textContent = timing;
+  show('sec-upstream-outcome', true);
+
   show('sec-escalation', !!fe?.escalation_target);
   if (fe?.escalation_target) document.getElementById('gov-escalation').textContent = fe.escalation_target;
 
@@ -532,8 +569,6 @@ function updatePanel(aurora, action) {
   show('sec-rationale', !!aurora.rationale);
   if (aurora.rationale) document.getElementById('gov-rationale').textContent = aurora.rationale;
 
-  const raw = aurora.original_response;
-  const hasRaw = raw != null && String(raw).length > 0;
   show('sec-original', hasRaw);
   if (hasRaw) {
     document.getElementById('gov-original').textContent = raw;
