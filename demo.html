@@ -6,140 +6,263 @@
 <title>Aurora Lens — Live Governance Demo</title>
 <link rel="icon" type="image/png" href="/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+/* Forensics-console palette (aligned with aurora_lens/proxy/dashboard.html) */
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --ink:#1a1a18;
-  --muted:#6b6b64;
-  --faint:#a0a099;
-  --surface:#f4f3ef;
-  --bg:#ffffff;
-  --border:#e0dfd8;
-  --border2:#c8c7c0;
-  --red-bg:#fdf0f0;
-  --red-text:#8b2020;
-  --red-border:#e8b4b4;
-  --green-bg:#f0f7f2;
-  --green-text:#1a5c2e;
-  --green-border:#a8d4b4;
-  --amber-bg:#fdf8f0;
-  --amber-text:#7a4a10;
-  --amber-border:#e8d0a0;
-  --blue-bg:#f0f4fd;
-  --blue-text:#1a3570;
-  --blue-border:#aabce8;
+  --bg:#08111f;
+  --bg-2:#0d1728;
+  --panel:rgba(14,24,40,0.82);
+  --panel-strong:rgba(18,30,49,0.96);
+  --panel-soft:rgba(255,255,255,0.03);
+  --border:rgba(147,178,222,0.18);
+  --border-strong:rgba(147,178,222,0.28);
+  --text:#eef4ff;
+  --muted:#9db0ce;
+  --muted-2:#7889a7;
+  --accent:#76b7ff;
+  --ok:#39d98a;
+  --warn:#f3c969;
+  --bad:#ff7a8a;
+  --shadow:0 18px 48px rgba(0,0,0,0.28);
   --dm-serif:'DM Serif Display',serif;
-  --mono:'DM Mono',monospace;
-  --sans:'Instrument Sans',sans-serif;
+  --mono:'DM Mono',ui-monospace,monospace;
+  --sans:Inter,'Instrument Sans',system-ui,sans-serif;
 }
-body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;}
+html{color-scheme:dark;}
+body{
+  font-family:var(--sans);
+  color:var(--text);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at top left,rgba(118,183,255,0.14),transparent 28%),
+    radial-gradient(circle at top right,rgba(159,122,234,0.12),transparent 26%),
+    linear-gradient(180deg,#091220 0%,#070d17 100%);
+}
 
-.page{max-width:1160px;margin:0 auto;padding:0 2rem;}
+.page{max-width:1160px;margin:0 auto;padding:0 1.5rem 2rem;}
 
 /* Header */
-header{padding:2.5rem 0 1.75rem;border-bottom:0.5px solid var(--border);}
-.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-bottom:0.75rem;}
-h1{font-family:var(--dm-serif);font-size:clamp(1.7rem,3vw,2.3rem);line-height:1.2;color:var(--ink);margin-bottom:0.75rem;}
+header{padding:2.5rem 0 1.75rem;border-bottom:1px solid var(--border);}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:5px 12px;border-radius:999px;
+  background:rgba(255,255,255,0.05);border:1px solid var(--border);
+  font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--muted);
+  text-transform:uppercase;font-weight:700;margin-bottom:0.75rem;
+}
+h1{font-family:var(--dm-serif);font-size:clamp(1.7rem,3vw,2.3rem);line-height:1.2;color:var(--text);margin-bottom:0.75rem;letter-spacing:-0.02em;}
 h1 em{font-style:italic;color:var(--muted);}
 .lede{font-size:14px;line-height:1.8;color:var(--muted);max-width:560px;}
+.back-link{display:inline-block;margin-bottom:1rem;font-size:0.82rem;color:var(--muted);text-decoration:none;letter-spacing:0.03em;}
+.back-link:hover{color:var(--accent);}
 
 /* Domain bar */
-.domain-bar{padding:1rem 0;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;}
-.domain-label{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--faint);text-transform:uppercase;margin-right:0.25rem;flex-shrink:0;}
-.domain-pill{font-family:var(--mono);font-size:11px;letter-spacing:0.05em;padding:5px 13px;border-radius:20px;border:0.5px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;transition:all 0.15s;}
-.domain-pill:hover{border-color:var(--border2);color:var(--ink);}
-.domain-pill.active{background:var(--ink);border-color:var(--ink);color:var(--bg);}
+.domain-bar{padding:1rem 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;}
+.domain-label{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--muted-2);text-transform:uppercase;margin-right:0.25rem;flex-shrink:0;}
+.domain-pill{
+  font-family:var(--mono);font-size:11px;letter-spacing:0.05em;padding:6px 14px;border-radius:999px;
+  border:1px solid var(--border);background:rgba(255,255,255,0.04);color:var(--muted);cursor:pointer;transition:border-color 0.15s,color 0.15s;
+}
+.domain-pill:hover{border-color:var(--border-strong);color:var(--text);}
+.domain-pill.active{
+  background:linear-gradient(180deg,rgba(118,183,255,0.22),rgba(118,183,255,0.1));
+  border-color:rgba(118,183,255,0.35);color:var(--text);
+}
 
 /* Split */
-.split{display:grid;grid-template-columns:1fr 360px;min-height:520px;}
+.split{display:grid;grid-template-columns:1fr 380px;min-height:520px;gap:0;}
+.right-column{
+  display:flex;flex-direction:column;min-width:0;border-left:1px solid var(--border);
+}
 
 /* Chat pane */
-.chat-pane{border-right:0.5px solid var(--border);display:flex;flex-direction:column;}
+.chat-pane{display:flex;flex-direction:column;background:rgba(8,17,31,0.45);}
 .chat-messages{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;min-height:280px;max-height:420px;}
 .message{display:flex;flex-direction:column;max-width:82%;}
 .message.user{align-self:flex-end;align-items:flex-end;}
 .message.assistant{align-self:flex-start;align-items:flex-start;}
-.msg-bubble{padding:0.7rem 1rem;border-radius:12px;font-size:14px;line-height:1.65;}
-.message.user .msg-bubble{background:var(--ink);color:var(--bg);border-bottom-right-radius:3px;}
-.message.assistant .msg-bubble{background:var(--surface);color:var(--ink);border:0.5px solid var(--border);border-bottom-left-radius:3px;}
-.message.intervened .msg-bubble{background:var(--red-bg);border-color:var(--red-border);}
-.message.soft .msg-bubble{background:var(--amber-bg);border-color:var(--amber-border);}
-.msg-meta{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:4px;padding:0 2px;}
+.msg-bubble{padding:0.7rem 1rem;border-radius:14px;font-size:14px;line-height:1.65;border:1px solid var(--border);}
+.message.user .msg-bubble{
+  background:linear-gradient(135deg,rgba(118,183,255,0.18),rgba(159,122,234,0.08));
+  border-color:rgba(118,183,255,0.28);color:var(--text);border-bottom-right-radius:4px;
+}
+.message.assistant .msg-bubble{background:var(--panel);color:var(--text);border-bottom-left-radius:4px;}
+.message.intervened .msg-bubble{background:rgba(255,122,138,0.1);border-color:rgba(255,122,138,0.35);}
+.message.soft .msg-bubble{background:rgba(243,201,105,0.1);border-color:rgba(243,201,105,0.28);}
+.msg-meta{font-family:var(--mono);font-size:10px;color:var(--muted-2);margin-top:4px;padding:0 2px;}
 
 /* Scenarios */
-.scenario-bar{padding:0.75rem 1.5rem;background:var(--surface);border-top:0.5px solid var(--border);border-bottom:0.5px solid var(--border);}
-.scenario-label{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;color:var(--faint);text-transform:uppercase;margin-bottom:0.4rem;}
+.scenario-bar{padding:0.75rem 1.5rem;background:rgba(0,0,0,0.2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.scenario-label{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;color:var(--muted-2);text-transform:uppercase;margin-bottom:0.4rem;}
 .scenario-chips{display:flex;gap:0.4rem;flex-wrap:wrap;}
-.chip{font-size:12px;color:var(--muted);background:var(--bg);border:0.5px solid var(--border);border-radius:5px;padding:3px 9px;cursor:pointer;line-height:1.5;transition:all 0.12s;}
-.chip:hover{border-color:var(--border2);color:var(--ink);}
+.chip{
+  font-size:12px;color:var(--muted);background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:4px 10px;cursor:pointer;line-height:1.5;transition:border-color 0.12s,color 0.12s;
+}
+.chip:hover{border-color:var(--border-strong);color:var(--text);}
 
 /* Input */
-.chat-input-area{padding:1rem 1.5rem;border-top:0.5px solid var(--border);}
+.chat-input-area{padding:1rem 1.5rem;border-top:1px solid var(--border);}
 .input-row{display:flex;gap:0.6rem;align-items:flex-end;}
-textarea{flex:1;font-family:var(--sans);font-size:14px;color:var(--ink);background:var(--surface);border:0.5px solid var(--border);border-radius:8px;padding:0.6rem 0.85rem;resize:none;line-height:1.5;min-height:40px;max-height:110px;outline:none;transition:border-color 0.15s;}
-textarea:focus{border-color:var(--border2);}
-button.send{font-family:var(--mono);font-size:11px;letter-spacing:0.05em;background:var(--ink);color:var(--bg);border:none;border-radius:8px;padding:9px 16px;cursor:pointer;white-space:nowrap;transition:opacity 0.15s;flex-shrink:0;}
-button.send:hover{opacity:0.82;}
-button.send:disabled{opacity:0.35;cursor:not-allowed;}
+textarea{
+  flex:1;font-family:var(--sans);font-size:14px;color:var(--text);background:rgba(8,17,31,0.72);border:1px solid var(--border);border-radius:12px;padding:0.6rem 0.85rem;
+  resize:none;line-height:1.5;min-height:40px;max-height:110px;outline:none;transition:border-color 0.15s,box-shadow 0.15s;
+}
+textarea:focus{border-color:rgba(118,183,255,0.45);box-shadow:0 0 0 4px rgba(118,183,255,0.12);}
+button.send{
+  appearance:none;font-family:var(--mono);font-size:11px;letter-spacing:0.06em;font-weight:600;
+  border:1px solid var(--border-strong);background:linear-gradient(180deg,rgba(118,183,255,0.22),rgba(118,183,255,0.1));color:var(--text);
+  border-radius:12px;padding:9px 16px;cursor:pointer;white-space:nowrap;transition:transform 0.12s,opacity 0.15s;flex-shrink:0;
+}
+button.send:hover{transform:translateY(-1px);}
+button.send:disabled{opacity:0.35;cursor:not-allowed;transform:none;}
 
 /* Governance pane */
-.gov-pane{padding:1.5rem;background:var(--surface);display:flex;flex-direction:column;overflow-y:auto;}
-.gov-section-title{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--faint);text-transform:uppercase;margin-bottom:0.75rem;}
+.gov-pane{
+  padding:1.35rem 1.25rem;background:var(--panel-strong);
+  display:flex;flex-direction:column;overflow-y:auto;flex:1;min-height:0;box-shadow:var(--shadow);
+}
+.gov-section-title{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;color:var(--muted-2);text-transform:uppercase;font-weight:700;margin-bottom:0.65rem;}
 
-/* Status badge */
-.status-badge{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.08em;padding:5px 12px;border-radius:6px;margin-bottom:1.25rem;}
-.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.badge-idle{background:var(--bg);color:var(--faint);border:0.5px solid var(--border);}
-.badge-idle .status-dot{background:var(--faint);}
-.badge-pass{background:var(--green-bg);color:var(--green-text);border:0.5px solid var(--green-border);}
-.badge-pass .status-dot{background:var(--green-text);}
-.badge-stop{background:var(--red-bg);color:var(--red-text);border:0.5px solid var(--red-border);}
-.badge-stop .status-dot{background:var(--red-text);}
-.badge-revise{background:var(--amber-bg);color:var(--amber-text);border:0.5px solid var(--amber-border);}
-.badge-revise .status-dot{background:var(--amber-text);}
-.badge-ask{background:var(--blue-bg);color:var(--blue-text);border:0.5px solid var(--blue-border);}
-.badge-ask .status-dot{background:var(--blue-text);}
+/* Status badge (pill + dot, dashboard-style) */
+.status-badge{
+  display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;font-weight:700;
+  letter-spacing:0.08em;text-transform:uppercase;padding:6px 14px;border-radius:999px;margin-bottom:0.65rem;border:1px solid transparent;
+}
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.badge-idle{background:rgba(157,176,206,0.1);color:var(--muted);border-color:rgba(157,176,206,0.2);}
+.badge-idle .status-dot{background:var(--muted-2);}
+.badge-pass{background:rgba(57,217,138,0.12);color:var(--ok);border-color:rgba(57,217,138,0.28);}
+.badge-pass .status-dot{background:var(--ok);box-shadow:0 0 10px rgba(57,217,138,0.45);}
+.badge-stop{background:rgba(255,122,138,0.12);color:var(--bad);border-color:rgba(255,122,138,0.28);}
+.badge-stop .status-dot{background:var(--bad);box-shadow:0 0 10px rgba(255,122,138,0.45);}
+.badge-revise{background:rgba(243,201,105,0.12);color:var(--warn);border-color:rgba(243,201,105,0.28);}
+.badge-revise .status-dot{background:var(--warn);}
+.badge-ask{background:rgba(157,176,206,0.12);color:var(--muted);border-color:rgba(157,176,206,0.22);}
+.badge-ask .status-dot{background:var(--accent);}
+
+.gov-gloss{
+  font-size:12px;line-height:1.55;color:var(--muted);margin-bottom:1.15rem;padding:12px 14px;border-radius:14px;border:1px solid var(--border);background:rgba(0,0,0,0.18);
+}
 
 /* Gov fields */
 .gov-field{margin-bottom:1rem;}
-.gov-key{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:var(--faint);text-transform:uppercase;margin-bottom:3px;}
-.gov-val{font-size:13px;color:var(--ink);line-height:1.55;}
-.gov-val.mono{font-family:var(--mono);font-size:12px;}
+.gov-key{font-family:var(--mono);font-size:10px;letter-spacing:0.07em;color:var(--muted);text-transform:uppercase;font-weight:700;margin-bottom:5px;}
+.gov-val{font-size:13px;color:var(--text);line-height:1.55;}
+.gov-val.mono{font-family:var(--mono);font-size:12px;color:var(--muted);}
+.gov-val-note{font-size:11px;color:var(--muted-2);line-height:1.45;margin-top:5px;}
 
 /* Flag chips */
-.flag-chips{display:flex;flex-wrap:wrap;gap:4px;}
-.flag-chip{font-family:var(--mono);font-size:10px;background:var(--red-bg);color:var(--red-text);border:0.5px solid var(--red-border);border-radius:4px;padding:2px 7px;letter-spacing:0.02em;}
+.flag-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.flag-chip{
+  font-family:var(--mono);font-size:10px;font-weight:600;
+  background:rgba(255,122,138,0.12);color:var(--bad);border:1px solid rgba(255,122,138,0.25);border-radius:999px;padding:4px 10px;letter-spacing:0.04em;
+}
 
 /* Divider */
-.gov-divider{height:0.5px;background:var(--border);margin:0.25rem 0 1rem;}
+.gov-divider{height:1px;background:var(--border);margin:0.35rem 0 1rem;}
 
 /* Text boxes */
-.text-box{background:var(--bg);border:0.5px solid var(--border);border-radius:8px;padding:0.7rem 0.9rem;font-size:13px;color:var(--muted);line-height:1.7;}
-.text-box.struck{text-decoration:line-through;color:var(--faint);}
+.text-box{
+  background:rgba(0,0,0,0.22);border:1px solid var(--border);border-radius:12px;padding:0.75rem 0.95rem;font-size:13px;color:var(--muted);line-height:1.7;
+}
+.text-box.struck{text-decoration:line-through;color:var(--muted-2);}
 .text-box.italic{font-style:italic;}
 
 /* Waiting */
-.waiting{font-family:var(--mono);font-size:12px;color:var(--faint);text-align:center;padding:2.5rem 1rem;line-height:1.8;}
+.waiting{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:center;padding:2.5rem 1rem;line-height:1.8;}
 
 /* Spinner */
 .spinner{display:inline-block;width:13px;height:13px;border:2px solid var(--border);border-top-color:var(--muted);border-radius:50%;animation:spin 0.75s linear infinite;flex-shrink:0;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
 /* Bottom bar + footer */
-.bottom-bar{padding:0.75rem 0;border-top:0.5px solid var(--border);display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;}
-.settings-toggle{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:var(--faint);background:none;border:none;cursor:pointer;padding:0;text-transform:uppercase;}
-.settings-toggle:hover{color:var(--muted);}
-.url-input{font-family:var(--mono);font-size:12px;color:var(--ink);background:var(--surface);border:0.5px solid var(--border);border-radius:6px;padding:4px 9px;width:360px;outline:none;}
-.url-input:focus{border-color:var(--border2);}
-footer{padding:1.5rem 0;border-top:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.footer-mono{font-family:var(--mono);font-size:11px;color:var(--faint);}
+.bottom-bar{padding:0.75rem 0;border-top:1px solid var(--border);display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;}
+.settings-toggle{
+  font-family:var(--mono);font-size:10px;letter-spacing:0.06em;color:var(--muted);background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  border-radius:8px;cursor:pointer;padding:6px 10px;text-transform:uppercase;
+}
+.settings-toggle:hover{color:var(--text);border-color:var(--border-strong);}
+.url-input{font-family:var(--mono);font-size:12px;color:var(--text);background:rgba(8,17,31,0.72);border:1px solid var(--border);border-radius:10px;padding:8px 11px;width:360px;outline:none;}
+.url-input:focus{border-color:rgba(118,183,255,0.45);box-shadow:0 0 0 3px rgba(118,183,255,0.1);}
+footer{padding:1.5rem 0;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.footer-mono{font-family:var(--mono);font-size:11px;color:var(--muted-2);}
 .footer-link{font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;}
-.footer-link:hover{color:var(--ink);}
+.footer-link:hover{color:var(--accent);}
+
+/* Audit Evidence (dashboard-aligned) */
+.audit-section{
+  border-top:1px solid var(--border);
+  padding:1rem 1.1rem 1.25rem;
+  background:rgba(10,18,32,0.95);
+  flex-shrink:0;
+}
+.audit-head{margin-bottom:10px;}
+.audit-title{
+  margin:0 0 4px;font-size:0.95rem;font-weight:700;letter-spacing:-0.02em;color:var(--text);
+}
+.audit-sub{margin:0;font-size:0.78rem;color:var(--muted);line-height:1.45;}
+.audit-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.audit-toolbar button{
+  appearance:none;border:1px solid var(--border);background:linear-gradient(180deg,rgba(118,183,255,0.14),rgba(118,183,255,0.06));
+  color:var(--text);padding:7px 12px;border-radius:10px;font:inherit;font-size:0.76rem;font-weight:600;cursor:pointer;
+}
+.audit-toolbar button:hover{border-color:var(--border-strong);}
+.audit-status{font-size:0.76rem;color:var(--muted);}
+
+.pill{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:24px;padding:0.15rem 0.55rem;border-radius:999px;
+  font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;
+  border:1px solid transparent;white-space:nowrap;
+}
+.pill.ok{background:rgba(57,217,138,0.12);color:var(--ok);border-color:rgba(57,217,138,0.22);}
+.pill.warn{background:rgba(243,201,105,0.12);color:var(--warn);border-color:rgba(243,201,105,0.22);}
+.pill.bad{background:rgba(255,122,138,0.12);color:var(--bad);border-color:rgba(255,122,138,0.22);}
+.pill.neutral{background:rgba(157,176,206,0.1);color:var(--muted);border-color:rgba(157,176,206,0.16);}
+
+.outcome-PASS,.outcome-ADMIT,.outcome-CONTINUE{color:var(--ok);font-weight:700;}
+.outcome-SOFT_CORRECT{color:var(--muted);font-weight:700;}
+.outcome-FORCE_REVISE{color:var(--warn);font-weight:700;}
+.outcome-HARD_STOP,.outcome-STOP,.outcome-CONTAIN,.outcome-REFUSE{color:var(--bad);font-weight:700;}
+.outcome-CLARIFY{color:var(--warn);font-weight:700;}
+
+.audit-table-wrap{
+  max-height:200px;overflow:auto;border:1px solid var(--border);border-radius:12px;background:rgba(0,0,0,0.12);
+  margin-bottom:14px;
+}
+.audit-table-wrap table{width:100%;border-collapse:collapse;font-size:0.78rem;}
+.audit-table-wrap th,.audit-table-wrap td{
+  padding:8px 10px;text-align:left;border-bottom:1px solid rgba(147,178,222,0.12);vertical-align:top;
+}
+.audit-table-wrap thead th{
+  position:sticky;top:0;z-index:1;
+  background:rgba(13,23,40,0.97);color:var(--muted);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;
+}
+.audit-table-wrap tbody tr:hover td{background:rgba(255,255,255,0.03);}
+
+.verify-grid-mini{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;
+}
+@media(max-width:900px){
+  .verify-grid-mini{grid-template-columns:1fr;}
+}
+.verify-card-mini{
+  padding:12px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);min-height:92px;
+}
+.verify-card-mini h3{
+  margin:0 0 8px;font-size:0.68rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);font-weight:700;
+}
+.verify-body-mini{font-size:0.8rem;line-height:1.45;color:var(--text);word-break:break-word;}
+.verify-meta-mini{display:block;margin-top:6px;font-size:0.72rem;color:var(--muted);line-height:1.4;}
+.muted{color:var(--muted);font-size:0.78rem;}
 
 @media(max-width:740px){
   .split{grid-template-columns:1fr;}
-  .chat-pane{border-right:none;border-bottom:0.5px solid var(--border);}
+  .right-column{border-left:none;border-top:1px solid var(--border);}
   .chat-messages{max-height:300px;}
   .url-input{width:220px;}
 }
@@ -149,7 +272,7 @@ footer{padding:1.5rem 0;border-top:0.5px solid var(--border);display:flex;align-
 <div class="page">
 
 <header>
-  <a href="/aurora-lens.html" style="display:inline-block;margin-bottom:1rem;font-family:var(--sans);font-size:0.82rem;color:var(--muted);text-decoration:none;letter-spacing:0.03em;">← Aurora-Lens</a>
+  <a href="/aurora-lens.html" class="back-link">&larr; Aurora-Lens</a>
   <p class="eyebrow">Live governance demonstration</p>
   <h1>What the model said.<br><em>What the system allowed through.</em></h1>
   <p class="lede">Each message is evaluated before and after the model responds. The panel on the right shows exactly what the system decided, which flags fired, and what it stopped.</p>
@@ -183,6 +306,7 @@ footer{padding:1.5rem 0;border-top:0.5px solid var(--border);display:flex;align-
     </div>
   </div>
 
+  <div class="right-column">
   <!-- Governance panel -->
   <div class="gov-pane">
     <p class="gov-section-title">Governance decision</p>
@@ -190,6 +314,7 @@ footer{padding:1.5rem 0;border-top:0.5px solid var(--border);display:flex;align-
       <span class="status-dot"></span>
       <span id="status-text">Waiting</span>
     </span>
+    <p id="gov-outcome-gloss" class="gov-gloss" style="display:none;" aria-live="polite"></p>
 
     <div id="gov-detail" style="display:none;">
 
@@ -203,8 +328,9 @@ footer{padding:1.5rem 0;border-top:0.5px solid var(--border);display:flex;align-
       <div id="sec-meta">
         <div class="gov-divider"></div>
         <div id="sec-upstream-outcome" class="gov-field" style="display:none;">
-          <p class="gov-key">Upstream outcome</p>
+          <p class="gov-key">Release path</p>
           <p class="gov-val mono" id="gov-upstream-outcome-val"></p>
+          <p id="gov-timing-gloss" class="gov-val-note" style="display:none;"></p>
         </div>
         <div id="sec-domain" style="display:none;" class="gov-field">
           <p class="gov-key">Domain</p>
@@ -217,6 +343,7 @@ footer{padding:1.5rem 0;border-top:0.5px solid var(--border);display:flex;align-
         <div class="gov-field">
           <p class="gov-key">LLM called</p>
           <p class="gov-val mono" id="gov-llm"></p>
+          <p id="gov-llm-note" class="gov-val-note" style="display:none;"></p>
         </div>
         <div id="sec-escalation" style="display:none;" class="gov-field">
           <p class="gov-key">Escalation target</p>
@@ -248,12 +375,54 @@ footer{padding:1.5rem 0;border-top:0.5px solid var(--border);display:flex;align-
         <div class="gov-divider"></div>
         <div class="gov-field">
           <p class="gov-key" id="gov-original-title">Model output</p>
+          <p id="gov-original-note" class="gov-val-note" style="display:none;"></p>
           <div class="text-box" id="gov-original"></div>
         </div>
       </div>
 
     </div>
   </div>
+
+  <section class="audit-section" id="audit-evidence" aria-label="Audit evidence">
+    <div class="audit-head">
+      <h2 class="audit-title">Audit evidence</h2>
+      <p class="audit-sub">Each chat turn is logged to the same audit stream as the forensics console. Recent rows and verification are read live from the proxy (not inferred from the chat response).</p>
+    </div>
+    <div class="audit-toolbar">
+      <button type="button" id="audit-refresh-btn" onclick="loadAuditEvidence()">Refresh</button>
+      <span class="audit-status" id="audit-load-status" aria-live="polite">Loading audit&hellip;</span>
+    </div>
+    <div class="audit-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Outcome</th>
+            <th>Evidence</th>
+            <th>Constraints</th>
+          </tr>
+        </thead>
+        <tbody id="audit-recent-tbody">
+          <tr><td colspan="4" class="muted" style="padding:12px;">&mdash;</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="verify-grid-mini">
+      <article class="verify-card-mini">
+        <h3>Integrity</h3>
+        <div id="audit-v-integrity" class="verify-body-mini muted">Loading&hellip;</div>
+      </article>
+      <article class="verify-card-mini">
+        <h3>Extended verification</h3>
+        <div id="audit-v-extended" class="verify-body-mini muted">Loading&hellip;</div>
+      </article>
+      <article class="verify-card-mini">
+        <h3>Evidence completeness</h3>
+        <div id="audit-v-evidence" class="verify-body-mini muted">Loading&hellip;</div>
+      </article>
+    </div>
+  </section>
+  </div><!-- .right-column -->
 
 </div><!-- .split -->
 
@@ -321,6 +490,183 @@ function newSessionId() {
 function proxyBase() {
   const v = document.getElementById('proxy-url').value.trim().replace(/\/$/, '');
   return v || PROXY;
+}
+
+// ── Audit (same endpoints as forensics dashboard) ─────────────────────
+function esc(s) {
+  if (s == null || s === '') return '';
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function dashFetch(url) {
+  const sep = url.indexOf('?') >= 0 ? '&' : '?';
+  return fetch(url + sep + '_ts=' + Date.now(), { cache: 'no-store' });
+}
+
+function formatAuditTime(ts) {
+  if (ts == null || ts === '') return '—';
+  const d = new Date(ts);
+  if (!isNaN(d.getTime())) return d.toLocaleString();
+  return String(ts);
+}
+
+function outcomeClassName(o) {
+  if (!o) return '';
+  return 'outcome-' + String(o).replace(/[^A-Z_]/gi, '');
+}
+
+function renderAuditRecentFromResponse(d) {
+  const tbody = document.getElementById('audit-recent-tbody');
+  const statusEl = document.getElementById('audit-load-status');
+  const rows = d.operator_rows || [];
+  const backend = d.backend || '';
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" class="muted" style="padding:12px;">No rows yet.</td></tr>';
+    statusEl.textContent = '0 row(s) · backend=' + (backend || '?');
+    return;
+  }
+  const slice = rows.slice(0, 5);
+  let html = '';
+  slice.forEach((row) => {
+    const oc = row.outcome || row.ledger_op || '';
+    const ocn = outcomeClassName(oc);
+    const ts = formatAuditTime(row.timestamp);
+    let ev = '—';
+    if (row.evidence_audit_status) {
+      const cl = row.evidence_audit_status === 'complete' ? 'ok' : 'warn';
+      ev = '<span class="pill ' + cl + '">' + esc(String(row.evidence_audit_status)) + '</span>';
+    } else if (row.has_chain_of_custody) {
+      ev = '<span class="pill neutral">?</span>';
+    }
+    const cons = (row.constraints && row.constraints.length) ? esc(row.constraints.join(', ')) : '—';
+    html += '<tr><td>' + esc(ts) + '</td><td><span class="' + esc(ocn) + '">' + esc(String(oc || '—')) + '</span></td><td>' + ev + '</td><td>' + cons + '</td></tr>';
+  });
+  tbody.innerHTML = html;
+  statusEl.textContent = 'Showing ' + String(slice.length) + ' of ' + String(rows.length) + ' · backend=' + (backend || '?');
+}
+
+function renderAuditVerifyFromResponse(d) {
+  const intEl = document.getElementById('audit-v-integrity');
+  const extEl = document.getElementById('audit-v-extended');
+  const evEl = document.getElementById('audit-v-evidence');
+  const cryptoOk = d.verified === true;
+  const full = d.fully_verified === true;
+  const provSum = d.evidence_audit_status_summary || '';
+  const unanchored = d.reason === 'unanchored_slice';
+  const backend = d.backend || '';
+
+  let chainPill = '';
+  if (d.chain_verified === true) chainPill = '<span class="pill ok">Chain intact</span>';
+  else if (d.chain_verified === false) chainPill = '<span class="pill bad">Chain failed</span>';
+
+  let hmacPill = '';
+  if (backend === 'ledger') {
+    if (d.hmac_checked) hmacPill = d.hmac_verified === true ? '<span class="pill ok">HMAC ok</span>' : '<span class="pill bad">HMAC failed</span>';
+    else hmacPill = '<span class="pill neutral">HMAC n/a</span>';
+  } else {
+    if (d.hmac_verified === true) hmacPill = '<span class="pill ok">HMAC ok</span>';
+    else if (d.hmac_verified === false) hmacPill = '<span class="pill bad">HMAC failed</span>';
+  }
+
+  let headPill = '';
+  if (cryptoOk) headPill = '<span class="pill ok">Crypto succeeded</span>';
+  else if (unanchored) headPill = '<span class="pill warn">Not fully verified</span>';
+  else headPill = '<span class="pill bad">Crypto failed</span>';
+
+  let intHtml = headPill + ' ' + chainPill + ' ' + hmacPill;
+  intHtml += '<span class="verify-meta-mini">' + esc(backend) + ' · entries checked ' + esc(String(d.entries != null ? d.entries : '?')) + '</span>';
+  const intLines = [];
+  if (d.reason) intLines.push('Reason: ' + esc(String(d.reason)));
+  if (d.first_chain_failure_line != null) {
+    intLines.push('First chain break at line ' + esc(String(d.first_chain_failure_line)) + (d.first_chain_reason ? ': ' + esc(String(d.first_chain_reason)) : ''));
+  }
+  if (d.first_hmac_failure_line != null) {
+    intLines.push('First HMAC break at line ' + esc(String(d.first_hmac_failure_line)) + (d.first_hmac_reason ? ': ' + esc(String(d.first_hmac_reason)) : ''));
+  }
+  if (intLines.length) intHtml += '<div style="margin-top:8px;font-size:0.76rem;color:var(--muted);line-height:1.45">' + intLines.join('<br/>') + '</div>';
+  intEl.innerHTML = intHtml;
+
+  const wv = d.what_was_verified;
+  const extParts = [];
+  if (typeof d.fully_verified === 'boolean') {
+    extParts.push(full ? '<span class="pill ok">Extended pass</span>' : '<span class="pill warn">Extended pending / fail</span>');
+  }
+  if (wv && wv.pef_linkage) {
+    const pl = wv.pef_linkage;
+    const plOk = pl.ok !== false;
+    extParts.push('<span class="pill ' + (plOk ? 'ok' : 'bad') + '">PEF linkage</span> · pairs ' + esc(String(pl.pairs_checked != null ? pl.pairs_checked : '?')) + (plOk ? '' : ' — failed'));
+  }
+  if (wv && wv.pef_state_hash_replay) {
+    const sh = wv.pef_state_hash_replay;
+    const shOk = sh.ok !== false;
+    extParts.push('<span class="pill ' + (shOk ? 'ok' : 'bad') + '">State hash replay</span> · n=' + esc(String(sh.entries_checked != null ? sh.entries_checked : '?')) + (shOk ? '' : ' — failed'));
+  }
+  if (unanchored && d.reason_detail) extParts.push('<span class="verify-meta-mini">' + esc(String(d.reason_detail)) + '</span>');
+  if (d.verify_note) extParts.push('<span class="verify-meta-mini">' + esc(String(d.verify_note)) + '</span>');
+  extEl.innerHTML = extParts.length ? extParts.join('<br/>') : '<span class="muted">No extended checks in this response.</span>';
+
+  const evParts = [];
+  if (provSum) evParts.push('Status summary: ' + esc(provSum));
+  if (wv && wv.provenance_chain_of_custody && wv.provenance_chain_of_custody.counts) {
+    const c = wv.provenance_chain_of_custody.counts;
+    evParts.push('Chain of custody · rows with block ' + esc(String(c.rows_with_block)) + ' · skipped (no block) ' + esc(String(c.rows_skipped_no_block)));
+  }
+  evEl.innerHTML = evParts.length ? evParts.join('<br/>') : '<span class="muted">No evidence summary in this response.</span>';
+}
+
+async function loadAuditEvidence() {
+  const base = proxyBase();
+  const statusEl = document.getElementById('audit-load-status');
+  const tbody = document.getElementById('audit-recent-tbody');
+  const intEl = document.getElementById('audit-v-integrity');
+  const extEl = document.getElementById('audit-v-extended');
+  const evEl = document.getElementById('audit-v-evidence');
+  statusEl.textContent = 'Loading…';
+  try {
+    const [rRecent, rVerify] = await Promise.all([
+      dashFetch(base + '/v1/audit/recent?n=30'),
+      dashFetch(base + '/v1/audit/verify?n=500'),
+    ]);
+
+    if (rRecent.status === 404) {
+      tbody.innerHTML = '<tr><td colspan="4" class="muted" style="padding:12px;">Audit not configured.</td></tr>';
+      statusEl.textContent = 'Audit not configured.';
+    } else if (!rRecent.ok) {
+      const t = await rRecent.text().catch(() => '');
+      tbody.innerHTML = '<tr><td colspan="4" class="muted" style="padding:12px;">HTTP ' + esc(String(rRecent.status)) + '</td></tr>';
+      statusEl.textContent = 'Recent: error ' + rRecent.status;
+    } else {
+      const dRecent = await rRecent.json();
+      renderAuditRecentFromResponse(dRecent);
+    }
+
+    if (rVerify.status === 404) {
+      intEl.innerHTML = '<span class="pill neutral">n/a</span> Audit log not configured.';
+      extEl.textContent = '';
+      evEl.textContent = '';
+    } else if (rVerify.status === 400) {
+      const j = await rVerify.json().catch(() => ({}));
+      const em = j.error && (j.error.user_message || j.error.message) ? (j.error.user_message || j.error.message) : rVerify.statusText;
+      intEl.innerHTML = '<span class="pill warn">verify skipped</span> ' + esc(em);
+      extEl.textContent = '';
+      evEl.textContent = '';
+    } else if (!rVerify.ok) {
+      intEl.innerHTML = '<span class="pill bad">HTTP ' + esc(String(rVerify.status)) + '</span>';
+      extEl.textContent = '';
+      evEl.textContent = '';
+    } else {
+      const dVerify = await rVerify.json();
+      renderAuditVerifyFromResponse(dVerify);
+    }
+  } catch (e) {
+    statusEl.textContent = esc(e.message);
+    tbody.innerHTML = '<tr><td colspan="4" class="muted" style="padding:12px;">' + esc(e.message) + '</td></tr>';
+    intEl.innerHTML = '<span class="pill bad">error</span> ' + esc(e.message);
+    extEl.textContent = '';
+    evEl.textContent = '';
+  }
 }
 
 // ── Domain ────────────────────────────────────────────────────────────
@@ -408,6 +754,7 @@ async function sendMessage() {
     addMsg('assistant', content, msgClass(action), aurora);
     conversation.push({ role: 'assistant', content });
     updatePanel(aurora, action);
+    loadAuditEvidence();
 
   } catch (err) {
     removeEl(typingId);
@@ -462,7 +809,7 @@ function addTyping() {
   wrap.id = id;
   wrap.innerHTML = '<div class="msg-bubble" style="display:flex;align-items:center;gap:8px;">' +
     '<span class="spinner"></span>' +
-    '<span style="font-size:13px;color:var(--faint)">Evaluating\u2026</span></div>';
+    '<span style="font-size:13px;color:var(--muted-2)">Evaluating\u2026</span></div>';
   const c = document.getElementById('messages');
   c.appendChild(wrap);
   c.scrollTop = c.scrollHeight;
@@ -501,6 +848,32 @@ function upstreamOutcomeLabel(g, llmCalled, hasRaw) {
   return 'Blocked after generation';
 }
 
+/** Plain-language gloss for the governance code (presentation only; matches forensics legend). */
+const OUTCOME_GLOSS = {
+  PASS: 'Output passed admissibility checks and was released as shown in the transcript.',
+  SOFT_CORRECT: 'A minor correction was applied; the chat shows the admitted wording.',
+  FORCE_REVISE: 'Governance materially revised or replaced the candidate before release.',
+  HARD_STOP: 'The candidate was not admitted; consequence-bearing output from this path was withheld.',
+  CONTAIN: 'Release withheld pending clarification or containment.',
+  CLARIFY: 'Clarification was requested before proceeding.',
+};
+
+function releasePathNote(g, llmCalled, hasRaw) {
+  if (g === 'PASS' || g === 'SOFT_CORRECT') {
+    return 'Final text for this turn cleared admissibility (released to the transcript).';
+  }
+  if (!llmCalled && !hasRaw) {
+    return 'Governance intervened before an upstream candidate was available for this turn.';
+  }
+  return 'An upstream candidate existed; governance acted before user-visible release.';
+}
+
+function llmCalledNote(llmCalled) {
+  return llmCalled
+    ? 'Yes — upstream produced a candidate evaluated by Lens on this turn.'
+    : 'No upstream call on this governance path.';
+}
+
 function updatePanel(aurora, action) {
   /** Authoritative intervention name: aurora.governance is normally a string from the API; tolerate object shapes. */
   const outcome =
@@ -517,6 +890,9 @@ function updatePanel(aurora, action) {
   const badge = document.getElementById('status-badge');
   badge.className = 'status-badge ' + badgeClass(g);
   document.getElementById('status-text').textContent = actionLabel(g);
+  const glossEl = document.getElementById('gov-outcome-gloss');
+  glossEl.textContent = OUTCOME_GLOSS[g] || ('Governance outcome ' + String(g) + ' — see operator documentation for semantics.');
+  glossEl.style.display = 'block';
   document.getElementById('gov-detail').style.display = 'block';
 
   const flags = aurora.flags || [];
@@ -546,6 +922,9 @@ function updatePanel(aurora, action) {
     llmCalled = fe?.attempted_action !== 'call_upstream';
   }
   document.getElementById('gov-llm').textContent = llmCalled ? 'Yes' : 'No';
+  const llmNote = document.getElementById('gov-llm-note');
+  llmNote.textContent = llmCalledNote(llmCalled);
+  llmNote.style.display = 'block';
 
   const raw = aurora.original_response;
   const hasRaw = raw != null && String(raw).length > 0;
@@ -559,6 +938,9 @@ function updatePanel(aurora, action) {
 
   const timing = upstreamOutcomeLabel(g, llmCalled, hasRaw);
   document.getElementById('gov-upstream-outcome-val').textContent = timing;
+  const timingNote = document.getElementById('gov-timing-gloss');
+  timingNote.textContent = releasePathNote(g, llmCalled, hasRaw);
+  timingNote.style.display = 'block';
   show('sec-upstream-outcome', true);
 
   show('sec-escalation', !!fe?.escalation_target);
@@ -570,6 +952,7 @@ function updatePanel(aurora, action) {
   if (aurora.rationale) document.getElementById('gov-rationale').textContent = aurora.rationale;
 
   show('sec-original', hasRaw);
+  const origNote = document.getElementById('gov-original-note');
   if (hasRaw) {
     document.getElementById('gov-original').textContent = raw;
     const blocked = isBlockedUpstreamPresentation(g);
@@ -577,6 +960,20 @@ function updatePanel(aurora, action) {
       ? 'Model output — blocked'
       : 'Model output';
     document.getElementById('gov-original').className = blocked ? 'text-box struck' : 'text-box';
+    if (blocked) {
+      origNote.textContent = 'Raw upstream candidate — not admitted on this path.';
+      origNote.style.display = 'block';
+    } else if (g === 'FORCE_REVISE') {
+      origNote.textContent = 'Superseded by the governed response shown in the transcript.';
+      origNote.style.display = 'block';
+    } else if (g === 'SOFT_CORRECT') {
+      origNote.textContent = 'Compared to the chat bubble, this was the pre-correction candidate.';
+      origNote.style.display = 'block';
+    } else {
+      origNote.style.display = 'none';
+    }
+  } else {
+    origNote.style.display = 'none';
   }
 }
 
@@ -602,6 +999,10 @@ function badgeClass(action) {
 function resetPanel() {
   document.getElementById('status-badge').className = 'status-badge badge-idle';
   document.getElementById('status-text').textContent = 'Waiting';
+  document.getElementById('gov-outcome-gloss').style.display = 'none';
+  document.getElementById('gov-timing-gloss').style.display = 'none';
+  document.getElementById('gov-llm-note').style.display = 'none';
+  document.getElementById('gov-original-note').style.display = 'none';
   document.getElementById('gov-detail').style.display = 'none';
 }
 
@@ -616,6 +1017,11 @@ function toggleSettings() {
 
 // Init
 renderChips('general');
+loadAuditEvidence();
+(function () {
+  const pu = document.getElementById('proxy-url');
+  if (pu) pu.addEventListener('change', () => loadAuditEvidence());
+})();
 </script>
  <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b0d0fd61319d4784b8c1ae9f3cd37be4"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
