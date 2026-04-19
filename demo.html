@@ -830,9 +830,10 @@
       letter-spacing: 0.05em;
       border: 1px solid transparent;
     }
-    .pill.ok   { background: rgba(52,211,153,0.12); color: var(--ok);   border-color: rgba(52,211,153,0.25); }
-    .pill.warn { background: rgba(251,191,36,0.12);  color: var(--warn); border-color: rgba(251,191,36,0.25); }
-    .pill.bad  { background: rgba(248,113,113,0.12); color: var(--bad);  border-color: rgba(248,113,113,0.25); }
+    .pill.ok       { background: rgba(52,211,153,0.12); color: var(--ok);   border-color: rgba(52,211,153,0.25); }
+    .pill.warn     { background: rgba(251,191,36,0.12);  color: var(--warn); border-color: rgba(251,191,36,0.25); }
+    .pill.bad      { background: rgba(248,113,113,0.12); color: var(--bad);  border-color: rgba(248,113,113,0.25); }
+    .pill.neutral  { background: rgba(120,170,230,0.08); color: var(--muted); border-color: var(--border); }
 
     .api-links {
       display: flex;
@@ -1492,22 +1493,108 @@
     }
 
     async function loadVerify() {
+      const intEl = document.getElementById('verify-integrity');
+      const extEl = document.getElementById('verify-extended');
+      const evEl = document.getElementById('verify-evidence');
+      function clearVerifyStyles() {
+        [intEl, extEl, evEl].forEach(function(el) {
+          el.style.color = '';
+        });
+      }
       try {
-        const r = await dashFetch(base + '/v1/audit/verify');
+        const r = await dashFetch(base + '/v1/audit/verify?n=500');
+        if (r.status === 404) {
+          intEl.textContent = 'Audit log not configured.';
+          intEl.style.color = 'var(--muted-2)';
+          extEl.textContent = '';
+          evEl.textContent = '';
+          return;
+        }
+        if (r.status === 400) {
+          const j = await r.json().catch(function() { return {}; });
+          const em = j.error && (j.error.user_message || j.error.message) ? (j.error.user_message || j.error.message) : r.statusText;
+          intEl.textContent = 'Verify skipped: ' + em;
+          intEl.style.color = 'var(--warn)';
+          extEl.textContent = '';
+          evEl.textContent = '';
+          return;
+        }
         if (!r.ok) throw new Error('HTTP ' + r.status);
         const d = await r.json();
-        const v = d.verification || d;
-        document.getElementById('verify-integrity').textContent  = v.chain_valid === true ? '✓ Chain intact' : (v.chain_valid === false ? '✗ Chain broken' : '—');
-        document.getElementById('verify-integrity').style.color  = v.chain_valid === true ? 'var(--ok)' : (v.chain_valid === false ? 'var(--bad)' : 'var(--muted)');
-        document.getElementById('verify-extended').textContent   = v.extended_valid != null ? (v.extended_valid ? '✓ Valid' : '✗ Invalid') : '—';
-        document.getElementById('verify-extended').style.color   = v.extended_valid === true ? 'var(--ok)' : (v.extended_valid === false ? 'var(--bad)' : 'var(--muted)');
-        document.getElementById('verify-evidence').textContent   = v.evidence_complete != null ? (v.evidence_complete ? '✓ Complete' : '⚠ Incomplete') : '—';
-        document.getElementById('verify-evidence').style.color   = v.evidence_complete === true ? 'var(--ok)' : (v.evidence_complete === false ? 'var(--warn)' : 'var(--muted)');
+        const nested = d.verification && typeof d.verification === 'object' ? d.verification : {};
+        const chainVerified = d.chain_verified != null ? d.chain_verified : nested.chain_valid;
+        const cryptoOk = d.verified === true || nested.verified === true;
+        const fullyVerified = d.fully_verified != null ? d.fully_verified : nested.extended_valid;
+        const unanchored = d.reason === 'unanchored_slice';
+        const backend = d.backend || nested.backend || '';
+        const provSum = d.evidence_audit_status_summary || nested.evidence_audit_status_summary || '';
+        const wv = d.what_was_verified || nested.what_was_verified;
+
+        clearVerifyStyles();
+
+        // Integrity: match /v1/audit/verify payload (chain_verified, verified, HMAC)
+        let chainPill = '';
+        if (chainVerified === true) chainPill = '<span class="pill ok">Chain intact</span>';
+        else if (chainVerified === false) chainPill = '<span class="pill bad">Chain failed</span>';
+        else chainPill = '<span class="pill neutral">Chain —</span>';
+
+        let hmacPill = '';
+        if (backend === 'ledger') {
+          if (d.hmac_checked) hmacPill = d.hmac_verified === true ? '<span class="pill ok">HMAC ok</span>' : '<span class="pill bad">HMAC failed</span>';
+          else hmacPill = '<span class="pill neutral">HMAC n/a</span>';
+        } else {
+          if (d.hmac_verified === true) hmacPill = '<span class="pill ok">HMAC ok</span>';
+          else if (d.hmac_verified === false) hmacPill = '<span class="pill bad">HMAC failed</span>';
+          else hmacPill = '<span class="pill neutral">HMAC —</span>';
+        }
+
+        let headPill = '';
+        if (cryptoOk) headPill = '<span class="pill ok">Crypto ok</span>';
+        else if (unanchored) headPill = '<span class="pill warn">Not fully verified</span>';
+        else headPill = '<span class="pill bad">Crypto failed</span>';
+
+        let intHtml = headPill + ' ' + chainPill + ' ' + hmacPill;
+        intHtml += '<div style="margin-top:8px;font-size:0.78rem;color:var(--muted);line-height:1.45">' + esc(backend) + ' · entries ' + esc(String(d.entries != null ? d.entries : '?')) + '</div>';
+        const intLines = [];
+        if (d.reason) intLines.push('Reason: ' + esc(String(d.reason)));
+        if (d.first_chain_failure_line != null) intLines.push('First chain break at line ' + esc(String(d.first_chain_failure_line)) + (d.first_chain_reason ? ': ' + esc(String(d.first_chain_reason)) : ''));
+        if (d.first_hmac_failure_line != null) intLines.push('First HMAC break at line ' + esc(String(d.first_hmac_failure_line)) + (d.first_hmac_reason ? ': ' + esc(String(d.first_hmac_reason)) : ''));
+        if (intLines.length) intHtml += '<div style="margin-top:8px;font-size:0.76rem;color:var(--muted-2);line-height:1.45">' + intLines.join('<br/>') + '</div>';
+        intEl.innerHTML = intHtml;
+
+        // Extended: fully_verified + what_was_verified (PEF, etc.)
+        const extParts = [];
+        if (typeof fullyVerified === 'boolean') extParts.push(fullyVerified ? '<span class="pill ok">Extended pass</span>' : '<span class="pill warn">Extended pending / fail</span>');
+        if (wv && wv.pef_linkage) {
+          const pl = wv.pef_linkage;
+          const plOk = pl.ok !== false;
+          extParts.push('<span class="pill ' + (plOk ? 'ok' : 'bad') + '">PEF linkage</span> · pairs ' + esc(String(pl.pairs_checked != null ? pl.pairs_checked : '?')) + (plOk ? '' : ' — failed'));
+        }
+        if (wv && wv.pef_state_hash_replay) {
+          const sh = wv.pef_state_hash_replay;
+          const shOk = sh.ok !== false;
+          extParts.push('<span class="pill ' + (shOk ? 'ok' : 'bad') + '">State hash replay</span> · n=' + esc(String(sh.entries_checked != null ? sh.entries_checked : '?')) + (shOk ? '' : ' — failed'));
+        }
+        if (unanchored && d.reason_detail) extParts.push('<span style="font-size:0.78rem;color:var(--muted)">' + esc(String(d.reason_detail)) + '</span>');
+        if (d.verify_note) extParts.push('<span style="font-size:0.78rem;color:var(--muted)">' + esc(String(d.verify_note)) + '</span>');
+        extEl.innerHTML = extParts.length ? extParts.join('<br/>') : '<span style="color:var(--muted)">No extended checks in this response.</span>';
+
+        // Evidence completeness
+        const evParts = [];
+        if (provSum) evParts.push('<span style="color:var(--text)">' + esc(provSum) + '</span>');
+        if (wv && wv.provenance_chain_of_custody && wv.provenance_chain_of_custody.counts) {
+          const c = wv.provenance_chain_of_custody.counts;
+          evParts.push('Rows with block ' + esc(String(c.rows_with_block)) + ' · skipped (no block) ' + esc(String(c.rows_skipped_no_block)));
+        }
+        const evComplete = nested.evidence_complete;
+        if (evComplete === true) evParts.unshift('<span class="pill ok">Complete</span>');
+        else if (evComplete === false) evParts.unshift('<span class="pill warn">Incomplete</span>');
+        evEl.innerHTML = evParts.length ? evParts.join('<br/>') : '<span style="color:var(--muted)">No evidence summary in this response.</span>';
       } catch(e) {
-        ['verify-integrity','verify-extended','verify-evidence'].forEach(id => {
-          document.getElementById(id).textContent = 'unavailable';
-          document.getElementById(id).style.color = 'var(--muted-2)';
-        });
+        intEl.textContent = 'Error: ' + e.message;
+        intEl.style.color = 'var(--bad)';
+        extEl.textContent = '';
+        evEl.textContent = '';
       }
     }
 
@@ -1534,7 +1621,12 @@
 
         // api links
         ['recent','verify','health','metrics'].forEach(function(k) {
-          const paths = { recent: '/v1/audit/recent', verify: '/v1/audit/verify', health: '/health', metrics: '/metrics' };
+          const paths = {
+            recent: '/v1/audit/recent?n=20',
+            verify: '/v1/audit/verify?n=500',
+            health: '/health',
+            metrics: '/metrics'
+          };
           const el = document.getElementById('link-' + k);
           if (el) el.href = base + paths[k];
         });
