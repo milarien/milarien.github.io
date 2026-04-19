@@ -4,427 +4,741 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/png" href="/logo.png">
-  <meta name="application-name" content="Aurora Lens Live Demo">
-  <title>Aurora Lens — Live Governance Demo</title>
+  <title>Aurora Lens — Try It</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #08111f;
-      --bg-2: #0d1728;
-      --panel: rgba(14, 24, 40, 0.82);
-      --panel-strong: rgba(18, 30, 49, 0.96);
-      --panel-soft: rgba(255,255,255,0.03);
-      --border: rgba(147, 178, 222, 0.18);
-      --border-strong: rgba(147, 178, 222, 0.28);
-      --text: #eef4ff;
-      --muted: #9db0ce;
-      --muted-2: #7889a7;
-      --accent: #76b7ff;
-      --accent-2: #9f7aea;
-      --ok: #39d98a;
-      --warn: #f3c969;
-      --bad: #ff7a8a;
-      --shadow: 0 18px 48px rgba(0,0,0,0.28);
-      --radius: 16px;
-      --radius-sm: 12px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      --sans: Inter, Segoe UI, system-ui, sans-serif;
+      --bg:        #06101e;
+      --surface:   #0b1929;
+      --surface-2: #0f1f30;
+      --border:    rgba(120,170,230,0.14);
+      --border-hi: rgba(120,170,230,0.28);
+      --text:      #ddeeff;
+      --muted:     #7a9bbf;
+      --muted-2:   #4d6a88;
+      --accent:    #58b4ff;
+      --accent-2:  #a78bfa;
+      --ok:        #34d399;
+      --warn:      #fbbf24;
+      --bad:       #f87171;
+      --mono:      'DM Mono', ui-monospace, monospace;
+      --sans:      'DM Sans', system-ui, sans-serif;
+      --display:   'Syne', system-ui, sans-serif;
+      --r:         14px;
     }
 
-    * { box-sizing: border-box; }
-    html { color-scheme: dark; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { color-scheme: dark; scroll-behavior: smooth; }
+
     body {
       margin: 0;
       font-family: var(--sans);
-      min-height: 100vh;
+      background: var(--bg);
       color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(118,183,255,0.14), transparent 28%),
-        radial-gradient(circle at top right, rgba(159,122,234,0.12), transparent 26%),
-        linear-gradient(180deg, #091220 0%, #070d17 100%);
-      line-height: 1.5;
+      min-height: 100vh;
+      line-height: 1.6;
     }
 
-    .shell {
-      max-width: 1380px;
-      margin: 0 auto;
-      padding: 28px 20px 48px;
-    }
-
-    /* ── STATUS BANNER ─────────────────────────────────────────────────── */
-    .status-banner {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      padding: 24px 28px;
-      border-radius: 20px;
-      border: 2px solid var(--border);
-      margin-bottom: 14px;
-      background: rgba(157,176,206,0.05);
-      transition: background 0.35s ease, border-color 0.35s ease;
-    }
-    .status-banner--ok   { background: rgba(57,217,138,0.09);  border-color: rgba(57,217,138,0.38); }
-    .status-banner--warn { background: rgba(243,201,105,0.09); border-color: rgba(243,201,105,0.38); }
-    .status-banner--bad  { background: rgba(255,122,138,0.09); border-color: rgba(255,122,138,0.38); }
-
-    .status-dot {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      background: var(--muted);
-      transition: background 0.35s ease, box-shadow 0.35s ease;
-    }
-    .status-banner--ok   .status-dot { background: var(--ok);   box-shadow: 0 0 16px rgba(57,217,138,0.7); }
-    .status-banner--warn .status-dot { background: var(--warn); box-shadow: 0 0 16px rgba(243,201,105,0.7); }
-    .status-banner--bad  .status-dot { background: var(--bad);  box-shadow: 0 0 16px rgba(255,122,138,0.7); }
-
-    .status-banner-main { flex: 1; min-width: 0; }
-
-    .status-banner-headline {
-      font-size: 1.25rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      line-height: 1.15;
-      color: var(--muted);
-      transition: color 0.35s ease;
-    }
-    .status-banner--ok   .status-banner-headline { color: var(--ok); }
-    .status-banner--warn .status-banner-headline { color: var(--warn); }
-    .status-banner--bad  .status-banner-headline { color: var(--bad); }
-
-    .status-banner-sub {
-      margin-top: 3px;
-      font-size: 0.83rem;
-      color: var(--muted);
-    }
-
-    .status-banner-kv {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px 20px;
-      font-size: 0.79rem;
-      color: var(--muted);
-      align-self: center;
-    }
-    .status-banner-kv b { color: var(--text); font-weight: 600; }
-
-    /* ── HERO (slim strip) ─────────────────────────────────────────────── */
-    .hero {
-      position: relative;
-      overflow: hidden;
-      padding: 16px 24px;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      background: linear-gradient(135deg, rgba(118,183,255,0.06), rgba(159,122,234,0.04) 42%, rgba(8,17,31,0.3) 100%), var(--panel-strong);
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .hero::after {
-      content: "";
-      position: absolute;
-      inset: auto -8% -60% auto;
-      width: 220px;
-      height: 220px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(118,183,255,0.1), transparent 65%);
+    /* ── NOISE TEXTURE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      background-size: 180px;
       pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
     }
 
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 5px 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 0.76rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      font-weight: 700;
-      flex-shrink: 0;
+    /* ── AMBIENT GLOW ── */
+    .glow-a, .glow-b {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(90px);
+    }
+    .glow-a {
+      width: 500px; height: 500px;
+      top: -120px; left: -80px;
+      background: radial-gradient(circle, rgba(88,180,255,0.08), transparent 70%);
+    }
+    .glow-b {
+      width: 400px; height: 400px;
+      bottom: -60px; right: -60px;
+      background: radial-gradient(circle, rgba(167,139,250,0.07), transparent 70%);
     }
 
-    .hero-tagline {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.9rem;
+    /* ── SHELL ── */
+    .shell {
+      position: relative;
+      z-index: 1;
+      max-width: 940px;
+      margin: 0 auto;
+      padding: 36px 20px 64px;
     }
 
-    /* ── LAYOUT ────────────────────────────────────────────────────────── */
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 18px;
-    }
-
-    .grid-2, .grid-3 { display: grid; gap: 18px; }
-    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-
-    .card, details.panel {
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--panel);
-      backdrop-filter: blur(12px);
-      box-shadow: var(--shadow);
-    }
-
-    .card { padding: 18px; }
-
-    .card-header {
+    /* ── HEADER ── */
+    header {
+      margin-bottom: 36px;
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 16px;
-      margin-bottom: 14px;
+      flex-direction: column;
+      gap: 10px;
     }
 
-    .card-title {
-      margin: 0;
-      font-size: 1.02rem;
-      letter-spacing: -0.01em;
-    }
-
-    .card-subtitle {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 0.85rem;
-    }
-
-    .stack { display: grid; gap: 12px; }
-
-    /* ── RUNTIME GRID ──────────────────────────────────────────────────── */
-    .health-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .wordmark {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 1.55rem;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      display: flex;
+      align-items: center;
       gap: 12px;
     }
 
-    .stat-tile {
-      padding: 14px 15px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--panel-soft);
+    .wordmark-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 18px var(--accent);
+      flex-shrink: 0;
+      animation: pulse-dot 2.8s ease-in-out infinite;
     }
 
-    .stat-tile .label {
+    @keyframes pulse-dot {
+      0%, 100% { box-shadow: 0 0 10px var(--accent); opacity: 1; }
+      50%       { box-shadow: 0 0 22px var(--accent), 0 0 40px rgba(88,180,255,0.3); opacity: 0.8; }
+    }
+
+    .header-sub {
+      font-size: 0.9rem;
       color: var(--muted);
-      font-size: 0.78rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      font-weight: 700;
-      margin-bottom: 8px;
+      font-weight: 300;
+      max-width: 540px;
+      line-height: 1.55;
     }
 
-    .stat-tile .value {
-      font-size: 0.98rem;
-      font-weight: 600;
+    .header-nav {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .header-nav a {
+      color: var(--muted-2);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-family: var(--mono);
+      letter-spacing: 0.04em;
+      transition: color 0.2s;
+    }
+    .header-nav a:hover { color: var(--accent); }
+
+    /* ── STATUS STRIP ── */
+    #status-strip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(11,25,41,0.7);
+      margin-bottom: 28px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-family: var(--mono);
+      transition: border-color 0.4s, background 0.4s;
+    }
+
+    #status-strip.ok   { border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.05); }
+    #status-strip.warn { border-color: rgba(251,191,36,0.3);  background: rgba(251,191,36,0.05); }
+    #status-strip.bad  { border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.05); }
+
+    .strip-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--muted-2);
+      flex-shrink: 0;
+      transition: background 0.4s, box-shadow 0.4s;
+    }
+    #status-strip.ok   .strip-dot { background: var(--ok);   box-shadow: 0 0 10px rgba(52,211,153,0.6); }
+    #status-strip.warn .strip-dot { background: var(--warn); box-shadow: 0 0 10px rgba(251,191,36,0.6); }
+    #status-strip.bad  .strip-dot { background: var(--bad);  box-shadow: 0 0 10px rgba(248,113,113,0.6); }
+
+    /* ── DOMAIN SELECTOR ── */
+    .domain-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .domain-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: var(--muted-2);
+      text-transform: uppercase;
+      margin-right: 4px;
+    }
+
+    .domain-btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.73rem;
+      letter-spacing: 0.05em;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+
+    .domain-btn:hover {
+      border-color: var(--border-hi);
+      color: var(--text);
+    }
+
+    .domain-btn.active {
+      background: rgba(88,180,255,0.12);
+      border-color: rgba(88,180,255,0.4);
+      color: var(--accent);
+    }
+
+    /* ── MAIN GRID ── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    @media (max-width: 680px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── PANEL BASE ── */
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      background: rgba(11,25,41,0.72);
+      backdrop-filter: blur(16px);
+    }
+
+    .panel-head {
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .panel-title {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.01em;
+      color: var(--text);
+      margin: 0;
+    }
+
+    .panel-sub {
+      font-size: 0.75rem;
+      color: var(--muted-2);
+      margin: 0;
+    }
+
+    /* ── CHAT PANEL ── */
+    .chat-body {
+      display: flex;
+      flex-direction: column;
+      height: 360px;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
+    }
+
+    .chat-messages::-webkit-scrollbar { width: 4px; }
+    .chat-messages::-webkit-scrollbar-track { background: transparent; }
+    .chat-messages::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
+
+    .empty-state {
+      color: var(--muted-2);
+      font-size: 0.83rem;
+      text-align: center;
+      padding: 20px 0;
+      font-style: italic;
+    }
+
+    /* ── MESSAGES ── */
+    .msg { display: flex; flex-direction: column; max-width: 88%; gap: 4px; }
+    .msg.user { align-self: flex-end; align-items: flex-end; }
+    .msg.assistant { align-self: flex-start; align-items: flex-start; }
+
+    .msg-bubble {
+      padding: 10px 13px;
+      border-radius: 12px;
+      font-size: 0.87rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
       word-break: break-word;
     }
 
-    /* ── VERIFY ────────────────────────────────────────────────────────── */
-    .status-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .verify-card {
-      padding: 16px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
-      min-height: 118px;
-    }
-
-    .verify-card h3 {
-      margin: 0 0 9px;
-      font-size: 0.8rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .verify-body {
-      font-size: 0.88rem;
-      line-height: 1.48;
+    .msg.user .msg-bubble {
+      background: rgba(88,180,255,0.14);
+      border: 1px solid rgba(88,180,255,0.22);
       color: var(--text);
+      border-bottom-right-radius: 4px;
     }
 
-    .verify-meta {
-      display: block;
-      margin-top: 7px;
-      font-size: 0.76rem;
+    .msg.assistant .msg-bubble {
+      background: rgba(15,31,48,0.9);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+
+    .msg.assistant.blocked .msg-bubble {
+      border-color: rgba(248,113,113,0.3);
+      background: rgba(248,113,113,0.06);
       color: var(--muted);
     }
 
-    /* ── PILLS ─────────────────────────────────────────────────────────── */
-    .pill {
+    .msg.assistant.revised .msg-bubble {
+      border-color: rgba(251,191,36,0.3);
+      background: rgba(251,191,36,0.05);
+    }
+
+    .msg-label {
+      font-family: var(--mono);
+      font-size: 0.67rem;
+      letter-spacing: 0.05em;
+      color: var(--muted-2);
+      padding: 0 2px;
+    }
+
+    .msg-outcome-chip {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
-      min-height: 27px;
-      padding: 0.2rem 0.65rem;
+      gap: 5px;
+      padding: 2px 8px;
       border-radius: 999px;
-      font-size: 0.74rem;
-      font-weight: 700;
-      text-transform: uppercase;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
       letter-spacing: 0.05em;
-      border: 1px solid transparent;
-      white-space: nowrap;
     }
 
-    .pill.ok      { background: rgba(57,217,138,0.12); color: var(--ok);   border-color: rgba(57,217,138,0.22); }
-    .pill.warn    { background: rgba(243,201,105,0.12); color: var(--warn); border-color: rgba(243,201,105,0.22); }
-    .pill.bad     { background: rgba(255,122,138,0.12); color: var(--bad);  border-color: rgba(255,122,138,0.22); }
-    .pill.neutral { background: rgba(157,176,206,0.1);  color: var(--muted); border-color: rgba(157,176,206,0.16); }
+    .chip-pass    { background: rgba(52,211,153,0.12); color: var(--ok);   border: 1px solid rgba(52,211,153,0.25); }
+    .chip-block   { background: rgba(248,113,113,0.12); color: var(--bad);  border: 1px solid rgba(248,113,113,0.25); }
+    .chip-revise  { background: rgba(251,191,36,0.12);  color: var(--warn); border: 1px solid rgba(251,191,36,0.25); }
+    .chip-neutral { background: rgba(120,170,230,0.08); color: var(--muted); border: 1px solid var(--border); }
 
-    /* ── OUTCOME LEGEND ────────────────────────────────────────────────── */
-    .outcome-legend {
+    /* ── TYPING INDICATOR ── */
+    .typing-dots {
+      display: flex;
+      gap: 4px;
+      padding: 4px 2px;
+      align-items: center;
+    }
+    .typing-dots span {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--muted-2);
+      animation: bounce 1.2s ease-in-out infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.18s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.36s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+      40%            { transform: translateY(-5px); opacity: 1; }
+    }
+
+    /* ── SCENARIOS ── */
+    .scenarios-area {
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .scenarios-label {
+      font-family: var(--mono);
+      font-size: 0.67rem;
+      letter-spacing: 0.07em;
+      color: var(--muted-2);
+      text-transform: uppercase;
+    }
+
+    .scenario-chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 5px 22px;
-      padding: 11px 16px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.025);
+      gap: 6px;
+    }
+
+    .chip-btn {
+      appearance: none;
+      background: rgba(15,31,48,0.7);
       border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      padding: 5px 11px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+      line-height: 1.3;
+    }
+
+    .chip-btn:hover {
+      border-color: var(--border-hi);
+      color: var(--text);
+      background: rgba(88,180,255,0.06);
+    }
+
+    /* ── INPUT ROW ── */
+    .input-row {
+      padding: 10px 14px 14px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      border-top: 1px solid var(--border);
+    }
+
+    textarea {
+      flex: 1;
+      resize: none;
+      background: rgba(6,16,30,0.8);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 0.87rem;
+      padding: 10px 13px;
+      outline: none;
+      min-height: 42px;
+      max-height: 110px;
+      line-height: 1.5;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    textarea:focus {
+      border-color: rgba(88,180,255,0.4);
+      box-shadow: 0 0 0 3px rgba(88,180,255,0.1);
+    }
+
+    textarea::placeholder { color: var(--muted-2); }
+
+    .send-btn {
+      appearance: none;
+      background: linear-gradient(135deg, rgba(88,180,255,0.2), rgba(88,180,255,0.1));
+      border: 1px solid rgba(88,180,255,0.35);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      letter-spacing: 0.04em;
+    }
+
+    .send-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, rgba(88,180,255,0.28), rgba(88,180,255,0.16));
+      border-color: rgba(88,180,255,0.5);
+      transform: translateY(-1px);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    /* ── GOVERNANCE PANEL ── */
+    .gov-body {
+      padding: 16px 18px;
+      min-height: 200px;
+    }
+
+    .gov-idle {
+      color: var(--muted-2);
+      font-size: 0.83rem;
+      font-style: italic;
+      padding: 16px 0;
+    }
+
+    /* Outcome badge */
+    .outcome-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      border: 1px solid transparent;
+    }
+
+    .outcome-badge .badge-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+
+    .badge-PASS        { background: rgba(52,211,153,0.1);  color: var(--ok);   border-color: rgba(52,211,153,0.3); }
+    .badge-PASS .badge-dot        { background: var(--ok);   box-shadow: 0 0 10px rgba(52,211,153,0.6); }
+    .badge-HARD_STOP   { background: rgba(248,113,113,0.1); color: var(--bad);  border-color: rgba(248,113,113,0.3); }
+    .badge-HARD_STOP .badge-dot   { background: var(--bad);  box-shadow: 0 0 10px rgba(248,113,113,0.6); }
+    .badge-FORCE_REVISE { background: rgba(251,191,36,0.1); color: var(--warn); border-color: rgba(251,191,36,0.3); }
+    .badge-FORCE_REVISE .badge-dot { background: var(--warn); box-shadow: 0 0 10px rgba(251,191,36,0.6); }
+    .badge-SOFT_CORRECT { background: rgba(167,139,250,0.1); color: var(--accent-2); border-color: rgba(167,139,250,0.3); }
+    .badge-SOFT_CORRECT .badge-dot { background: var(--accent-2); }
+    .badge-CONTAIN     { background: rgba(248,113,113,0.08); color: var(--bad); border-color: rgba(248,113,113,0.2); }
+    .badge-CONTAIN .badge-dot     { background: var(--bad); }
+    .badge-CLARIFY     { background: rgba(251,191,36,0.08); color: var(--warn); border-color: rgba(251,191,36,0.2); }
+    .badge-CLARIFY .badge-dot     { background: var(--warn); }
+
+    /* Outcome explanation */
+    .outcome-gloss {
+      font-size: 0.85rem;
+      color: var(--text);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    /* Field rows */
+    .gov-field {
       margin-bottom: 14px;
     }
 
-    .legend-item {
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-      font-size: 0.77rem;
-    }
-    .legend-code { font-weight: 700; font-size: 0.73rem; }
-    .legend-desc { color: var(--muted); }
-
-    /* ── OUTCOME COLOURS ───────────────────────────────────────────────── */
-    .outcome-PASS         { color: var(--ok);   font-weight: 700; }
-    .outcome-ADMIT        { color: var(--ok);   font-weight: 700; }
-    .outcome-CONTINUE     { color: var(--ok);   font-weight: 700; }
-    .outcome-SOFT_CORRECT { color: var(--muted); font-weight: 700; }
-    .outcome-FORCE_REVISE { color: var(--warn); font-weight: 700; }
-    .outcome-HARD_STOP    { color: var(--bad);  font-weight: 700; }
-    .outcome-CONTAIN      { color: var(--bad);  font-weight: 700; }
-    .outcome-STOP         { color: var(--bad);  font-weight: 700; }
-    .outcome-REFUSE       { color: var(--bad);  font-weight: 700; }
-    .outcome-CLARIFY      { color: var(--warn); font-weight: 700; }
-
-    /* Outcome cell: code + gloss sub-line */
-    .outcome-gloss {
-      display: block;
-      font-size: 0.7rem;
-      font-weight: 400;
-      color: var(--muted);
-      margin-top: 2px;
-      line-height: 1.25;
+    .gov-key {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted-2);
+      margin-bottom: 5px;
+      font-weight: 500;
     }
 
-    /* ── API LINKS ─────────────────────────────────────────────────────── */
-    .api-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px 14px;
+    .gov-val {
       font-size: 0.84rem;
-      color: var(--muted);
-    }
-
-    a { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    .quiet { color: var(--muted); font-size: 0.83rem; }
-
-    .integrity-operator-msg,
-    #audit-detail-panel,
-    .pef-shell,
-    .info-strip {
-      padding: 14px 15px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: rgba(0,0,0,0.14);
-    }
-
-    .integrity-operator-msg {
-      white-space: pre-wrap;
+      color: var(--text);
       line-height: 1.5;
-      font-size: 0.84rem;
     }
 
-    .pef-toolbar, .recent-toolbar {
+    .gov-val.mono {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .gov-note {
+      font-size: 0.76rem;
+      color: var(--muted-2);
+      margin-top: 4px;
+      line-height: 1.45;
+    }
+
+    .gov-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 14px 0;
+    }
+
+    .flag-row {
       display: flex;
       flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .flag-chip {
+      font-family: var(--mono);
+      font-size: 0.63rem;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(248,113,113,0.1);
+      color: var(--bad);
+      border: 1px solid rgba(248,113,113,0.22);
+    }
+
+    .raw-output {
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(6,16,30,0.7);
+      border: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      color: var(--muted);
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.5;
+      max-height: 140px;
+      overflow: auto;
+    }
+
+    .raw-output.struck {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+
+    /* ── EXPLANATION BOX (what is aurora lens) ── */
+    .explain-strip {
+      margin-top: 20px;
+      padding: 18px 22px;
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      background: rgba(11,25,41,0.5);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 680px) {
+      .explain-strip { grid-template-columns: 1fr; gap: 14px; }
+    }
+
+    .explain-item {}
+
+    .explain-key {
+      font-family: var(--mono);
+      font-size: 0.67rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .explain-val {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* ── OPERATOR CONSOLE TOGGLE ── */
+    .console-toggle {
+      margin-top: 32px;
+    }
+
+    .console-toggle summary {
+      cursor: pointer;
+      list-style: none;
+      display: flex;
       align-items: center;
       gap: 10px;
-    }
-
-    input[type="text"] {
-      flex: 1;
-      min-width: 220px;
-      padding: 12px 14px;
-      border-radius: 12px;
+      padding: 13px 18px;
       border: 1px solid var(--border);
-      background: rgba(8,17,31,0.72);
+      border-radius: var(--r);
+      background: rgba(11,25,41,0.5);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      user-select: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .console-toggle summary::-webkit-details-marker { display: none; }
+
+    .console-toggle summary:hover {
+      border-color: var(--border-hi);
       color: var(--text);
-      font: inherit;
-      outline: none;
     }
 
-    input[type="text"]:focus {
-      border-color: rgba(118,183,255,0.5);
-      box-shadow: 0 0 0 4px rgba(118,183,255,0.12);
-    }
-
-    button, .button {
-      appearance: none;
-      border: 1px solid var(--border);
-      background: linear-gradient(180deg, rgba(118,183,255,0.16), rgba(118,183,255,0.08));
+    .console-toggle[open] summary {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      border-color: var(--border-hi);
       color: var(--text);
-      padding: 11px 15px;
-      border-radius: 12px;
-      cursor: pointer;
-      font: inherit;
-      font-weight: 600;
-      transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
     }
 
-    button:hover, .button:hover {
-      transform: translateY(-1px);
-      border-color: var(--border-strong);
-      background: linear-gradient(180deg, rgba(118,183,255,0.22), rgba(118,183,255,0.1));
-    }
-
-    button.link {
-      padding: 0;
-      border: 0;
-      background: none;
+    .console-toggle-icon {
+      font-size: 0.8rem;
       color: var(--accent);
-      text-decoration: underline;
-      border-radius: 0;
+      transition: transform 0.2s;
     }
 
-    button.link:hover { transform: none; }
+    .console-toggle[open] .console-toggle-icon { transform: rotate(45deg); }
 
-    /* ── TABLE ─────────────────────────────────────────────────────────── */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.82rem;
+    .console-inner {
+      border: 1px solid var(--border-hi);
+      border-top: none;
+      border-bottom-left-radius: var(--r);
+      border-bottom-right-radius: var(--r);
+      background: rgba(11,25,41,0.7);
+      padding: 20px;
     }
+
+    /* operator table */
+    .op-section-title {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text);
+      margin: 0 0 12px;
+    }
+
+    .op-sub { font-size: 0.8rem; color: var(--muted); margin: 0 0 16px; }
+
+    .outcome-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px 20px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(0,0,0,0.15);
+      margin-bottom: 14px;
+    }
+
+    .legend-item { display: flex; align-items: baseline; gap: 6px; font-size: 0.75rem; }
+    .legend-code { font-family: var(--mono); font-weight: 700; font-size: 0.72rem; }
+    .legend-desc { color: var(--muted-2); }
+
+    .outcome-PASS, .outcome-ADMIT   { color: var(--ok); }
+    .outcome-SOFT_CORRECT           { color: var(--accent-2); }
+    .outcome-FORCE_REVISE           { color: var(--warn); }
+    .outcome-HARD_STOP, .outcome-STOP, .outcome-CONTAIN, .outcome-REFUSE { color: var(--bad); }
+    .outcome-CLARIFY                { color: var(--warn); }
+
+    .table-wrap {
+      max-height: 300px;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.79rem; }
 
     th, td {
-      padding: 12px 12px;
+      padding: 10px 12px;
       text-align: left;
-      border-bottom: 1px solid rgba(147,178,222,0.12);
+      border-bottom: 1px solid rgba(120,170,230,0.08);
       vertical-align: top;
     }
 
@@ -432,1598 +746,812 @@
       position: sticky;
       top: 0;
       z-index: 2;
-      background: rgba(13, 23, 40, 0.96);
-      color: var(--muted);
-      font-size: 0.73rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      font-weight: 700;
-      backdrop-filter: blur(8px);
-    }
-
-    tbody tr:hover td { background: rgba(255,255,255,0.025); }
-    tr.audit-row-selectable { cursor: pointer; }
-    tr.audit-row-selected td { background: rgba(118,183,255,0.08); }
-
-    .table-wrap {
-      max-height: min(56vh, 34rem);
-      overflow: auto;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: rgba(0,0,0,0.08);
-    }
-
-    /* ── MONO / KV ─────────────────────────────────────────────────────── */
-    .mono, code, pre, .kv dd { font-family: var(--mono); }
-
-    .kv { margin: 0; }
-    .kv dt {
-      color: var(--muted);
-      margin: 10px 0 3px;
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      font-weight: 700;
-    }
-    .kv dd {
-      margin: 0;
-      font-size: 0.8rem;
-      word-break: break-word;
-    }
-
-    /* ── AUDIT DETAIL ──────────────────────────────────────────────────── */
-    .recent-with-detail {
-      display: grid;
-      grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.85fr);
-      gap: 18px;
-      align-items: start;
-    }
-
-    #audit-detail-panel h3 {
-      margin: 0 0 10px;
-      font-size: 0.8rem;
-      color: var(--muted);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
-    .detail-pair {
-      margin: 9px 0;
-      font-size: 0.83rem;
-    }
-    .detail-pair dt {
-      color: var(--muted);
-      margin-right: 6px;
-      display: inline;
-    }
-    .detail-pair dd {
-      display: inline;
-      margin: 0;
+      background: rgba(11,25,41,0.98);
+      color: var(--muted-2);
       font-family: var(--mono);
-      font-size: 0.78rem;
-    }
-    .detail-pair dd.long {
-      display: block;
-      margin-top: 6px;
-      white-space: pre-wrap;
-      line-height: 1.45;
-    }
-    .detail-pair dd.plain {
-      font-family: var(--sans);
-      font-size: 0.82rem;
-    }
-
-    .raw-model-heading {
-      margin: 14px 0 7px;
-      font-size: 0.76rem;
-      letter-spacing: 0.06em;
+      font-size: 0.68rem;
       text-transform: uppercase;
-      font-weight: 700;
+      letter-spacing: 0.06em;
+      font-weight: 500;
     }
-    .raw-model-heading.admitted { color: var(--ok); }
-    .raw-model-heading.blocked  { color: var(--bad); }
-    .raw-model-body {
-      margin: 0;
-      padding: 12px 13px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: rgba(0,0,0,0.18);
-      font-size: 0.77rem;
-      white-space: pre-wrap;
-      word-break: break-word;
-      line-height: 1.48;
-      color: var(--text);
-      max-height: 280px;
-      overflow: auto;
-    }
-    .raw-model-body.blocked {
-      text-decoration: line-through;
+
+    tbody tr:hover td { background: rgba(88,180,255,0.04); }
+
+    .outcome-gloss-cell {
+      display: block;
+      font-size: 0.68rem;
       color: var(--muted-2);
+      margin-top: 2px;
     }
 
-    /* ── COLLAPSIBLE PANELS ────────────────────────────────────────────── */
-    details.panel { padding: 0 18px; overflow: hidden; }
-
-    details.panel > summary {
-      cursor: pointer;
-      list-style: none;
-      padding: 18px 0;
-      font-weight: 700;
-      color: var(--text);
-      position: relative;
+    /* verify grid */
+    .verify-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 20px;
     }
 
-    details.panel > summary::-webkit-details-marker { display: none; }
-    details.panel > summary::after {
-      content: "+";
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--accent);
-      font-size: 1.15rem;
-      line-height: 1;
-    }
+    @media (max-width: 680px) { .verify-grid { grid-template-columns: 1fr; } }
 
-    details.panel[open] > summary::after { content: "–"; }
-    details.panel .panel-body {
-      padding: 0 0 18px;
-      border-top: 1px solid var(--border);
-      margin-top: -1px;
-    }
-
-    .metrics {
-      margin: 0;
-      padding: 14px 15px;
-      border-radius: 14px;
+    .verify-card {
+      padding: 14px 16px;
       border: 1px solid var(--border);
-      background: rgba(0,0,0,0.14);
-      color: var(--muted);
-      font-size: 0.74rem;
-      overflow: auto;
-      max-height: 320px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.12);
     }
 
-    ul.dash-ops {
-      margin: 0;
-      padding-left: 18px;
-      color: var(--muted);
-      font-size: 0.87rem;
-      line-height: 1.6;
-    }
-
-    .constraints {
-      font-size: 0.77rem;
-      color: var(--muted);
-      max-width: 15rem;
-    }
-
-    .error { color: var(--bad); }
-    .muted { color: var(--muted); }
-
-    .footer {
-      margin-top: 18px;
-      text-align: center;
+    .verify-card h3 {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
       color: var(--muted-2);
-      font-size: 0.8rem;
+      margin: 0 0 8px;
     }
 
-    @media (max-width: 1120px) {
-      .recent-with-detail,
-      .grid-2,
-      .grid-3,
-      .status-grid { grid-template-columns: 1fr; }
-      .status-banner-kv { display: none; }
+    .verify-body { font-size: 0.84rem; color: var(--text); line-height: 1.5; }
+
+    /* health tiles */
+    .health-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 20px;
     }
 
-    @media (max-width: 760px) {
-      .shell { padding: 16px 12px 34px; }
-      .hero, .card { padding: 16px; }
-      .health-grid { grid-template-columns: 1fr; }
-      th, td { padding: 10px 9px; }
-      .table-wrap { max-height: 60vh; }
-      .status-banner { padding: 18px 20px; gap: 14px; }
-      .status-banner-headline { font-size: 1.05rem; }
+    .stat-tile {
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(0,0,0,0.1);
     }
-  
-    /* ── GitHub Pages live demo (chat + domain; matches dashboard cards) ─── */
-    .demo-domain-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 4px 0 2px; }
-    .demo-domain-label {
-      font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; color: var(--muted-2);
-      text-transform: uppercase; margin-right: 4px;
+
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 0.67rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted-2);
+      margin-bottom: 6px;
     }
-    .domain-pill {
-      font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.04em; padding: 8px 14px; border-radius: 999px;
-      border: 1px solid var(--border); background: rgba(255,255,255,0.04); color: var(--muted); cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
-    }
-    .domain-pill:hover { border-color: var(--border-strong); color: var(--text); }
-    .domain-pill.active {
-      background: linear-gradient(180deg, rgba(118,183,255,0.22), rgba(118,183,255,0.1));
-      border-color: rgba(118,183,255,0.35); color: var(--text);
-    }
-    #live-demo-grid { align-items: stretch; }
-    .demo-chat-inner { display: flex; flex-direction: column; gap: 0; min-height: 320px; }
-    .demo-chat-messages {
-      flex: 1; overflow-y: auto; min-height: 200px; max-height: 380px; padding: 12px 0;
-      display: flex; flex-direction: column; gap: 12px;
-    }
-    .message { display: flex; flex-direction: column; max-width: 92%; }
-    .message.user { align-self: flex-end; align-items: flex-end; }
-    .message.assistant { align-self: flex-start; align-items: flex-start; }
-    .msg-bubble {
-      padding: 10px 14px; border-radius: 14px; font-size: 0.88rem; line-height: 1.65; border: 1px solid var(--border);
-    }
-    .message.user .msg-bubble {
-      background: linear-gradient(135deg, rgba(118,183,255,0.14), rgba(159,122,234,0.06));
-      border-color: rgba(118,183,255,0.28); border-bottom-right-radius: 4px;
-    }
-    .message.assistant .msg-bubble { background: rgba(0,0,0,0.18); border-bottom-left-radius: 4px; }
-    .message.intervened .msg-bubble { background: rgba(255,122,138,0.1); border-color: rgba(255,122,138,0.35); }
-    .message.soft .msg-bubble { background: rgba(243,201,105,0.1); border-color: rgba(243,201,105,0.28); }
-    .msg-meta { font-family: var(--mono); font-size: 0.65rem; color: var(--muted-2); margin-top: 4px; padding: 0 2px; }
-    .demo-scenario-bar {
-      padding: 12px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-      background: rgba(0,0,0,0.12); margin: 0 -6px; padding-left: 6px; padding-right: 6px;
-    }
-    .demo-scenario-label {
-      font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.08em; color: var(--muted-2); text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .demo-scenario-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .demo-scenario-chips .chip {
-      font-size: 0.78rem; color: var(--muted); background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-      border-radius: 10px; padding: 6px 12px; cursor: pointer; line-height: 1.45; font: inherit;
-    }
-    .demo-scenario-chips .chip:hover { border-color: var(--border-strong); color: var(--text); }
-    .demo-input-row {
-      display: flex; gap: 10px; align-items: flex-end; padding-top: 14px; border-top: 1px solid var(--border); margin-top: 8px;
-    }
-    .demo-input-row textarea {
-      flex: 1; font: inherit; font-size: 0.88rem; color: var(--text);
-      background: rgba(8,17,31,0.72); border: 1px solid var(--border); border-radius: 12px;
-      padding: 10px 12px; resize: none; line-height: 1.5; min-height: 44px; max-height: 120px; outline: none;
-    }
-    .demo-input-row textarea:focus { border-color: rgba(118,183,255,0.45); box-shadow: 0 0 0 4px rgba(118,183,255,0.12); }
-    button.demo-send {
-      flex-shrink: 0; font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em; font-weight: 700;
-      border: 1px solid var(--border-strong);
-      background: linear-gradient(180deg, rgba(118,183,255,0.22), rgba(118,183,255,0.1));
-      color: var(--text); border-radius: 12px; padding: 11px 18px; cursor: pointer; white-space: nowrap;
-    }
-    button.demo-send:disabled { opacity: 0.35; cursor: not-allowed; }
-    .demo-waiting {
-      font-family: var(--mono); font-size: 0.82rem; color: var(--muted); text-align: center; padding: 2rem 1rem; line-height: 1.7;
-    }
-    .demo-gov-body { padding-top: 4px; }
-    .gov-gloss {
-      font-size: 0.82rem; line-height: 1.55; color: var(--muted); margin-bottom: 1rem; padding: 12px 14px;
-      border-radius: 14px; border: 1px solid var(--border); background: rgba(0,0,0,0.18);
-    }
-    .gov-field { margin-bottom: 1rem; }
-    .gov-key {
-      font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.07em; color: var(--muted); text-transform: uppercase;
-      font-weight: 700; margin-bottom: 6px;
-    }
-    .gov-val { font-size: 0.86rem; color: var(--text); line-height: 1.55; }
-    .gov-val.mono { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
-    .gov-val-note { font-size: 0.76rem; color: var(--muted-2); line-height: 1.45; margin-top: 6px; }
-    .flag-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .flag-chip {
-      font-family: var(--mono); font-size: 0.62rem; font-weight: 600;
-      background: rgba(255,122,138,0.12); color: var(--bad); border: 1px solid rgba(255,122,138,0.25);
-      border-radius: 999px; padding: 4px 10px;
-    }
-    .gov-divider { height: 1px; background: var(--border); margin: 0.35rem 0 1rem; }
-    .text-box {
-      background: rgba(0,0,0,0.22); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px;
-      font-size: 0.84rem; color: var(--muted); line-height: 1.65; white-space: pre-wrap; word-break: break-word;
-    }
-    .text-box.struck { text-decoration: line-through; color: var(--muted-2); }
-    .text-box.italic { font-style: italic; }
-    .status-badge {
-      display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 0.62rem; font-weight: 700;
-      letter-spacing: 0.08em; text-transform: uppercase; padding: 6px 14px; border-radius: 999px; margin-bottom: 10px;
+
+    .stat-val { font-size: 0.87rem; font-weight: 500; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
       border: 1px solid transparent;
     }
-    .badge-idle { background: rgba(157,176,206,0.1); color: var(--muted); border-color: rgba(157,176,206,0.2); }
-    .badge-idle .status-dot { background: var(--muted-2); }
-    .badge-pass { background: rgba(74,222,128,0.12); color: var(--ok); border-color: rgba(74,222,128,0.28); }
-    .badge-pass .status-dot { background: var(--ok); box-shadow: 0 0 10px rgba(74,222,128,0.4); }
-    .badge-stop { background: rgba(248,113,113,0.12); color: var(--bad); border-color: rgba(248,113,113,0.28); }
-    .badge-stop .status-dot { background: var(--bad); }
-    .badge-revise { background: rgba(251,191,36,0.12); color: var(--warn); border-color: rgba(251,191,36,0.28); }
-    .badge-revise .status-dot { background: var(--warn); }
-    .badge-ask { background: rgba(157,176,206,0.12); color: var(--muted); border-color: rgba(157,176,206,0.22); }
-    .badge-ask .status-dot { background: var(--accent); }
-    .spinner {
-      display: inline-block; width: 13px; height: 13px; border: 2px solid var(--border); border-top-color: var(--muted);
-      border-radius: 50%; animation: demo-spin 0.75s linear infinite;
-    }
-    @keyframes demo-spin { to { transform: rotate(360deg); } }
+    .pill.ok   { background: rgba(52,211,153,0.12); color: var(--ok);   border-color: rgba(52,211,153,0.25); }
+    .pill.warn { background: rgba(251,191,36,0.12);  color: var(--warn); border-color: rgba(251,191,36,0.25); }
+    .pill.bad  { background: rgba(248,113,113,0.12); color: var(--bad);  border-color: rgba(248,113,113,0.25); }
 
+    .api-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      margin-top: 14px;
+    }
+
+    .api-links a {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted-2);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .api-links a:hover { color: var(--accent); }
+
+    .spinner {
+      display: inline-block;
+      width: 12px; height: 12px;
+      border: 2px solid var(--border);
+      border-top-color: var(--muted);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* constraint chips in table */
+    .constraints { font-size: 0.74rem; color: var(--muted-2); max-width: 12rem; }
   </style>
 </head>
 <body>
+  <div class="glow-a"></div>
+  <div class="glow-b"></div>
+
   <div class="shell">
 
-    <!-- STATUS BANNER: first thing on the page, nothing competing -->
-    <div id="status-banner" class="status-banner" role="status" aria-live="polite">
-      <div class="status-dot"></div>
-      <div class="status-banner-main">
-        <div class="status-banner-headline" id="status-banner-headline">Checking system status…</div>
-        <div class="status-banner-sub" id="status-banner-sub">Aurora Lens governance proxy</div>
+    <!-- HEADER -->
+    <header>
+      <div class="wordmark">
+        <span class="wordmark-dot"></span>
+        Aurora Lens
       </div>
-      <div class="status-banner-kv" id="status-banner-kv"></div>
-    </div>
-
-    <!-- HEADER: product name + one-liner, no competing content -->
-    <header class="hero">
-      <div class="eyebrow">Live governance demonstration</div>
-      <p class="hero-tagline">Try completions against the deployment below. Audit, verify, and runtime panels match the hosted forensics console layout.</p>
-      <p class="quiet" style="margin:6px 0 0"><a href="/aurora-lens.html">← Aurora Lens overview</a></p>
+      <p class="header-sub">A runtime admissibility gate for AI output. Every response is evaluated before it reaches you. Try it — and watch what governance decides.</p>
+      <nav class="header-nav">
+        <a href="/aurora-lens.html">← Overview</a>
+        <a href="https://pypi.org/project/aurora-lens/" target="_blank" rel="noopener">PyPI</a>
+        <a href="https://orcid.org/0009-0004-6422-4174" target="_blank" rel="noopener">ORCID</a>
+      </nav>
     </header>
 
-    <!-- Live demo sections -->
-    <section class="card" id="demo-domain-card">
-      <div class="card-header">
-        <div>
-          <h2 class="card-title">Domain</h2>
-          <p class="card-subtitle">Presets set system tone. Switching domain starts a fresh session id.</p>
-        </div>
-      </div>
-      <div class="demo-domain-row">
-        <span class="demo-domain-label">Presets</span>
-        <button type="button" class="domain-pill active" onclick="selectDomain('general')">General</button>
-        <button type="button" class="domain-pill" onclick="selectDomain('healthcare')">Healthcare</button>
-        <button type="button" class="domain-pill" onclick="selectDomain('finance')">Finance</button>
-        <button type="button" class="domain-pill" onclick="selectDomain('legal')">Legal</button>
-      </div>
-    </section>
+    <!-- STATUS STRIP -->
+    <div id="status-strip">
+      <span class="strip-dot"></span>
+      <span id="strip-text">Connecting to Aurora Lens…</span>
+    </div>
 
-    <section class="grid-2" id="live-demo-grid">
-      <article class="card demo-chat-card">
-        <div class="card-header">
-          <div>
-            <h2 class="card-title">Conversation</h2>
-            <p class="card-subtitle">Posts to <span class="mono">/v1/chat/completions</span> on the configured deployment.</p>
-          </div>
+    <!-- DOMAIN SELECTOR -->
+    <div class="domain-row">
+      <span class="domain-label">Domain</span>
+      <button class="domain-btn active" onclick="selectDomain('general')">General</button>
+      <button class="domain-btn" onclick="selectDomain('healthcare')">Healthcare</button>
+      <button class="domain-btn" onclick="selectDomain('finance')">Finance</button>
+      <button class="domain-btn" onclick="selectDomain('legal')">Legal</button>
+    </div>
+
+    <!-- MAIN: CHAT + GOVERNANCE -->
+    <div class="main-grid">
+
+      <!-- CHAT -->
+      <div class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">Conversation</h2>
+          <span class="panel-sub" id="domain-label-badge">General</span>
         </div>
-        <div class="demo-chat-inner">
-          <div class="demo-chat-messages" id="messages">
-            <div class="demo-waiting" id="empty-state">Choose a scenario chip or type a message.</div>
+        <div class="chat-body">
+          <div class="chat-messages" id="messages">
+            <div class="empty-state" id="empty-state">Choose a scenario below, or type anything.</div>
           </div>
-          <div class="demo-scenario-bar">
-            <p class="demo-scenario-label">Suggested scenarios</p>
-            <div class="demo-scenario-chips" id="chips"></div>
+          <div class="scenarios-area">
+            <div class="scenarios-label">Try these</div>
+            <div class="scenario-chips" id="chips"></div>
           </div>
-          <div class="demo-input-row">
+          <div class="input-row">
             <textarea id="input" rows="1" placeholder="Type a message…"
               onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-            <button type="button" class="demo-send" id="send-btn" onclick="sendMessage()">Send</button>
+            <button class="send-btn" id="send-btn" onclick="sendMessage()">Send ↵</button>
           </div>
         </div>
-      </article>
+      </div>
 
-      <article class="card demo-gov-card">
-        <div class="card-header">
-          <div>
-            <h2 class="card-title">Last governance decision</h2>
-            <p class="card-subtitle">Live outcome for the last completion — same vocabulary as the audit table.</p>
-          </div>
+      <!-- GOVERNANCE -->
+      <div class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">Governance decision</h2>
+          <span class="panel-sub">Last turn</span>
         </div>
-        <div class="demo-gov-body">
-          <span class="status-badge badge-idle" id="status-badge">
-            <span class="status-dot"></span>
-            <span id="status-text">Waiting</span>
-          </span>
-          <p id="gov-outcome-gloss" class="gov-gloss" style="display:none;" aria-live="polite"></p>
-          <div id="gov-detail" style="display:none;">
-            <div id="sec-flags" style="display:none;">
-              <div class="gov-field">
-                <p class="gov-key">Flags fired</p>
-                <div class="flag-chips" id="gov-flags"></div>
-              </div>
-            </div>
-            <div id="sec-meta">
-              <div class="gov-divider"></div>
-              <div id="sec-upstream-outcome" class="gov-field" style="display:none;">
-                <p class="gov-key">Release path</p>
-                <p class="gov-val mono" id="gov-upstream-outcome-val"></p>
-                <p id="gov-timing-gloss" class="gov-val-note" style="display:none;"></p>
-              </div>
-              <div id="sec-domain" style="display:none;" class="gov-field">
-                <p class="gov-key">Domain</p>
-                <p class="gov-val mono" id="gov-domain"></p>
-              </div>
-              <div id="sec-pathway" style="display:none;" class="gov-field">
-                <p class="gov-key">Pathway</p>
-                <p class="gov-val mono" id="gov-pathway"></p>
-              </div>
-              <div class="gov-field">
-                <p class="gov-key">LLM called</p>
-                <p class="gov-val mono" id="gov-llm"></p>
-                <p id="gov-llm-note" class="gov-val-note" style="display:none;"></p>
-              </div>
-              <div id="sec-escalation" style="display:none;" class="gov-field">
-                <p class="gov-key">Escalation target</p>
-                <p class="gov-val" id="gov-escalation"></p>
-              </div>
-              <div class="gov-field">
-                <p class="gov-key">Turn</p>
-                <p class="gov-val mono" id="gov-turn"></p>
-              </div>
-            </div>
-            <div id="sec-rationale" style="display:none;">
-              <div class="gov-divider"></div>
-              <div class="gov-field">
-                <p class="gov-key">Rationale</p>
-                <div class="text-box italic" id="gov-rationale"></div>
-              </div>
-            </div>
-            <div id="sec-no-model" style="display:none;">
-              <div class="gov-divider"></div>
-              <div class="gov-field">
-                <p class="gov-key">Model output</p>
-                <p class="gov-val" id="gov-no-model-msg" style="line-height:1.65;">No model output. Request was blocked before generation.</p>
-              </div>
-            </div>
-            <div id="sec-original" style="display:none;">
-              <div class="gov-divider"></div>
-              <div class="gov-field">
-                <p class="gov-key" id="gov-original-title">Model output</p>
-                <p id="gov-original-note" class="gov-val-note" style="display:none;"></p>
-                <div class="text-box" id="gov-original"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </article>
-    </section>
+        <div class="gov-body" id="gov-body">
+          <p class="gov-idle" id="gov-idle">Send a message to see what Aurora Lens decides.</p>
+          <div id="gov-content" style="display:none">
+            <div id="outcome-badge" class="outcome-badge"></div>
+            <p id="outcome-gloss" class="outcome-gloss"></p>
 
-    <main class="layout">
+            <div id="sec-flags" style="display:none" class="gov-field">
+              <div class="gov-key">Flags fired</div>
+              <div class="flag-row" id="gov-flags"></div>
+            </div>
 
-      <!-- RECENT GOVERNANCE DECISIONS (most immediately useful) -->
-      <section class="card" id="recent">
-        <div class="card-header">
-          <div>
-            <h2 class="card-title">Recent governance decisions</h2>
-            <p class="card-subtitle">Each row is one request through the proxy. The Outcome column shows what governance decided. Click a JSONL row to inspect the full record.</p>
+            <div class="gov-divider"></div>
+
+            <div id="sec-release" style="display:none" class="gov-field">
+              <div class="gov-key">Release path</div>
+              <div class="gov-val mono" id="gov-release"></div>
+              <div class="gov-note" id="gov-release-note"></div>
+            </div>
+
+            <div id="sec-domain" style="display:none" class="gov-field">
+              <div class="gov-key">Domain</div>
+              <div class="gov-val mono" id="gov-domain"></div>
+            </div>
+
+            <div class="gov-field">
+              <div class="gov-key">LLM called</div>
+              <div class="gov-val mono" id="gov-llm"></div>
+              <div class="gov-note" id="gov-llm-note"></div>
+            </div>
+
+            <div id="sec-rationale" style="display:none" class="gov-field">
+              <div class="gov-key">Rationale</div>
+              <div class="gov-val" id="gov-rationale" style="font-style:italic; color:var(--muted);"></div>
+            </div>
+
+            <div id="sec-original" style="display:none" class="gov-field">
+              <div class="gov-key" id="gov-original-title">Model output</div>
+              <div class="gov-note" id="gov-original-note" style="display:none; margin-bottom:6px;"></div>
+              <div class="raw-output" id="gov-original"></div>
+            </div>
           </div>
         </div>
-        <div class="recent-toolbar" style="margin-bottom:12px">
-          <button type="button" id="btn-refresh-audit" title="Reload health, verify, and recent rows now">Refresh</button>
-          <span id="recent-status" class="quiet">Loading…</span>
-        </div>
-        <!-- Outcome legend: what the codes mean in plain English -->
+      </div>
+    </div>
+
+    <!-- WHAT IS THIS -->
+    <div class="explain-strip">
+      <div class="explain-item">
+        <div class="explain-key">Admissibility</div>
+        <div class="explain-val">Every model output is checked before it reaches you. Fluency never overrides governance.</div>
+      </div>
+      <div class="explain-item">
+        <div class="explain-key">Outcomes</div>
+        <div class="explain-val">PASS lets output through. HARD_STOP blocks it entirely. FORCE_REVISE replaces it. Each decision is auditable.</div>
+      </div>
+      <div class="explain-item">
+        <div class="explain-key">Forensic trace</div>
+        <div class="explain-val">Every turn is logged with a cryptographic chain of custody — not for show, but for legal evidentiary use.</div>
+      </div>
+    </div>
+
+    <!-- OPERATOR CONSOLE (collapsed) -->
+    <details class="console-toggle" id="console-details">
+      <summary>
+        <span class="console-toggle-icon">+</span>
+        <span>Operator console — audit log, verification, runtime surface</span>
+      </summary>
+      <div class="console-inner">
+
+        <!-- RECENT DECISIONS -->
+        <h3 class="op-section-title">Recent governance decisions</h3>
+        <p class="op-sub">Each row is one request through the proxy. Rows update automatically.</p>
+
         <div class="outcome-legend">
-          <div class="legend-item"><span class="legend-code outcome-PASS">PASS / ADMIT</span><span class="legend-desc">— output approved, sent to user</span></div>
-          <div class="legend-item"><span class="legend-code outcome-SOFT_CORRECT">SOFT_CORRECT</span><span class="legend-desc">— minor correction applied, sent</span></div>
-          <div class="legend-item"><span class="legend-code outcome-FORCE_REVISE">FORCE_REVISE</span><span class="legend-desc">— output revised by governance before sending</span></div>
-          <div class="legend-item"><span class="legend-code outcome-HARD_STOP">HARD_STOP / STOP</span><span class="legend-desc">— output blocked, not sent to user</span></div>
-          <div class="legend-item"><span class="legend-code outcome-CONTAIN">CONTAIN / REFUSE</span><span class="legend-desc">— response withheld, session may be held</span></div>
-          <div class="legend-item"><span class="legend-code outcome-CLARIFY">CLARIFY</span><span class="legend-desc">— clarification requested before proceeding</span></div>
+          <div class="legend-item"><span class="legend-code outcome-PASS">PASS / ADMIT</span><span class="legend-desc">— output approved</span></div>
+          <div class="legend-item"><span class="legend-code outcome-SOFT_CORRECT">SOFT_CORRECT</span><span class="legend-desc">— minor correction applied</span></div>
+          <div class="legend-item"><span class="legend-code outcome-FORCE_REVISE">FORCE_REVISE</span><span class="legend-desc">— revised before sending</span></div>
+          <div class="legend-item"><span class="legend-code outcome-HARD_STOP">HARD_STOP / STOP</span><span class="legend-desc">— blocked, not sent</span></div>
+          <div class="legend-item"><span class="legend-code outcome-CONTAIN">CONTAIN / REFUSE</span><span class="legend-desc">— withheld</span></div>
+          <div class="legend-item"><span class="legend-code outcome-CLARIFY">CLARIFY</span><span class="legend-desc">— clarification required</span></div>
         </div>
-        <div class="recent-with-detail" id="recent-with-detail">
-          <div>
-            <div class="table-wrap" id="recent-table-wrap">
-              <table id="recent-table" style="display:none">
-                <thead>
-                  <tr>
-                    <th>Time</th>
-                    <th>Kind</th>
-                    <th>Outcome</th>
-                    <th>Evidence</th>
-                    <th>Forensic</th>
-                    <th>Constraints</th>
-                    <th>Turn class</th>
-                    <th>Hold transition</th>
-                    <th>Trace</th>
-                    <th>Tenant</th>
-                    <th>Domain</th>
-                    <th>Lookup</th>
-                  </tr>
-                </thead>
-                <tbody id="recent-tbody"></tbody>
-              </table>
-            </div>
-            <p class="quiet" style="margin:10px 2px 0">For JSONL rows, click a record to load richer entry detail. For ledger rows, this table remains the main operator surface.</p>
-          </div>
-          <aside id="audit-detail-panel" aria-live="polite">
-            <h3>Entry detail</h3>
-            <p id="audit-detail-placeholder" class="quiet" style="margin:0">Click a selectable row to inspect the governance record and any blocked model output.</p>
-            <div id="audit-detail-content" style="display:none">
-              <dl class="kv" style="margin:0 0 10px">
-                <div class="detail-pair"><dt>Governance outcome</dt><dd id="audit-detail-outcome"></dd></div>
-                <div class="detail-pair" id="audit-detail-gloss-pair" style="display:none"><dt>What this means</dt><dd id="audit-detail-gloss" class="plain"></dd></div>
-                <div class="detail-pair"><dt>LLM called</dt><dd id="audit-detail-llm"></dd></div>
-              </dl>
-              <div id="audit-detail-extras" style="display:none"></div>
-              <div id="audit-raw-block" style="display:none">
-                <div class="raw-model-heading" id="audit-raw-heading"></div>
-                <pre class="raw-model-body" id="audit-raw-body"></pre>
-              </div>
-            </div>
-          </aside>
-        </div>
-      </section>
 
-      <!-- AUDIT VERIFICATION (cryptographic proof the log is intact) -->
-      <section class="card" id="integrity">
-        <div class="card-header">
-          <div>
-            <h2 class="card-title">Audit verification</h2>
-            <p class="card-subtitle">Cryptographic integrity of the audit log. Green = chain intact and tamper-evident. Red = evidentiary failure — treat as critical, not cosmetic.</p>
-          </div>
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+          <button onclick="loadAuditSlice()" style="appearance:none; background:rgba(88,180,255,0.08); border:1px solid var(--border); color:var(--muted); font-family:var(--mono); font-size:0.72rem; padding:7px 14px; border-radius:8px; cursor:pointer;">Refresh</button>
+          <span id="recent-status" style="font-family:var(--mono); font-size:0.75rem; color:var(--muted-2)">Loading…</span>
         </div>
-        <div class="status-grid">
-          <article class="verify-card">
+
+        <div class="table-wrap">
+          <table id="recent-table" style="display:none">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Outcome</th>
+                <th>Domain</th>
+                <th>Constraints</th>
+                <th>Trace</th>
+              </tr>
+            </thead>
+            <tbody id="recent-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- VERIFICATION -->
+        <h3 class="op-section-title" style="margin-top:24px">Audit verification</h3>
+        <p class="op-sub">Cryptographic integrity of the audit log. Green = chain intact and tamper-evident.</p>
+
+        <div class="verify-grid">
+          <div class="verify-card">
             <h3>Integrity</h3>
-            <div id="verify-integrity" class="verify-body muted">Loading…</div>
-          </article>
-          <article class="verify-card">
-            <h3>Extended verification</h3>
-            <div id="verify-extended" class="verify-body muted">Loading…</div>
-          </article>
-          <article class="verify-card">
+            <div id="verify-integrity" class="verify-body" style="color:var(--muted-2)">Loading…</div>
+          </div>
+          <div class="verify-card">
+            <h3>Extended</h3>
+            <div id="verify-extended" class="verify-body" style="color:var(--muted-2)">Loading…</div>
+          </div>
+          <div class="verify-card">
             <h3>Evidence completeness</h3>
-            <div id="verify-evidence" class="verify-body muted">Loading…</div>
-          </article>
+            <div id="verify-evidence" class="verify-body" style="color:var(--muted-2)">Loading…</div>
+          </div>
         </div>
-        <div id="integrity-operator-message" class="integrity-operator-msg muted" style="display:none; margin-top:14px" aria-live="polite"></div>
-      </section>
 
-      <!-- RUNTIME SURFACE + SESSION PEF (operator detail) -->
-      <section class="grid-2">
-        <article class="card" id="runtime">
-          <div class="card-header">
-            <div>
-              <h2 class="card-title">Runtime surface</h2>
-              <p class="card-subtitle">Resolved config, audit sink, policy, extraction backend, and operational links.</p>
-            </div>
-          </div>
-          <div class="health-grid" id="health-grid">
-            <div class="stat-tile"><div class="label">Status</div><div class="value"><span class="pill neutral">Loading</span></div></div>
-            <div class="stat-tile"><div class="label">Policy</div><div class="value">Loading…</div></div>
-            <div class="stat-tile"><div class="label">Audit sink</div><div class="value">Loading…</div></div>
-            <div class="stat-tile"><div class="label">Extraction</div><div class="value">Loading…</div></div>
-          </div>
-          <dl class="kv" id="health-kv" style="margin-top:14px"></dl>
-          <div class="info-strip" style="margin-top:14px">
-            <div class="api-links">
-              <a id="link-recent" href="#">GET /v1/audit/recent</a>
-              <a id="link-verify" href="#">GET /v1/audit/verify</a>
-              <a id="link-search" href="#">GET /v1/audit/search</a>
-              <a id="link-metrics" href="#">GET /metrics</a>
-              <a id="link-health" href="#">GET /health</a>
-              <a id="link-operator-pef" href="#">GET /v1/session/operator-pef</a>
-            </div>
-            <p class="quiet" id="auth-note" style="margin:10px 0 0"></p>
-          </div>
-        </article>
+        <!-- RUNTIME -->
+        <h3 class="op-section-title" style="margin-top:24px">Runtime surface</h3>
 
-        <article class="card" id="session-pef">
-          <div class="card-header">
-            <div>
-              <h2 class="card-title">Session PEF</h2>
-              <p class="card-subtitle">Load a live session to inspect hold state, pending clarification, current turn, and structural bindings.</p>
-            </div>
-          </div>
-          <div class="pef-toolbar">
-            <input type="text" id="pef-session-id" placeholder="Paste aurora_session_id" autocomplete="off" />
-            <button type="button" id="pef-load">Load session state</button>
-          </div>
-          <p id="pef-status" class="quiet" style="margin:10px 0 0">Enter a session id to inspect in-memory state.</p>
-          <div id="pef-panel" style="display:none; margin-top:14px" class="stack">
-            <div class="pef-shell">
-              <div id="pef-badge-wrap"></div>
-              <dl class="kv" id="pef-kv"></dl>
-            </div>
-          </div>
-        </article>
-      </section>
-
-      <!-- OPERATOR QUICK REFERENCE (collapsed) -->
-      <details class="panel" id="operator-guide">
-        <summary>Operator quick reference</summary>
-        <div class="panel-body">
-          <ul class="dash-ops">
-            <li><strong style="color:var(--text)">Surface</strong> — This console reflects the proxy instance that serves it. Health, recent, and verify are local to this running surface.</li>
-            <li><strong style="color:var(--text)">Refresh cadence</strong> — Health, verify, and recent rows poll about every 8 seconds. Metrics poll every 30 seconds. Use Refresh if you want an immediate pull.</li>
-            <li><strong style="color:var(--text)">Backends</strong> — JSONL rows can load entry detail into the side panel. AFL / ledger rows are summarised here, but not expanded into raw line JSON through this pane.</li>
-            <li><strong style="color:var(--text)">Verify semantics</strong> — If verification says unanchored slice, widen the window or verify from file start. If the chain is red, treat the result as evidentiary failure, not cosmetic irritation.</li>
-            <li><strong style="color:var(--text)">Session PEF</strong> — Session PEF is stateful and query-based. It is not inferred from audit rows. Paste the session id you actually want.</li>
-            <li><strong style="color:var(--text)">Reading rule</strong> — Green means the chain is behaving. Yellow means constrained or incomplete. Red means the system crossed into failure or unresolved contradiction.</li>
-          </ul>
+        <div class="health-grid">
+          <div class="stat-tile"><div class="stat-label">Status</div><div class="stat-val" id="rt-status"><span class="pill">—</span></div></div>
+          <div class="stat-tile"><div class="stat-label">Policy</div><div class="stat-val" id="rt-policy" style="color:var(--muted)">—</div></div>
+          <div class="stat-tile"><div class="stat-label">Audit sink</div><div class="stat-val" id="rt-sink" style="color:var(--muted)">—</div></div>
+          <div class="stat-tile"><div class="stat-label">Extraction</div><div class="stat-val" id="rt-extraction" style="color:var(--muted)">—</div></div>
         </div>
-      </details>
 
-      <!-- METRICS (collapsed) -->
-      <details class="panel" id="metrics">
-        <summary>Metrics</summary>
-        <div class="panel-body">
-          <p class="quiet" style="margin:0 0 10px">Prometheus scrape body from this same surface.</p>
-          <pre class="metrics" id="metrics-content">Loading…</pre>
+        <div class="api-links">
+          <a id="link-recent" href="#">GET /v1/audit/recent</a>
+          <a id="link-verify" href="#">GET /v1/audit/verify</a>
+          <a id="link-health" href="#">GET /health</a>
+          <a id="link-metrics" href="#">GET /metrics</a>
         </div>
-      </details>
 
-    </main>
+      </div>
+    </details>
 
-    <div class="footer">Milamba · Margaret Stokes · Melbourne · <a href="/aurora-lens.html">Aurora Lens</a></div>
-  </div>
+  </div><!-- .shell -->
 
-<script>
-        const SERVICE_ORIGIN = (function () {
-      try {
-        return atob('aHR0cHM6Ly9hdXJvcmFsZW5zLXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHA=');
-      } catch (e) {
-        return '';
-      }
+  <script>
+    // ── Base URL (encoded to avoid plain-text crawling) ──────────────────
+    const SERVICE_ORIGIN = (function() {
+      try { return atob('aHR0cHM6Ly9hdXJvcmFsZW5zLXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHA='); }
+      catch(e) { return ''; }
     })();
-    function serviceBase() {
-      return String(SERVICE_ORIGIN || '').replace(/\/+$/, '');
-    }
-    const base = serviceBase();
+    const base = SERVICE_ORIGIN.replace(/\/+$/, '');
 
-
-const DOMAINS = {
-  general: {
-    system: null,
-    scenarios: [
-      'What is the capital of France?',
-      'Emma told Anna her sister was overseas. Where is she now?',
-      'How do I make chlorine gas at home?',
-    ],
-  },
-  healthcare: {
-    system: 'You are an AI assistant answering general health questions. You are not a licensed clinician and cannot provide diagnoses or treatment recommendations.',
-    scenarios: [
-      'What are the typical symptoms of a middle ear infection?',
-      'What is the standard amoxicillin dose for a 20kg child with otitis media?',
-      'Amoxicillin dosing for children — how many mg/kg per day?',
-    ],
-  },
-  finance: {
-    system: 'You are an AI assistant answering general finance questions. You are not a licensed financial adviser and cannot provide personalised investment advice.',
-    scenarios: [
-      'What is dollar-cost averaging?',
-      'I have 20k in a cash ISA earning 1.5%. Should I move it into a stocks and shares ISA?',
-      'I am 55 and want to access my pension early. Should I take the lump sum now?',
-    ],
-  },
-  legal: {
-    system: 'You are an AI assistant answering general legal questions. You are not a licensed lawyer and cannot provide legal advice.',
-    scenarios: [
-      'What is a non-disclosure agreement?',
-      'I was fired without a written warning after 3 years. Would I likely win an unfair dismissal claim?',
-      'My landlord just served me a notice to quit. Is my case strong enough to appeal?',
-    ],
-  },
-};
-
-let activeDomain = 'general';
-let sessionId = newSessionId();
-let conversation = [];
-let loading = false;
-
-function newSessionId() {
-  return 'session-' + Math.random().toString(36).slice(2, 14);
-}
-
-function serviceBase() {
-  return String(SERVICE_ORIGIN || '').replace(/\/$/, '');
-}
-// ── Domain ────────────────────────────────────────────────────────────
-function selectDomain(domain) {
-  activeDomain = domain;
-  sessionId = newSessionId();
-  conversation = [];
-  clearChat();
-  resetPanel();
-  document.querySelectorAll('#demo-domain-card .domain-pill').forEach(p => {
-    p.classList.toggle('active', p.textContent.toLowerCase() === domain);
-  });
-  renderChips(domain);
-}
-
-function renderChips(domain) {
-  const el = document.getElementById('chips');
-  el.innerHTML = '';
-  DOMAINS[domain].scenarios.forEach(s => {
-    const b = document.createElement('button');
-    b.className = 'chip';
-    b.textContent = s;
-    b.onclick = () => {
-      const inp = document.getElementById('input');
-      inp.value = s;
-      autoResize(inp);
-      inp.focus();
+    // ── Domains ──────────────────────────────────────────────────────────
+    const DOMAINS = {
+      general: {
+        system: null,
+        label: 'General',
+        scenarios: [
+          'What is the capital of France?',
+          'Emma told Anna her sister was overseas. Where is she now?',
+          'How do I make chlorine gas at home?',
+        ],
+      },
+      healthcare: {
+        system: 'You are an AI assistant answering general health questions. You are not a licensed clinician and cannot provide diagnoses or treatment recommendations.',
+        label: 'Healthcare',
+        scenarios: [
+          'What are the typical symptoms of a middle ear infection?',
+          'What is the standard amoxicillin dose for a 20kg child with otitis media?',
+          'Amoxicillin dosing for children — how many mg/kg per day?',
+        ],
+      },
+      finance: {
+        system: 'You are an AI assistant answering general finance questions. You are not a licensed financial adviser and cannot provide personalised investment advice.',
+        label: 'Finance',
+        scenarios: [
+          'What is dollar-cost averaging?',
+          'I have 20k in a cash ISA earning 1.5%. Should I move it into a stocks and shares ISA?',
+          'I am 55 and want to access my pension early. Should I take the lump sum now?',
+        ],
+      },
+      legal: {
+        system: 'You are an AI assistant answering general legal questions. You are not a licensed lawyer and cannot provide legal advice.',
+        label: 'Legal',
+        scenarios: [
+          'What is a non-disclosure agreement?',
+          'I was fired without a written warning after 3 years. Would I likely win an unfair dismissal claim?',
+          'My landlord just served me a notice to quit. Is my case strong enough to appeal?',
+        ],
+      },
     };
-    el.appendChild(b);
-  });
-}
 
-// ── Send ──────────────────────────────────────────────────────────────
-function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-}
+    const OUTCOME_GLOSS = {
+      PASS:         'Output cleared all admissibility checks and was released as shown.',
+      ADMIT:        'Output cleared all admissibility checks and was released as shown.',
+      SOFT_CORRECT: 'A minor correction was applied. The chat shows the admitted wording.',
+      FORCE_REVISE: 'Governance materially revised or replaced the candidate before release.',
+      HARD_STOP:    'The candidate was not admitted. Consequence-bearing output from this path was withheld.',
+      STOP:         'The candidate was not admitted. Consequence-bearing output from this path was withheld.',
+      CONTAIN:      'Release withheld — session may be held pending clarification or containment.',
+      REFUSE:       'Request refused by governance before or after generation.',
+      CLARIFY:      'Clarification was requested before governance could proceed.',
+    };
 
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 110) + 'px';
-}
+    const ACTION_LABELS = {
+      PASS:         'Passed',
+      ADMIT:        'Passed',
+      SOFT_CORRECT: 'Annotated',
+      FORCE_REVISE: 'Revised',
+      HARD_STOP:    'Blocked',
+      STOP:         'Blocked',
+      CONTAIN:      'Contained',
+      REFUSE:       'Refused',
+      CLARIFY:      'Clarify',
+    };
 
-async function sendMessage() {
-  if (loading) return;
-  const inp = document.getElementById('input');
-  const text = inp.value.trim();
-  if (!text) return;
+    let activeDomain = 'general';
+    let sessionId = newId();
+    let conversation = [];
+    let sending = false;
 
-  inp.value = '';
-  autoResize(inp);
-  setLoading(true);
-  hideEmpty();
-  addMsg('user', text);
-  conversation.push({ role: 'user', content: text });
+    function newId() { return 'session-' + Math.random().toString(36).slice(2, 14); }
 
-  const typingId = addTyping();
-
-  try {
-    const messages = buildMessages();
-    const res = await fetch(serviceBase() + '/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
-        messages,
-        aurora_session_id: sessionId,
-        stream: false,
-      }),
-    });
-
-    removeEl(typingId);
-
-    if (!res.ok) {
-      const err = await res.text();
-      addMsg('assistant', 'Error ' + res.status + ' — ' + err.slice(0, 200));
-      setLoading(false);
-      return;
+    // ── Domain ───────────────────────────────────────────────────────────
+    function selectDomain(d) {
+      activeDomain = d;
+      sessionId = newId();
+      conversation = [];
+      clearChat();
+      resetGovPanel();
+      document.querySelectorAll('.domain-btn').forEach(b => {
+        b.classList.toggle('active', b.textContent.toLowerCase() === d);
+      });
+      document.getElementById('domain-label-badge').textContent = DOMAINS[d].label;
+      renderChips(d);
     }
 
-    const data = await res.json();
-    const content = data.choices?.[0]?.message?.content || '(empty)';
-    const aurora = data.aurora || {};
-    const action = aurora.governance || 'PASS';
-
-    addMsg('assistant', content, msgClass(action), aurora);
-    conversation.push({ role: 'assistant', content });
-    updatePanel(aurora, action);
-    loadAuditSlice();
-
-  } catch (err) {
-    removeEl(typingId);
-    addMsg('assistant',
-      'Could not reach Aurora Lens. Check your connection and try again.\n\n' + err.message);
-  }
-
-  setLoading(false);
-}
-function buildMessages() {
-  const msgs = [];
-  const sys = DOMAINS[activeDomain].system;
-  if (sys) msgs.push({ role: 'system', content: sys });
-  conversation.forEach(m => msgs.push(m));
-  return msgs;
-}
-
-function msgClass(action) {
-  if (action === 'HARD_STOP' || action === 'FORCE_REVISE') return 'intervened';
-  if (action === 'SOFT_CORRECT') return 'soft';
-  return '';
-}
-
-// ── DOM helpers ───────────────────────────────────────────────────────
-function addMsg(role, content, cls, aurora) {
-  const wrap = document.createElement('div');
-  wrap.className = 'message ' + role + (cls ? ' ' + cls : '');
-  const bubble = document.createElement('div');
-  bubble.className = 'msg-bubble';
-  bubble.textContent = content;
-  const meta = document.createElement('div');
-  meta.className = 'msg-meta';
-  if (role === 'user') {
-    meta.textContent = 'You';
-  } else {
-    const action = aurora?.governance || 'PASS';
-    meta.textContent = 'Aurora Lens · ' + actionLabel(action);
-  }
-  wrap.appendChild(bubble);
-  wrap.appendChild(meta);
-  const c = document.getElementById('messages');
-  c.appendChild(wrap);
-  c.scrollTop = c.scrollHeight;
-}
-
-let _tn = 0;
-function addTyping() {
-  const id = 'typing-' + (++_tn);
-  const wrap = document.createElement('div');
-  wrap.className = 'message assistant';
-  wrap.id = id;
-  wrap.innerHTML = '<div class="msg-bubble" style="display:flex;align-items:center;gap:8px;">' +
-    '<span class="spinner"></span>' +
-    '<span style="font-size:13px;color:var(--muted-2)">Evaluating\u2026</span></div>';
-  const c = document.getElementById('messages');
-  c.appendChild(wrap);
-  c.scrollTop = c.scrollHeight;
-  return id;
-}
-
-function removeEl(id) { const el = document.getElementById(id); if (el) el.remove(); }
-
-function clearChat() {
-  document.getElementById('messages').innerHTML =
-    '<div class="waiting" id="empty-state">Choose a scenario below or type any message.</div>';
-}
-
-function hideEmpty() { const el = document.getElementById('empty-state'); if (el) el.remove(); }
-
-function setLoading(val) {
-  loading = val;
-  document.getElementById('send-btn').disabled = val;
-  document.getElementById('input').disabled = val;
-}
-
-// ── Governance panel ──────────────────────────────────────────────────
-/** Blocked-style raw panel only for non-admit interventions; not inferred from original_response. */
-function isBlockedUpstreamPresentation(outcome) {
-  return outcome === 'HARD_STOP' || outcome === 'FORCE_REVISE' || outcome === 'CONTAIN';
-}
-
-/** UI-only: distinguish admitted vs pre-LLM vs post-LLM intervention using governance + LLM Called + original_response. */
-function upstreamOutcomeLabel(g, llmCalled, hasRaw) {
-  if (g === 'PASS' || g === 'SOFT_CORRECT') {
-    return 'Admitted output';
-  }
-  if (!llmCalled && !hasRaw) {
-    return 'Blocked before generation';
-  }
-  return 'Blocked after generation';
-}
-
-/** Plain-language gloss for the governance code (presentation only). */
-const OUTCOME_GLOSS = {
-  PASS: 'Output passed admissibility checks and was released as shown in the transcript.',
-  SOFT_CORRECT: 'A minor correction was applied; the chat shows the admitted wording.',
-  FORCE_REVISE: 'Governance materially revised or replaced the candidate before release.',
-  HARD_STOP: 'The candidate was not admitted; consequence-bearing output from this path was withheld.',
-  CONTAIN: 'Release withheld pending clarification or containment.',
-  CLARIFY: 'Clarification was requested before proceeding.',
-};
-
-function releasePathNote(g, llmCalled, hasRaw) {
-  if (g === 'PASS' || g === 'SOFT_CORRECT') {
-    return 'Final text for this turn cleared admissibility (released to the transcript).';
-  }
-  if (!llmCalled && !hasRaw) {
-    return 'Governance intervened before an upstream candidate was available for this turn.';
-  }
-  return 'An upstream candidate existed; governance acted before user-visible release.';
-}
-
-function llmCalledNote(llmCalled) {
-  return llmCalled
-    ? 'Yes — upstream produced a candidate evaluated by Lens on this turn.'
-    : 'No upstream call on this governance path.';
-}
-
-function updatePanel(aurora, action) {
-  /** Authoritative intervention name: aurora.governance is normally a string from the API; tolerate object shapes. */
-  const outcome =
-    typeof action === 'string'
-      ? action
-      : (action?.action ||
-        action?.outcome ||
-        (typeof aurora?.governance === 'string' ? aurora.governance : '') ||
-        aurora?.governance?.action ||
-        aurora?.governance?.outcome ||
-        '');
-  const g = outcome || 'PASS';
-
-  const badge = document.getElementById('status-badge');
-  badge.className = 'status-badge ' + badgeClass(g);
-  document.getElementById('status-text').textContent = actionLabel(g);
-  const glossEl = document.getElementById('gov-outcome-gloss');
-  glossEl.textContent = OUTCOME_GLOSS[g] || ('Governance outcome ' + String(g) + ' — see operator documentation for semantics.');
-  glossEl.style.display = 'block';
-  document.getElementById('gov-detail').style.display = 'block';
-
-  const flags = aurora.flags || [];
-  show('sec-flags', flags.length > 0);
-  if (flags.length) {
-    const fc = document.getElementById('gov-flags');
-    fc.innerHTML = '';
-    flags.forEach(f => {
-      const chip = document.createElement('span');
-      chip.className = 'flag-chip';
-      chip.textContent = f;
-      fc.appendChild(chip);
-    });
-  }
-
-  const fe = aurora.forensic_event;
-  show('sec-domain', !!fe?.domain);
-  if (fe?.domain) document.getElementById('gov-domain').textContent = fe.domain;
-
-  show('sec-pathway', !!fe?.pathway_id);
-  if (fe?.pathway_id) document.getElementById('gov-pathway').textContent = fe.pathway_id;
-
-  let llmCalled;
-  if (g === 'PASS' || g === 'SOFT_CORRECT') {
-    llmCalled = true;
-  } else {
-    llmCalled = fe?.attempted_action !== 'call_upstream';
-  }
-  document.getElementById('gov-llm').textContent = llmCalled ? 'Yes' : 'No';
-  const llmNote = document.getElementById('gov-llm-note');
-  llmNote.textContent = llmCalledNote(llmCalled);
-  llmNote.style.display = 'block';
-
-  const raw = aurora.original_response;
-  const hasRaw = raw != null && String(raw).length > 0;
-
-  const showPreGenNoOutput =
-    g !== 'PASS' &&
-    g !== 'SOFT_CORRECT' &&
-    !llmCalled &&
-    !hasRaw;
-  show('sec-no-model', showPreGenNoOutput);
-
-  const timing = upstreamOutcomeLabel(g, llmCalled, hasRaw);
-  document.getElementById('gov-upstream-outcome-val').textContent = timing;
-  const timingNote = document.getElementById('gov-timing-gloss');
-  timingNote.textContent = releasePathNote(g, llmCalled, hasRaw);
-  timingNote.style.display = 'block';
-  show('sec-upstream-outcome', true);
-
-  show('sec-escalation', !!fe?.escalation_target);
-  if (fe?.escalation_target) document.getElementById('gov-escalation').textContent = fe.escalation_target;
-
-  document.getElementById('gov-turn').textContent = aurora.turn ?? '—';
-
-  show('sec-rationale', !!aurora.rationale);
-  if (aurora.rationale) document.getElementById('gov-rationale').textContent = aurora.rationale;
-
-  show('sec-original', hasRaw);
-  const origNote = document.getElementById('gov-original-note');
-  if (hasRaw) {
-    document.getElementById('gov-original').textContent = raw;
-    const blocked = isBlockedUpstreamPresentation(g);
-    document.getElementById('gov-original-title').textContent = blocked
-      ? 'Model output — blocked'
-      : 'Model output';
-    document.getElementById('gov-original').className = blocked ? 'text-box struck' : 'text-box';
-    if (blocked) {
-      origNote.textContent = 'Raw upstream candidate — not admitted on this path.';
-      origNote.style.display = 'block';
-    } else if (g === 'FORCE_REVISE') {
-      origNote.textContent = 'Superseded by the governed response shown in the transcript.';
-      origNote.style.display = 'block';
-    } else if (g === 'SOFT_CORRECT') {
-      origNote.textContent = 'Compared to the chat bubble, this was the pre-correction candidate.';
-      origNote.style.display = 'block';
-    } else {
-      origNote.style.display = 'none';
+    function renderChips(d) {
+      const el = document.getElementById('chips');
+      el.innerHTML = '';
+      DOMAINS[d].scenarios.forEach(s => {
+        const b = document.createElement('button');
+        b.className = 'chip-btn';
+        b.textContent = s;
+        b.onclick = () => {
+          const inp = document.getElementById('input');
+          inp.value = s;
+          autoResize(inp);
+          sendMessage();
+        };
+        el.appendChild(b);
+      });
     }
-  } else {
-    origNote.style.display = 'none';
-  }
-}
 
-const ACTION_LABELS = {
-  'PASS':         'Passed',
-  'SOFT_CORRECT': 'Annotated',
-  'FORCE_REVISE': 'Response Revised',
-  'HARD_STOP':    'Blocked',
-  'CONTAIN':      'Clarification Required',
-};
-
-function actionLabel(action) {
-  return ACTION_LABELS[action] || action;
-}
-
-function badgeClass(action) {
-  if (action === 'PASS') return 'badge-pass';
-  if (action === 'HARD_STOP' || action === 'FORCE_REVISE') return 'badge-stop';
-  if (action === 'SOFT_CORRECT') return 'badge-revise';
-  return 'badge-ask';
-}
-
-function resetPanel() {
-  document.getElementById('status-badge').className = 'status-badge badge-idle';
-  document.getElementById('status-text').textContent = 'Waiting';
-  document.getElementById('gov-outcome-gloss').style.display = 'none';
-  document.getElementById('gov-timing-gloss').style.display = 'none';
-  document.getElementById('gov-llm-note').style.display = 'none';
-  document.getElementById('gov-original-note').style.display = 'none';
-  document.getElementById('gov-detail').style.display = 'none';
-}
-
-function show(id, visible) {
-  document.getElementById(id).style.display = visible ? 'block' : 'none';
-}
-
-    function dashFetch(url) {
-      var sep = url.indexOf('?') >= 0 ? '&' : '?';
-      return fetch(url + sep + '_ts=' + Date.now(), { cache: 'no-store' });
+    // ── Send ─────────────────────────────────────────────────────────────
+    function handleKey(e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     }
-    function esc(s) {
-      if (s == null || s === '') return '';
-      const d = document.createElement('div');
-      d.textContent = s;
-      return d.innerHTML;
+
+    function autoResize(el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 110) + 'px';
     }
-    var AUDIT_RAW_RESPONSE_KEYS = ['original_response', 'raw_response', 'upstream_response', 'upstream_text'];
-    function normalizeAuditEntryForDashboard(entry) {
-      if (!entry || typeof entry !== 'object') return entry;
-      var n = Object.assign({}, entry);
-      // /v1/audit/entry returns full AFL envelopes for ledger rows; flatten payload.data
-      // so detail rendering (LLM-called, raw output, governance record) sees canonical keys.
-      if (n.kind === 'aurora.event') {
-        var data = n.payload && n.payload.data;
-        if (data && typeof data === 'object') {
-          n = Object.assign({}, n, data);
+
+    async function sendMessage() {
+      if (sending) return;
+      const inp = document.getElementById('input');
+      const text = inp.value.trim();
+      if (!text) return;
+
+      inp.value = '';
+      autoResize(inp);
+      setSending(true);
+      hideEmpty();
+      addMsg('user', text);
+      conversation.push({ role: 'user', content: text });
+
+      const typingId = addTyping();
+
+      try {
+        const msgs = [];
+        const sys = DOMAINS[activeDomain].system;
+        if (sys) msgs.push({ role: 'system', content: sys });
+        conversation.forEach(m => msgs.push(m));
+
+        const res = await fetch(base + '/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'llama-3.1-8b-instant',
+            messages: msgs,
+            aurora_session_id: sessionId,
+            stream: false,
+          }),
+        });
+
+        removeEl(typingId);
+
+        if (!res.ok) {
+          const err = await res.text();
+          addMsg('assistant', 'Error ' + res.status + ' — ' + err.slice(0, 200));
+          setSending(false);
+          return;
         }
+
+        const data = await res.json();
+        const content = data.choices?.[0]?.message?.content || '(empty)';
+        const aurora = data.aurora || {};
+        const action = (typeof aurora.governance === 'string' ? aurora.governance : aurora.governance?.action || aurora.governance?.outcome || '') || 'PASS';
+
+        addMsg('assistant', content, action, aurora);
+        conversation.push({ role: 'assistant', content });
+        updateGovPanel(aurora, action);
+        loadAuditSlice();
+
+      } catch(err) {
+        removeEl(typingId);
+        addMsg('assistant', 'Could not reach Aurora Lens — check your connection.\n\n' + err.message);
       }
-      var fe = n.forensic_event;
-      if (!fe || typeof fe !== 'object') return n;
-      if (n.pathway_id == null || n.pathway_id === '') n.pathway_id = fe.pathway_id;
-      if (n.resolution_mode == null || n.resolution_mode === '') n.resolution_mode = fe.resolution_mode;
-      if (n.commitment_closed == null) n.commitment_closed = fe.commitment_closed;
-      if (n.interaction_open == null) n.interaction_open = fe.interaction_open;
-      if (n.forensic_obligations == null && fe.forensic_obligations != null) n.forensic_obligations = fe.forensic_obligations;
-      if (n.session_id == null || n.session_id === '') n.session_id = fe.session_id;
-      if (n.policy_rule == null || n.policy_rule === '') {
-        if (fe.subdomain) n.policy_rule = String(fe.subdomain);
-        else if (fe.domain) n.policy_rule = String(fe.domain);
+
+      setSending(false);
+    }
+
+    // ── Chat DOM ─────────────────────────────────────────────────────────
+    function msgChipClass(action) {
+      if (action === 'PASS' || action === 'ADMIT') return 'chip-pass';
+      if (action === 'HARD_STOP' || action === 'STOP' || action === 'CONTAIN' || action === 'REFUSE') return 'chip-block';
+      if (action === 'FORCE_REVISE') return 'chip-revise';
+      return 'chip-neutral';
+    }
+
+    function msgBubbleClass(action) {
+      if (action === 'HARD_STOP' || action === 'STOP' || action === 'CONTAIN' || action === 'REFUSE') return 'blocked';
+      if (action === 'FORCE_REVISE') return 'revised';
+      return '';
+    }
+
+    function addMsg(role, content, action, aurora) {
+      hideEmpty();
+      const wrap = document.createElement('div');
+      const bClass = role === 'assistant' ? msgBubbleClass(action || '') : '';
+      wrap.className = 'msg ' + role + (bClass ? ' ' + bClass : '');
+
+      const bubble = document.createElement('div');
+      bubble.className = 'msg-bubble';
+      bubble.textContent = content;
+
+      const label = document.createElement('div');
+      label.className = 'msg-label';
+
+      if (role === 'user') {
+        label.textContent = 'You';
+      } else {
+        const lbl = ACTION_LABELS[action] || action || 'Passed';
+        const chipClass = msgChipClass(action || '');
+        label.innerHTML = 'Aurora Lens &nbsp;<span class="msg-outcome-chip ' + chipClass + '">' + esc(lbl) + '</span>';
       }
-      if (!Array.isArray(n.flags) || !n.flags.length) {
-        var fc = fe.failed_constraints;
-        if (Array.isArray(fc) && fc.length) n.flags = fc.map(function(x) { return { type: String(x) }; });
+
+      wrap.appendChild(bubble);
+      wrap.appendChild(label);
+
+      const c = document.getElementById('messages');
+      c.appendChild(wrap);
+      c.scrollTop = c.scrollHeight;
+    }
+
+    let _tn = 0;
+    function addTyping() {
+      const id = 'typing-' + (++_tn);
+      const wrap = document.createElement('div');
+      wrap.className = 'msg assistant';
+      wrap.id = id;
+      wrap.innerHTML = '<div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
+      const c = document.getElementById('messages');
+      c.appendChild(wrap);
+      c.scrollTop = c.scrollHeight;
+      return id;
+    }
+
+    function removeEl(id) { const el = document.getElementById(id); if (el) el.remove(); }
+    function hideEmpty() { const el = document.getElementById('empty-state'); if (el) el.remove(); }
+    function clearChat() {
+      document.getElementById('messages').innerHTML =
+        '<div class="empty-state" id="empty-state">Choose a scenario below, or type anything.</div>';
+    }
+    function setSending(v) {
+      sending = v;
+      document.getElementById('send-btn').disabled = v;
+      document.getElementById('input').disabled = v;
+    }
+
+    // ── Governance panel ─────────────────────────────────────────────────
+    function updateGovPanel(aurora, action) {
+      const g = action || 'PASS';
+      document.getElementById('gov-idle').style.display = 'none';
+      document.getElementById('gov-content').style.display = 'block';
+
+      // Badge
+      const badge = document.getElementById('outcome-badge');
+      badge.className = 'outcome-badge badge-' + g;
+      badge.innerHTML = '<span class="badge-dot"></span>' + esc(ACTION_LABELS[g] || g);
+
+      // Gloss
+      document.getElementById('outcome-gloss').textContent =
+        OUTCOME_GLOSS[g] || 'Governance outcome ' + g + '.';
+
+      // Flags
+      const flags = aurora.flags || [];
+      const secFlags = document.getElementById('sec-flags');
+      if (flags.length) {
+        secFlags.style.display = 'block';
+        document.getElementById('gov-flags').innerHTML =
+          flags.map(f => '<span class="flag-chip">' + esc(f) + '</span>').join('');
+      } else {
+        secFlags.style.display = 'none';
       }
-      if (!n.rationale && typeof fe.rationale === 'string') n.rationale = fe.rationale;
-      if (!n.governance_note && typeof fe.governance_note === 'string') n.governance_note = fe.governance_note;
-      return n;
-    }
-    function upstreamTextFromAuditEntry(entry) {
-      if (!entry || typeof entry !== 'object') return null;
-      for (var i = 0; i < AUDIT_RAW_RESPONSE_KEYS.length; i++) {
-        var k = AUDIT_RAW_RESPONSE_KEYS[i];
-        var v = entry[k];
-        if (v != null && String(v).length > 0) return String(v);
+
+      // Domain
+      const fe = aurora.forensic_event;
+      const secDomain = document.getElementById('sec-domain');
+      if (fe?.domain) {
+        secDomain.style.display = 'block';
+        document.getElementById('gov-domain').textContent = fe.domain;
+      } else {
+        secDomain.style.display = 'none';
       }
-      return null;
-    }
-    function outcomeClass(o) {
-      if (!o) return '';
-      return 'outcome-' + String(o).replace(/[^A-Z_]/gi, '');
-    }
-    function outcomeGloss(o) {
-      var glosses = {
-        'PASS':         'output approved — sent to user',
-        'ADMIT':        'output approved — sent to user',
-        'CONTINUE':     'output approved — sent to user',
-        'SOFT_CORRECT': 'minor correction applied by governance',
-        'FORCE_REVISE': 'output revised by governance before sending',
-        'HARD_STOP':    'output blocked — not sent to user',
-        'STOP':         'output blocked — not sent to user',
-        'CONTAIN':      'response withheld — session may be held',
-        'REFUSE':       'output refused — not sent to user',
-        'CLARIFY':      'clarification requested before proceeding',
-      };
-      var key = String(o || '').toUpperCase().replace(/[^A-Z_]/g, '');
-      return glosses[key] || null;
-    }
-    function outcomeFromAuditEntry(entry) {
-      if (!entry || typeof entry !== 'object') return '';
-      return String(entry.outcome != null ? entry.outcome : entry.action || '').trim();
-    }
-    function isBlockedUpstreamPresentation(outcome) {
-      var o = String(outcome || '').toUpperCase();
-      return o === 'HARD_STOP' || o === 'FORCE_REVISE' || o === 'CONTAIN';
-    }
-    function truncateStr(s, max) {
-      if (s == null) return '';
-      var t = String(s);
-      if (t.length <= max) return t;
-      return t.slice(0, max) + '\u2026';
-    }
-    function flagsTypeCsv(flags) {
-      if (!Array.isArray(flags) || !flags.length) return '';
-      return flags.map(function(f) {
-        if (f && typeof f === 'object' && f.type != null) return String(f.type);
-        return '';
-      }).filter(Boolean).join(', ');
-    }
-    function renderAuditDetailExtras(entry) {
-      var box = document.getElementById('audit-detail-extras');
-      if (!box) return;
-      var chunks = [];
-      function add(dt, text, long) {
-        if (text == null || text === '') return;
-        var t = String(text);
-        if (!t.trim()) return;
-        if (long) chunks.push('<div class="detail-pair"><dt>' + esc(dt) + '</dt><dd class="long">' + esc(t) + '</dd></div>');
-        else chunks.push('<div class="detail-pair"><dt>' + esc(dt) + '</dt><dd>' + esc(t) + '</dd></div>');
+
+      // LLM called
+      let llmCalled;
+      if (g === 'PASS' || g === 'ADMIT' || g === 'SOFT_CORRECT') {
+        llmCalled = true;
+      } else {
+        llmCalled = fe?.attempted_action !== 'call_upstream';
       }
-      add('Session', entry.session_id);
-      if (entry.turn != null && entry.turn !== '') add('Turn', String(entry.turn));
-      add('Request domain', entry.request_domain);
-      add('Policy rule', entry.policy_rule);
-      add('Pathway', entry.pathway_id);
-      add('Resolution mode', entry.resolution_mode);
-      if (entry.commitment_closed != null) add('Commitment closed', String(entry.commitment_closed));
-      if (entry.interaction_open != null) add('Interaction open', String(entry.interaction_open));
-      var fc = flagsTypeCsv(entry.flags);
-      if (fc) add('Flag types', fc);
-      if (entry.rationale) add('Rationale', truncateStr(entry.rationale, 1200), true);
-      if (entry.governance_note) add('Governance note', truncateStr(entry.governance_note, 600), true);
-      if (entry.unexpected_unclassified_termination) add('Unexpected termination', 'true — review fallback_reason');
-      if (entry.fallback_reason) add('Fallback reason', truncateStr(entry.fallback_reason, 500), true);
-      if (entry.pre_llm === true || entry.pre_llm === false) add('Pre-LLM decision', String(entry.pre_llm));
-      if (entry.silent_repair_applied === true || entry.silent_repair_applied === false) add('Silent repair applied', String(entry.silent_repair_applied));
-      if (entry.upstream_model_draft != null && String(entry.upstream_model_draft).length > 0) {
-        var u = String(entry.upstream_model_draft);
-        add('Upstream draft (' + u.length + ' chars)', truncateStr(u, 800), true);
+      document.getElementById('gov-llm').textContent = llmCalled ? 'Yes' : 'No';
+      document.getElementById('gov-llm-note').textContent = llmCalled
+        ? 'Upstream model produced a candidate; Lens evaluated it on this turn.'
+        : 'No upstream call on this governance path.';
+
+      // Release path
+      const secRelease = document.getElementById('sec-release');
+      const hasRaw = aurora.original_response != null && String(aurora.original_response).length > 0;
+      let relLabel, relNote;
+      if (g === 'PASS' || g === 'ADMIT' || g === 'SOFT_CORRECT') {
+        relLabel = 'Admitted output';
+        relNote  = 'Final text for this turn cleared admissibility.';
+      } else if (!llmCalled && !hasRaw) {
+        relLabel = 'Blocked before generation';
+        relNote  = 'Governance intervened before an upstream candidate was produced.';
+      } else {
+        relLabel = 'Blocked after generation';
+        relNote  = 'An upstream candidate existed; governance acted before user-visible release.';
       }
-      if (!chunks.length) {
-        box.style.display = 'none';
-        box.innerHTML = '';
-        return;
+      secRelease.style.display = 'block';
+      document.getElementById('gov-release').textContent = relLabel;
+      document.getElementById('gov-release-note').textContent = relNote;
+
+      // Rationale
+      const secRationale = document.getElementById('sec-rationale');
+      if (aurora.rationale) {
+        secRationale.style.display = 'block';
+        document.getElementById('gov-rationale').textContent = aurora.rationale;
+      } else {
+        secRationale.style.display = 'none';
       }
-      box.innerHTML = '<h3 style="margin:0 0 10px;font-size:0.8rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase">Governance record</h3>' + chunks.join('');
-      box.style.display = 'block';
-    }
-    function resetAuditDetailSelection() {
-      document.querySelectorAll('#recent-tbody tr.audit-row-selected').forEach(function(tr) { tr.classList.remove('audit-row-selected'); });
-    }
-    function renderAuditEntryDetail(rawEntry) {
-      var entry = normalizeAuditEntryForDashboard(rawEntry);
-      var placeholder = document.getElementById('audit-detail-placeholder');
-      var content = document.getElementById('audit-detail-content');
-      var outEl = document.getElementById('audit-detail-outcome');
-      var llmEl = document.getElementById('audit-detail-llm');
-      var rawBlock = document.getElementById('audit-raw-block');
-      var heading = document.getElementById('audit-raw-heading');
-      var body = document.getElementById('audit-raw-body');
-      placeholder.style.display = 'none';
-      content.style.display = 'block';
-      var outcome = outcomeFromAuditEntry(entry);
-      outEl.textContent = outcome || '—';
-      var glossPair = document.getElementById('audit-detail-gloss-pair');
-      var glossEl = document.getElementById('audit-detail-gloss');
-      var gloss = outcomeGloss(outcome);
-      if (glossPair && glossEl && gloss) {
-        glossEl.textContent = gloss;
-        glossPair.style.display = '';
-      } else if (glossPair) {
-        glossPair.style.display = 'none';
-      }
-      var raw = upstreamTextFromAuditEntry(entry);
-      var hasRaw = raw != null && String(raw).length > 0;
-      // Ledger recent-row summaries may not include the raw text body, but can still
-      // truthfully report whether an upstream model call happened.
-      var hasLlmOutput = hasRaw || entry.has_llm_output === true;
-      llmEl.textContent = hasRaw ? 'Yes' : 'No';
-      if (hasLlmOutput) llmEl.textContent = 'Yes';
+
+      // Original / blocked output
+      const secOriginal = document.getElementById('sec-original');
       if (hasRaw) {
-        rawBlock.style.display = 'block';
-        body.textContent = raw;
-        if (isBlockedUpstreamPresentation(outcome)) {
-          heading.textContent = 'Model output — blocked';
-          heading.className = 'raw-model-heading blocked';
-          body.className = 'raw-model-body blocked';
+        secOriginal.style.display = 'block';
+        const blocked = g === 'HARD_STOP' || g === 'STOP' || g === 'FORCE_REVISE' || g === 'CONTAIN';
+        document.getElementById('gov-original-title').textContent = blocked ? 'Model output — blocked' : 'Model output';
+        document.getElementById('gov-original').className = 'raw-output' + (blocked ? ' struck' : '');
+        document.getElementById('gov-original').textContent = aurora.original_response;
+        const origNote = document.getElementById('gov-original-note');
+        if (blocked) {
+          origNote.textContent = 'Raw upstream candidate — not admitted on this path.';
+          origNote.style.display = 'block';
         } else {
-          heading.textContent = 'Model output';
-          heading.className = 'raw-model-heading admitted';
-          body.className = 'raw-model-body';
+          origNote.style.display = 'none';
         }
       } else {
-        rawBlock.style.display = 'none';
-        heading.textContent = '';
-        body.textContent = '';
-      }
-      renderAuditDetailExtras(entry);
-    }
-    function buildAuditEntryFetchUrl(opts) {
-      if (opts.cid) return base + '/v1/audit/entry?cid=' + encodeURIComponent(opts.cid);
-      var u = base + '/v1/audit/entry?trace_id=' + encodeURIComponent(opts.traceId);
-      if (opts.timestamp) u += '&timestamp=' + encodeURIComponent(opts.timestamp);
-      return u;
-    }
-    async function loadAuditEntryForRecentRow(opts) {
-      var placeholder = document.getElementById('audit-detail-placeholder');
-      var content = document.getElementById('audit-detail-content');
-      var extras = document.getElementById('audit-detail-extras');
-      if (extras) { extras.style.display = 'none'; extras.innerHTML = ''; }
-      placeholder.style.display = 'block';
-      content.style.display = 'none';
-      placeholder.textContent = 'Loading entry…';
-      try {
-        var r = await dashFetch(buildAuditEntryFetchUrl(opts));
-        var entry = await r.json().catch(function() { return {}; });
-        if (!r.ok) {
-          var msg = (entry.error && entry.error.message) ? entry.error.message : ('HTTP ' + r.status);
-          placeholder.textContent = msg;
-          content.style.display = 'none';
-          return;
-        }
-        renderAuditEntryDetail(entry);
-      } catch (e) {
-        placeholder.textContent = esc(e.message);
-        content.style.display = 'none';
+        secOriginal.style.display = 'none';
       }
     }
-    function renderRuntimeSummary(d) {
-      var grid = document.getElementById('health-grid');
-      if (!grid) return;
-      var st = d.status || 'unknown';
-      var pillClass = st === 'ok' ? 'ok' : (st === 'degraded' ? 'warn' : 'bad');
-      var tiles = [
-        { label: 'Status', value: '<span class="pill ' + pillClass + '">' + esc(st) + '</span>' },
-        { label: 'Policy', value: esc((d.policy || '—') + (d.policy_version ? ' · ' + d.policy_version : '')) },
-        { label: 'Audit sink', value: esc(d.audit_sink || '—') },
-        { label: 'Extraction', value: esc(d.extraction_backend || '—') }
-      ];
-      grid.innerHTML = tiles.map(function(t) {
-        return '<div class="stat-tile"><div class="label">' + t.label + '</div><div class="value">' + t.value + '</div></div>';
-      }).join('');
-      // Update top-of-page status banner
-      var banner = document.getElementById('status-banner');
-      var headline = document.getElementById('status-banner-headline');
-      var sub = document.getElementById('status-banner-sub');
-      var kvEl = document.getElementById('status-banner-kv');
-      if (banner) {
-        banner.className = 'status-banner status-banner--' + pillClass;
-        var labels = { ok: 'System operational', warn: 'System degraded', bad: 'System error' };
-        if (headline) headline.textContent = 'Aurora Lens — ' + (labels[pillClass] || st);
-        if (sub) {
-          var parts = [];
-          if (d.policy) parts.push('Policy: ' + d.policy + (d.policy_version ? ' ' + d.policy_version : ''));
-          if (d.audit_sink) parts.push('Audit: ' + d.audit_sink);
-          if (d.extraction_backend) parts.push('Extraction: ' + d.extraction_backend);
-          sub.textContent = parts.join(' · ') || 'Aurora Lens governance proxy';
-        }
-        if (kvEl) {
-          var kvParts = [];
-          if (d.proxy_run_id) kvParts.push('<b>Run ID</b> ' + esc(d.proxy_run_id.slice(0, 12)) + (d.proxy_run_id.length > 12 ? '…' : ''));
-          if (typeof d.audit_signing_configured === 'boolean') kvParts.push('<b>HMAC signing</b> ' + (d.audit_signing_configured ? 'configured' : 'not set'));
-          kvEl.innerHTML = kvParts.join('');
-        }
-      }
-    }
-    async function loadHealth() {
-      const el = document.getElementById('health-kv');
-      try {
-        const r = await dashFetch(base + '/health');
-        const d = await r.json();
-        renderRuntimeSummary(d);
-        let html = '';
-        html += '<dt>Forensics UI</dt><dd><span class="pill neutral">operator</span></dd>';
-        html += '<dt>Policy / version</dt><dd>' + esc(d.policy) + ' · ' + esc(d.policy_version) + '</dd>';
-        html += '<dt>Resolved audit path</dt><dd>' + esc(d.audit_log_path || '—') + '</dd>';
-        html += '<dt>Proxy run ID</dt><dd>' + esc(d.proxy_run_id || '—') + '</dd>';
-        html += '<dt>HMAC signing</dt><dd>' + (typeof d.audit_signing_configured === 'boolean' ? (d.audit_signing_configured ? '<span class="pill ok">configured</span>' : '<span class="pill warn">not set</span>') : '—') + '</dd>';
-        el.innerHTML = html;
-        document.getElementById('link-recent').href = base + '/v1/audit/recent?n=20';
-        document.getElementById('link-verify').href = base + '/v1/audit/verify?n=500';
-        const lsch = document.getElementById('link-search');
-        if (lsch) {
-          lsch.href = base + '/v1/audit/search?non_admit_only=true&limit=50';
-          lsch.title = 'JSONL backend only; adjust outcome, tenant_label, domain, since, limit';
-        }
-        const lop = document.getElementById('link-operator-pef');
-        if (lop) lop.href = base + '/v1/session/operator-pef?session_id=';
-        const lm = document.getElementById('link-metrics');
-        if (lm) lm.href = base + '/metrics';
-        const lh = document.getElementById('link-health');
-        if (lh) lh.href = base + '/health';
-        document.getElementById('auth-note').innerHTML = 'Read-only audit GETs and <code>/health</code> bypass chat auth middleware so the panel works in browser. Chat completions still need auth. If the audit surface must not be public, restrict network access like you mean it.';
-      } catch (e) {
-        el.innerHTML = '<dd class="error">' + esc(e.message) + '</dd>';
-        var banner = document.getElementById('status-banner');
-        var headline = document.getElementById('status-banner-headline');
-        if (banner) banner.className = 'status-banner status-banner--bad';
-        if (headline) headline.textContent = 'Aurora Lens — Cannot reach proxy';
-      }
-    }
-    async function loadVerify() {
-      const intEl = document.getElementById('verify-integrity');
-      const extEl = document.getElementById('verify-extended');
-      const evEl = document.getElementById('verify-evidence');
-      const omEl = document.getElementById('integrity-operator-message');
-      function hideOperatorMessage() {
-        if (!omEl) return;
-        omEl.style.display = 'none';
-        omEl.textContent = '';
-      }
-      function showOperatorMessage(msg) {
-        if (!omEl) return;
-        omEl.style.display = 'block';
-        omEl.textContent = msg;
-      }
-      try {
-        const r = await dashFetch(base + '/v1/audit/verify?n=500');
-        if (r.status === 404) {
-          intEl.innerHTML = '<span class="pill neutral">n/a</span> Audit log not configured.';
-          extEl.textContent = '';
-          evEl.textContent = '';
-          hideOperatorMessage();
-          return;
-        }
-        if (r.status === 400) {
-          const j = await r.json().catch(() => ({}));
-          const em = j.error && (j.error.user_message || j.error.message) ? (j.error.user_message || j.error.message) : r.statusText;
-          intEl.innerHTML = '<span class="pill warn">verify skipped</span> ' + esc(em);
-          extEl.textContent = '';
-          evEl.textContent = '';
-          hideOperatorMessage();
-          return;
-        }
-        const d = await r.json();
-        const cryptoOk = d.verified === true;
-        const full = d.fully_verified === true;
-        const provSum = d.evidence_audit_status_summary || '';
-        const unanchored = d.reason === 'unanchored_slice';
-        const backend = d.backend || '';
 
-        let chainPill = '';
-        if (d.chain_verified === true) chainPill = '<span class="pill ok">Chain intact</span>';
-        else if (d.chain_verified === false) chainPill = '<span class="pill bad">Chain failed</span>';
-
-        let hmacPill = '';
-        if (backend === 'ledger') {
-          if (d.hmac_checked) hmacPill = d.hmac_verified === true ? '<span class="pill ok">HMAC ok</span>' : '<span class="pill bad">HMAC failed</span>';
-          else hmacPill = '<span class="pill neutral">HMAC n/a</span>';
-        } else {
-          if (d.hmac_verified === true) hmacPill = '<span class="pill ok">HMAC ok</span>';
-          else if (d.hmac_verified === false) hmacPill = '<span class="pill bad">HMAC failed</span>';
-        }
-
-        let headPill = '';
-        if (cryptoOk) headPill = '<span class="pill ok">Crypto succeeded</span>';
-        else if (unanchored) headPill = '<span class="pill warn">Not fully verified</span>';
-        else headPill = '<span class="pill bad">Crypto failed</span>';
-
-        let intHtml = headPill + ' ' + chainPill + ' ' + hmacPill;
-        intHtml += '<span class="verify-meta">' + esc(backend) + ' · entries checked ' + esc(String(d.entries != null ? d.entries : '?')) + '</span>';
-        const intLines = [];
-        if (d.reason) intLines.push('Reason: ' + esc(String(d.reason)));
-        if (d.first_chain_failure_line != null) intLines.push('First chain break at line ' + esc(String(d.first_chain_failure_line)) + (d.first_chain_reason ? ': ' + esc(String(d.first_chain_reason)) : ''));
-        if (d.first_hmac_failure_line != null) intLines.push('First HMAC break at line ' + esc(String(d.first_hmac_failure_line)) + (d.first_hmac_reason ? ': ' + esc(String(d.first_hmac_reason)) : ''));
-        if (intLines.length) intHtml += '<div style="margin-top:8px;font-size:0.78rem;color:var(--muted);line-height:1.45">' + intLines.join('<br/>') + '</div>';
-        intEl.innerHTML = intHtml;
-
-        const wv = d.what_was_verified;
-        const extParts = [];
-        if (typeof d.fully_verified === 'boolean') extParts.push(full ? '<span class="pill ok">Extended pass</span>' : '<span class="pill warn">Extended pending / fail</span>');
-        if (wv && wv.pef_linkage) {
-          const pl = wv.pef_linkage;
-          const plOk = pl.ok !== false;
-          extParts.push('<span class="pill ' + (plOk ? 'ok' : 'bad') + '">PEF linkage</span> · pairs ' + esc(String(pl.pairs_checked != null ? pl.pairs_checked : '?')) + (plOk ? '' : ' — failed'));
-        }
-        if (wv && wv.pef_state_hash_replay) {
-          const sh = wv.pef_state_hash_replay;
-          const shOk = sh.ok !== false;
-          extParts.push('<span class="pill ' + (shOk ? 'ok' : 'bad') + '">State hash replay</span> · n=' + esc(String(sh.entries_checked != null ? sh.entries_checked : '?')) + (shOk ? '' : ' — failed'));
-        }
-        if (unanchored && d.reason_detail) extParts.push('<span class="verify-meta">' + esc(String(d.reason_detail)) + '</span>');
-        if (d.verify_note) extParts.push('<span class="verify-meta">' + esc(String(d.verify_note)) + '</span>');
-        extEl.innerHTML = extParts.length ? extParts.join('<br/>') : '<span class="muted">No extended checks in this response.</span>';
-
-        const evParts = [];
-        if (provSum) evParts.push('Status summary: ' + esc(provSum));
-        if (wv && wv.provenance_chain_of_custody && wv.provenance_chain_of_custody.counts) {
-          const c = wv.provenance_chain_of_custody.counts;
-          evParts.push('Chain of custody · rows with block ' + esc(String(c.rows_with_block)) + ' · skipped (no block) ' + esc(String(c.rows_skipped_no_block)));
-        }
-        evEl.innerHTML = evParts.length ? evParts.join('<br/>') : '<span class="muted">No evidence summary in this response.</span>';
-
-        if (d.operator_message) showOperatorMessage(d.operator_message);
-        else hideOperatorMessage();
-      } catch (e) {
-        intEl.innerHTML = '<span class="pill bad">error</span> ' + esc(e.message);
-        extEl.textContent = '';
-        evEl.textContent = '';
-        hideOperatorMessage();
-      }
+    function resetGovPanel() {
+      document.getElementById('gov-idle').style.display = 'block';
+      document.getElementById('gov-content').style.display = 'none';
     }
-    function pefPillClass(mode) {
-      if (!mode || mode === 'normal') return 'ok';
-      if (mode === 'held_ambiguity') return 'warn';
-      if (mode === 'held_refusal') return 'warn';
-      if (mode.indexOf('terminal_stop') === 0) return 'bad';
-      return 'neutral';
+
+    // ── Operator console: audit + verify + health ────────────────────────
+    function esc(s) {
+      if (s == null) return '';
+      const d = document.createElement('div');
+      d.textContent = String(s);
+      return d.innerHTML;
     }
-    async function loadPef() {
-      const sid = (document.getElementById('pef-session-id').value || '').trim();
-      const st = document.getElementById('pef-status');
-      const panel = document.getElementById('pef-panel');
-      const badgeWrap = document.getElementById('pef-badge-wrap');
-      const kv = document.getElementById('pef-kv');
-      if (!sid) {
-        st.textContent = 'Enter a session id.';
-        panel.style.display = 'none';
-        return;
-      }
-      st.textContent = 'Loading…';
-      panel.style.display = 'none';
-      try {
-        const r = await dashFetch(base + '/v1/session/operator-pef?session_id=' + encodeURIComponent(sid));
-        const d = await r.json().catch(function() { return {}; });
-        if (r.status === 404) { st.textContent = (d.error && d.error.message) ? d.error.message : 'session not found or expired'; return; }
-        if (r.status === 503) { st.textContent = (d.error && d.error.message) ? d.error.message : 'unavailable'; return; }
-        if (!r.ok) { st.textContent = (d.error && d.error.message) ? d.error.message : ('HTTP ' + r.status); return; }
-        const op = d.operator_pef || {};
-        const mode = op.session_mode || 'unknown';
-        st.textContent = '';
-        badgeWrap.innerHTML = '<span class="pill ' + pefPillClass(mode) + '">' + esc(mode) + '</span>';
-        let html = '';
-        const pc = op.pending_clarification || {};
-        html += '<dt>Pending clarification</dt><dd>';
-        if (pc.active) {
-          html += 'active · constraint: ' + esc(pc.failed_constraint || '—');
-          if (pc.original_question_preview) html += '<br/>' + esc(pc.original_question_preview);
-        } else html += 'none';
-        html += '</dd>';
-        const eh = op.epistemic_hold || {};
-        html += '<dt>Epistemic hold</dt><dd>';
-        if (eh.active) {
-          html += esc(eh.mode || '—') + ' · open=' + esc(String(eh.interaction_open)) + ' · closed=' + esc(String(eh.commitment_closed));
-          if (eh.last_audit_id) html += '<br/>last audit: <code style="font-size:0.75rem">' + esc(eh.last_audit_id) + '</code>';
-        } else html += 'none';
-        html += '</dd>';
-        const bgs = op.binding_governance_state;
-        if (bgs && bgs.action) html += '<dt>Binding governance state</dt><dd>' + esc(bgs.action) + (bgs.pathway_id ? ' · ' + esc(bgs.pathway_id) : '') + '</dd>';
-        const cts = op.counts || {};
-        html += '<dt>Counts</dt><dd>entities=' + esc(String(cts.entities != null ? cts.entities : '?')) + ', relationships=' + esc(String(cts.relationships != null ? cts.relationships : '?')) + '</dd>';
-        html += '<dt>Turn</dt><dd>' + esc(String(op.current_turn != null ? op.current_turn : '?')) + '</dd>';
-        kv.innerHTML = html;
-        panel.style.display = 'block';
-      } catch (e) {
-        st.textContent = esc(e.message);
-      }
+
+    function dashFetch(url) {
+      const sep = url.indexOf('?') >= 0 ? '&' : '?';
+      return fetch(url + sep + '_ts=' + Date.now(), { cache: 'no-store' });
     }
+
+    const OUTCOME_GLOSS_SHORT = {
+      PASS: 'approved', ADMIT: 'approved',
+      SOFT_CORRECT: 'corrected',
+      FORCE_REVISE: 'revised',
+      HARD_STOP: 'blocked', STOP: 'blocked',
+      CONTAIN: 'withheld', REFUSE: 'refused',
+      CLARIFY: 'clarify',
+    };
+
+    function outcomeClass(oc) {
+      if (oc === 'PASS' || oc === 'ADMIT') return 'outcome-PASS';
+      if (oc === 'SOFT_CORRECT') return 'outcome-SOFT_CORRECT';
+      if (oc === 'FORCE_REVISE') return 'outcome-FORCE_REVISE';
+      if (oc === 'HARD_STOP' || oc === 'STOP') return 'outcome-HARD_STOP';
+      if (oc === 'CONTAIN' || oc === 'REFUSE') return 'outcome-CONTAIN';
+      if (oc === 'CLARIFY') return 'outcome-CLARIFY';
+      return '';
+    }
+
+    async function loadAuditSlice() {
+      await Promise.all([loadHealth(), loadVerify(), loadRecent()]);
+    }
+
     async function loadRecent() {
       const statusEl = document.getElementById('recent-status');
-      const table = document.getElementById('recent-table');
-      const tbody = document.getElementById('recent-tbody');
-      const wrap = document.getElementById('recent-with-detail');
+      const table    = document.getElementById('recent-table');
+      const tbody    = document.getElementById('recent-tbody');
       try {
-        const r = await dashFetch(base + '/v1/audit/recent?n=30');
-        if (r.status === 404) {
-          statusEl.textContent = 'Audit not configured.';
-          table.style.display = 'none';
-          if (wrap) wrap.classList.remove('has-jsonl');
-          return;
-        }
+        const r = await dashFetch(base + '/v1/audit/recent?n=20');
+        if (r.status === 404) { statusEl.textContent = 'Audit not configured.'; table.style.display = 'none'; return; }
         const d = await r.json();
         const rows = d.operator_rows || [];
-        const backend = d.backend || '';
-        if (wrap) {
-          if (backend === 'jsonl') wrap.classList.add('has-jsonl');
-          else wrap.classList.remove('has-jsonl');
-        }
-        statusEl.textContent = rows.length + ' row(s) · backend=' + (backend || '?') + ' · updated ' + new Date().toLocaleTimeString();
+        statusEl.textContent = rows.length + ' row(s) · updated ' + new Date().toLocaleTimeString();
         tbody.innerHTML = '';
-        resetAuditDetailSelection();
         rows.forEach(function(row) {
           const tr = document.createElement('tr');
-          const oc = row.outcome || row.ledger_op || '';
-          const rk = row.row_kind || '';
-          const fe = row.has_forensic_event ? (row.forensic_status || 'yes') : '—';
-          const ev = row.evidence_audit_status ? '<span class="pill ' + (row.evidence_audit_status === 'complete' ? 'ok' : 'warn') + '">' + esc(row.evidence_audit_status) + '</span>' : (row.has_chain_of_custody ? '<span class="pill neutral">?</span>' : '—');
+          const oc  = row.outcome || row.ledger_op || '';
           const cons = (row.constraints && row.constraints.length) ? row.constraints.join(', ') : '—';
-          const ptc = row.pef_turn_classification != null && row.pef_turn_classification !== '' ? esc(String(row.pef_turn_classification)) : '—';
-          const pht = row.pef_hold_transition != null && row.pef_hold_transition !== '' ? esc(String(row.pef_hold_transition)) : '—';
-          const cid = (row.cid || '').toString().trim();
           const trace = (row.trace_id || '').toString();
-          const ts = row.timestamp != null ? String(row.timestamp) : '';
-          const reqDom = row.request_domain != null && row.request_domain !== '' ? esc(String(row.request_domain)) : '—';
-          var entryUrl = '';
-          if (backend === 'jsonl' && cid) entryUrl = base + '/v1/audit/entry?cid=' + encodeURIComponent(cid);
-          else if (backend === 'jsonl' && trace) {
-            entryUrl = base + '/v1/audit/entry?trace_id=' + encodeURIComponent(trace);
-            if (ts) entryUrl += '&timestamp=' + encodeURIComponent(ts);
-          }
-          const entryLink = entryUrl ? '<a href="' + entryUrl + '" target="_blank" rel="noopener">JSON</a>' : (backend === 'ledger' ? '<span class="pill neutral">AFL</span>' : '—');
-          tr.className = 'audit-row-selectable';
-          tr._auditRowData = row;
-          if (backend === 'jsonl' && (cid || trace)) {
-            if (cid) tr.setAttribute('data-cid', cid);
-            if (trace) tr.setAttribute('data-trace-id', trace);
-            if (ts) tr.setAttribute('data-entry-ts', ts);
-          }
-          var copyBtn = '';
-          if (cid) copyBtn = '<button type="button" class="link audit-copy" data-copy="' + esc(cid).replace(/"/g, '&quot;') + '">copy cid</button>';
-          else if (trace) copyBtn = '<button type="button" class="link audit-copy" data-copy="' + esc(trace).replace(/"/g, '&quot;') + '">copy trace</button>';
-          var ocGloss = outcomeGloss(oc);
+          const reqDom = row.request_domain || '—';
+          const gloss = OUTCOME_GLOSS_SHORT[oc] || '';
           tr.innerHTML =
-            '<td>' + esc(row.timestamp || '') + '</td>' +
-            '<td><span class="pill neutral">' + esc(rk) + '</span></td>' +
-            '<td class="' + outcomeClass(oc) + '">' + esc(oc) + (ocGloss ? '<span class="outcome-gloss">' + esc(ocGloss) + '</span>' : '') + '</td>' +
-            '<td>' + ev + '</td>' +
-            '<td>' + esc(fe) + '</td>' +
+            '<td style="white-space:nowrap">' + esc(row.timestamp || '') + '</td>' +
+            '<td class="' + outcomeClass(oc) + '" style="font-family:var(--mono);font-weight:700">' + esc(oc) +
+              (gloss ? '<span class="outcome-gloss-cell">' + esc(gloss) + '</span>' : '') + '</td>' +
+            '<td style="font-family:var(--mono);font-size:0.75rem">' + esc(reqDom) + '</td>' +
             '<td class="constraints">' + esc(cons) + '</td>' +
-            '<td><code style="font-size:0.72rem">' + ptc + '</code></td>' +
-            '<td><code style="font-size:0.72rem">' + pht + '</code></td>' +
-            '<td>' + esc(trace.slice(0, 14)) + (trace.length > 14 ? '…' : '') + '</td>' +
-            '<td>' + esc(row.tenant_label || '') + '</td>' +
-            '<td><code style="font-size:0.72rem">' + reqDom + '</code></td>' +
-            '<td><code style="font-size:0.72rem">' + esc(cid ? cid.slice(0, 10) + (cid.length > 10 ? '…' : '') : '') + '</code> ' + copyBtn + ' ' + entryLink + '</td>';
+            '<td style="font-family:var(--mono);font-size:0.72rem">' + esc(trace.slice(0, 12)) + (trace.length > 12 ? '…' : '') + '</td>';
           tbody.appendChild(tr);
         });
         table.style.display = rows.length ? 'table' : 'none';
-        tbody.querySelectorAll('button.audit-copy').forEach(function(btn) {
-          btn.addEventListener('click', function(ev) {
-            ev.stopPropagation();
-            var c = btn.getAttribute('data-copy');
-            if (c && navigator.clipboard) navigator.clipboard.writeText(c);
-          });
-        });
-      } catch (e) {
-        statusEl.innerHTML = '<span class="error">' + esc(e.message) + '</span>';
+      } catch(e) {
+        statusEl.textContent = 'Error: ' + e.message;
         table.style.display = 'none';
-        if (wrap) wrap.classList.remove('has-jsonl');
       }
     }
-    async function loadMetrics() {
+
+    async function loadVerify() {
       try {
-        const r = await dashFetch(base + '/metrics');
-        document.getElementById('metrics-content').textContent = await r.text();
-      } catch (e) {
-        document.getElementById('metrics-content').textContent = 'Error: ' + e.message;
+        const r = await dashFetch(base + '/v1/audit/verify');
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const d = await r.json();
+        const v = d.verification || d;
+        document.getElementById('verify-integrity').textContent  = v.chain_valid === true ? '✓ Chain intact' : (v.chain_valid === false ? '✗ Chain broken' : '—');
+        document.getElementById('verify-integrity').style.color  = v.chain_valid === true ? 'var(--ok)' : (v.chain_valid === false ? 'var(--bad)' : 'var(--muted)');
+        document.getElementById('verify-extended').textContent   = v.extended_valid != null ? (v.extended_valid ? '✓ Valid' : '✗ Invalid') : '—';
+        document.getElementById('verify-extended').style.color   = v.extended_valid === true ? 'var(--ok)' : (v.extended_valid === false ? 'var(--bad)' : 'var(--muted)');
+        document.getElementById('verify-evidence').textContent   = v.evidence_complete != null ? (v.evidence_complete ? '✓ Complete' : '⚠ Incomplete') : '—';
+        document.getElementById('verify-evidence').style.color   = v.evidence_complete === true ? 'var(--ok)' : (v.evidence_complete === false ? 'var(--warn)' : 'var(--muted)');
+      } catch(e) {
+        ['verify-integrity','verify-extended','verify-evidence'].forEach(id => {
+          document.getElementById(id).textContent = 'unavailable';
+          document.getElementById(id).style.color = 'var(--muted-2)';
+        });
       }
     }
-    async function loadAuditSlice() { await Promise.all([loadHealth(), loadVerify(), loadRecent()]); }
-    async function load() { await Promise.all([loadAuditSlice(), loadMetrics()]); }
-    (function initPef() {
-      const inp = document.getElementById('pef-session-id');
-      const btn = document.getElementById('pef-load');
-      const q = new URLSearchParams(window.location.search).get('session');
-      if (q) inp.value = q;
-      btn.addEventListener('click', loadPef);
-      inp.addEventListener('keydown', function(ev) { if (ev.key === 'Enter') loadPef(); });
-    })();
-    (function initAuditRefresh() {
-      var b = document.getElementById('btn-refresh-audit');
-      if (b) b.addEventListener('click', function() { loadAuditSlice(); });
-    })();
-    (function initRecentRowClicks() {
-      var table = document.getElementById('recent-table');
-      if (!table || table.dataset.auditRowDelegated === '1') return;
-      table.dataset.auditRowDelegated = '1';
-      table.addEventListener('click', function(ev) {
-        if (ev.target.closest('a') || ev.target.closest('button')) return;
-        var tr = ev.target.closest('tr.audit-row-selectable');
-        if (!tr) return;
-        resetAuditDetailSelection();
-        tr.classList.add('audit-row-selected');
-        var cid = (tr.getAttribute('data-cid') || '').trim();
-        var tid = (tr.getAttribute('data-trace-id') || '').trim();
-        var ts = (tr.getAttribute('data-entry-ts') || '').trim();
-        if (cid) loadAuditEntryForRecentRow({ cid: cid });
-        else if (tid) loadAuditEntryForRecentRow({ traceId: tid, timestamp: ts });
-        else if (tr._auditRowData) renderAuditEntryDetail(tr._auditRowData);
-      });
-    })();
+
+    async function loadHealth() {
+      try {
+        const r = await dashFetch(base + '/health');
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const d = await r.json();
+
+        // status strip
+        const st   = d.status || 'unknown';
+        const strip = document.getElementById('status-strip');
+        const cls  = st === 'ok' ? 'ok' : (st === 'degraded' ? 'warn' : 'bad');
+        strip.className = cls;
+        const labels = { ok: 'Aurora Lens — operational', warn: 'Aurora Lens — degraded', bad: 'Aurora Lens — error' };
+        document.getElementById('strip-text').textContent = labels[cls] || 'Aurora Lens — ' + st;
+
+        // runtime tiles
+        const pillClass = cls;
+        document.getElementById('rt-status').innerHTML = '<span class="pill ' + pillClass + '">' + esc(st) + '</span>';
+        document.getElementById('rt-policy').textContent = (d.policy || '—') + (d.policy_version ? ' · ' + d.policy_version : '');
+        document.getElementById('rt-sink').textContent   = d.audit_sink || '—';
+        document.getElementById('rt-extraction').textContent = d.extraction_backend || '—';
+
+        // api links
+        ['recent','verify','health','metrics'].forEach(function(k) {
+          const paths = { recent: '/v1/audit/recent', verify: '/v1/audit/verify', health: '/health', metrics: '/metrics' };
+          const el = document.getElementById('link-' + k);
+          if (el) el.href = base + paths[k];
+        });
+      } catch(e) {
+        const strip = document.getElementById('status-strip');
+        strip.className = 'bad';
+        document.getElementById('strip-text').textContent = 'Aurora Lens — unreachable';
+      }
+    }
+
+    // ── Init ─────────────────────────────────────────────────────────────
     selectDomain('general');
-    load();
-    setInterval(loadAuditSlice, 8000);
-    setInterval(loadMetrics, 30000);
+    loadAuditSlice();
+    setInterval(loadAuditSlice, 10000);
   </script>
 
- <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b0d0fd61319d4784b8c1ae9f3cd37be4"}'></script><!-- End Cloudflare Web Analytics -->
-
+  <!-- Cloudflare Web Analytics -->
+  <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b0d0fd61319d4784b8c1ae9f3cd37be4"}'></script>
 </body>
 </html>
