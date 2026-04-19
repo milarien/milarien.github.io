@@ -183,7 +183,7 @@ Define **pass/fail** from **user-visible and API-visible** behaviour, without di
 
 ## 9. Non-goals
 
-- **Not** a code fix in this repository.
+- **Not** a code fix in this repository (the static site); implementation lives in the **`aurora-lens`** Python repo — canonical spec: `docs/pef-state-maintenance-findings.md` there.
 - **Not** a claimed **root cause** for turn 3 or turn 4.
 - **Not** a public marketing or philosophical document.
 - **Not** proof that **PEF** (or any named substrate) **works** or **fails** — only that **this session** did not show reliable **simple state** Q&A under mutation, while showing **blocking** of bad candidates.
@@ -195,7 +195,8 @@ Define **pass/fail** from **user-visible and API-visible** behaviour, without di
 
 | Item | Value |
 | --- | --- |
-| Location | Repository root: `pef-state-maintenance-findings.md` (not under `docs/`) |
+| **Canonical location** | **`aurora-lens`** repo: `docs/pef-state-maintenance-findings.md` |
+| **This copy** | `milarien.github.io` repository root (mirror; revise there or here and sync) |
 | Session type | Live demo vs production proxy |
 | Date context | Document written to capture 2026 demo session described in authoring thread |
 | Reproducibility | Re-run §2 user turns in order with new session |
