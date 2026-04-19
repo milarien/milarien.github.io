@@ -1195,6 +1195,40 @@
       el.style.height = Math.min(el.scrollHeight, 110) + 'px';
     }
 
+    // Temporary containment filter for a bug hunt, not a semantic classifier.
+    // Long-term home for this distinction is a backend provenance marker.
+    function isGovernanceArtifact(action, content) {
+      const a = (action || '').toUpperCase();
+      if (a === 'PASS' || a === 'ADMIT' || a === 'SOFT_CORRECT') return false;
+      if (a === 'CLARIFY') return false;
+      return true;
+    }
+
+    const DEV_SPEAK_PATTERNS = [
+      /^\s*I need extraction before I can respond to that\.?\s*$/i,
+    ];
+
+    function isDevSpeak(text) {
+      if (!text) return false;
+      return DEV_SPEAK_PATTERNS.some(re => re.test(text));
+    }
+
+    const INTERROGATIVE_RE = /\b(who|what|where|when|why|how|which|whose|whom)\b/i;
+
+    function isDeclarative(userInput) {
+      if (!userInput) return false;
+      const t = userInput.trim();
+      if (!t) return false;
+      if (t.includes('?')) return false;
+      if (INTERROGATIVE_RE.test(t)) return false;
+      return true;
+    }
+
+    function containmentAction(action) {
+      const a = (action || '').toUpperCase();
+      return a === 'CONTAIN' || a === 'HARD_STOP' || a === 'STOP' || a === 'REFUSE';
+    }
+
     async function sendMessage() {
       if (sending) return;
       const inp = document.getElementById('input');
@@ -1214,7 +1248,16 @@
         const msgs = [];
         const sys = DOMAINS[activeDomain].system;
         if (sys) msgs.push({ role: 'system', content: sys });
-        conversation.forEach(m => msgs.push(m));
+        let skipped = 0;
+        conversation.forEach(m => {
+          if (m.role === 'assistant' && m.is_governance_artifact) {
+            skipped += 1;
+            console.log('[aurora-lens demo] skipping governance artifact from history:', m.content);
+            return;
+          }
+          msgs.push({ role: m.role, content: m.content });
+        });
+        console.log('[aurora-lens demo] sending', msgs.length, 'msgs; skipped', skipped, 'governance artifacts');
 
         const res = await fetch(base + '/v1/chat/completions', {
           method: 'POST',
@@ -1231,18 +1274,34 @@
 
         if (!res.ok) {
           const err = await res.text();
+          console.log('[aurora-lens demo] non-2xx response', res.status, 'body:', err, 'msgs sent:', msgs);
           addMsg('assistant', 'Error ' + res.status + ' — ' + err.slice(0, 200));
           setSending(false);
           return;
         }
 
         const data = await res.json();
-        const content = data.choices?.[0]?.message?.content || '(empty)';
+        const rawContent = data.choices?.[0]?.message?.content || '(empty)';
         const aurora = data.aurora || {};
         const action = (typeof aurora.governance === 'string' ? aurora.governance : aurora.governance?.action || aurora.governance?.outcome || '') || 'PASS';
 
-        addMsg('assistant', content, action, aurora);
-        conversation.push({ role: 'assistant', content });
+        const flags = Array.isArray(aurora.flags) ? aurora.flags : [];
+        const noPolicyFlags = flags.length === 0;
+        const shouldSubstituteAck =
+          containmentAction(action) &&
+          noPolicyFlags &&
+          isDevSpeak(rawContent) &&
+          isDeclarative(text);
+
+        const displayContent = shouldSubstituteAck ? ('Got it. ' + text) : rawContent;
+        const isArtifact = shouldSubstituteAck ? true : isGovernanceArtifact(action, rawContent);
+
+        addMsg('assistant', displayContent, action, aurora);
+        conversation.push({
+          role: 'assistant',
+          content: displayContent,
+          is_governance_artifact: isArtifact,
+        });
         updateGovPanel(aurora, action);
         loadAuditSlice();
 
