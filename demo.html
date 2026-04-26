@@ -916,6 +916,10 @@
           <div class="scenarios-area">
             <div class="scenarios-label">Try these</div>
             <div class="scenario-chips" id="chips"></div>
+            <div class="scenario-chips" id="session-controls">
+              <button class="chip-btn" id="btn-new-scenario" onclick="startNewScenario()">New Scenario</button>
+              <button class="chip-btn" id="btn-continue-scenario" onclick="continueScenario()">Continue</button>
+            </div>
           </div>
           <div class="input-row">
             <textarea id="input" rows="1" placeholder="Type a message…"
@@ -1182,6 +1186,46 @@
         };
         el.appendChild(b);
       });
+    }
+
+    async function startNewScenario() {
+      if (sending) return;
+      const btn = document.getElementById('btn-new-scenario');
+      const original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Starting…';
+      try {
+        const res = await fetch(base + '/v1/session/new-scenario', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!res.ok) {
+          const txt = await res.text();
+          addMsg('assistant', 'Could not start a new scenario: HTTP ' + res.status + '. ' + txt.slice(0, 160));
+          return;
+        }
+        const payload = await res.json().catch(() => ({}));
+        const sidFromBody = payload?.aurora_session_id || payload?.session_id || '';
+        const sidFromHeader = res.headers.get('Aurora-Session-Id') || '';
+        const nextSessionId = String(sidFromBody || sidFromHeader || '').trim();
+        if (!nextSessionId) {
+          addMsg('assistant', 'Could not start a new scenario: missing aurora_session_id in response.');
+          return;
+        }
+        sessionId = nextSessionId;
+        conversation = [];
+        clearChat();
+        resetGovPanel();
+      } catch (err) {
+        addMsg('assistant', 'Could not start a new scenario: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+      }
+    }
+
+    function continueScenario() {
+      // Continue keeps current sessionId by design.
     }
 
     // ── Send ─────────────────────────────────────────────────────────────
