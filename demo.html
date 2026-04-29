@@ -325,6 +325,84 @@
       background: rgba(251,191,36,0.05);
     }
 
+    /* ── GOVERNED STATE PANELS ── */
+    .governed-panel {
+      width: 100%;
+      border-radius: 12px 12px 12px 4px;
+      padding: 14px 16px;
+      font-size: 0.87rem;
+      line-height: 1.55;
+      word-break: break-word;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .governed-panel.is-block {
+      background: rgba(248,113,113,0.06);
+      border: 1px solid rgba(248,113,113,0.3);
+    }
+
+    .governed-panel.is-warn {
+      background: rgba(251,191,36,0.05);
+      border: 1px solid rgba(251,191,36,0.3);
+    }
+
+    .governed-heading {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 0.88rem;
+      letter-spacing: 0.01em;
+    }
+
+    .is-block .governed-heading { color: var(--bad); }
+    .is-warn  .governed-heading { color: var(--warn); }
+
+    .governed-body {
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .governed-action,
+    .governed-status {
+      font-family: var(--mono);
+      font-size: 0.77rem;
+      color: var(--muted-2);
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: rgba(0,0,0,0.15);
+    }
+
+    .governed-action strong,
+    .governed-status strong {
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .is-block .governed-action { color: var(--bad); }
+    .is-warn  .governed-action { color: var(--warn); }
+
+    .governed-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .governed-option {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: rgba(88,180,255,0.08);
+      border: 1px solid rgba(88,180,255,0.2);
+      color: var(--accent);
+    }
+
     .msg-label {
       font-family: var(--mono);
       font-size: 0.67rem;
@@ -1272,6 +1350,81 @@
       return a === 'CONTAIN' || a === 'HARD_STOP' || a === 'STOP' || a === 'REFUSE';
     }
 
+    function isNonPassGoverned(action) {
+      const a = (action || '').toUpperCase();
+      return ['CONTAIN', 'CLARIFY', 'REFUSE', 'HARD_STOP', 'STOP', 'FORCE_REVISE'].includes(a);
+    }
+
+    function renderGovernedPanel(content, action) {
+      const a = (action || '').toUpperCase();
+      const panelClass = (a === 'CONTAIN' || a === 'REFUSE' || a === 'HARD_STOP' || a === 'STOP')
+        ? 'is-block' : 'is-warn';
+
+      const panel = document.createElement('div');
+      panel.className = 'governed-panel ' + panelClass;
+
+      let headingSet = false;
+      const bodyLines = [];
+      const options = [];
+      let actionLine = null;
+      let statusLine = null;
+
+      (content || '').split('\n').forEach(function(line) {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+        if (!headingSet) {
+          const h = document.createElement('div');
+          h.className = 'governed-heading';
+          h.textContent = trimmed;
+          panel.appendChild(h);
+          headingSet = true;
+          return;
+        }
+        if (/^Action:/i.test(trimmed)) { actionLine = trimmed; return; }
+        if (/^Status:/i.test(trimmed))  { statusLine = trimmed; return; }
+        if (/^- /.test(trimmed))        { options.push(trimmed.slice(2).trim()); return; }
+        bodyLines.push(trimmed);
+      });
+
+      if (bodyLines.length) {
+        const b = document.createElement('div');
+        b.className = 'governed-body';
+        b.textContent = bodyLines.join('\n');
+        panel.appendChild(b);
+      }
+
+      [['governed-action', actionLine], ['governed-status', statusLine]].forEach(function(pair) {
+        const cls = pair[0], raw = pair[1];
+        if (!raw) return;
+        const el = document.createElement('div');
+        el.className = cls;
+        const colon = raw.indexOf(':');
+        if (colon >= 0) {
+          const strong = document.createElement('strong');
+          strong.textContent = raw.slice(0, colon + 1);
+          el.appendChild(strong);
+          el.appendChild(document.createTextNode(raw.slice(colon + 1)));
+        } else {
+          el.textContent = raw;
+        }
+        panel.appendChild(el);
+      });
+
+      if (options.length) {
+        const opts = document.createElement('div');
+        opts.className = 'governed-options';
+        options.forEach(function(opt) {
+          const chip = document.createElement('span');
+          chip.className = 'governed-option';
+          chip.textContent = opt;
+          opts.appendChild(chip);
+        });
+        panel.appendChild(opts);
+      }
+
+      return panel;
+    }
+
     async function sendMessage() {
       if (sending) return;
       const inp = document.getElementById('input');
@@ -1376,22 +1529,29 @@
       const bClass = role === 'assistant' ? msgBubbleClass(action || '') : '';
       wrap.className = 'msg ' + role + (bClass ? ' ' + bClass : '');
 
-      const bubble = document.createElement('div');
-      bubble.className = 'msg-bubble';
-      bubble.textContent = content;
-
       const label = document.createElement('div');
       label.className = 'msg-label';
 
       if (role === 'user') {
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-bubble';
+        bubble.textContent = content;
+        wrap.appendChild(bubble);
         label.textContent = 'You';
       } else {
+        if (isNonPassGoverned(action)) {
+          wrap.appendChild(renderGovernedPanel(content, action));
+        } else {
+          const bubble = document.createElement('div');
+          bubble.className = 'msg-bubble';
+          bubble.textContent = content;
+          wrap.appendChild(bubble);
+        }
         const lbl = ACTION_LABELS[action] || action || 'Passed';
         const chipClass = msgChipClass(action || '');
         label.innerHTML = 'Aurora Lens &nbsp;<span class="msg-outcome-chip ' + chipClass + '">' + esc(lbl) + '</span>';
       }
 
-      wrap.appendChild(bubble);
       wrap.appendChild(label);
 
       const c = document.getElementById('messages');
