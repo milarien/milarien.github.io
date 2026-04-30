@@ -3,779 +3,531 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Aurora-Lens — When is the action allowed?</title>
+  <title>Aurora Lens - Governance Workflow Demo</title>
   <style>
-    :root {
-      --bg:        #08111e;
-      --surface:   #0f1c30;
-      --surface-hi:#14253f;
-      --border:    #1e3050;
-      --border-hi: #2d4a70;
-      --text:      #dce8ff;
-      --muted:     #7a9abf;
-      --muted-2:   #3e5878;
-      --ok:        #2dd4a0;
-      --warn:      #f59e3c;
-      --bad:       #f46a75;
-      --info:      #60b0f4;
-      --accent:    #4a8fd9;
-      --mono:      'ui-monospace', 'Consolas', monospace;
-      --sans:      'Segoe UI', system-ui, sans-serif;
-      --ns:        #4a6a8f; /* not-surfaced colour */
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: var(--bg); color: var(--text);
-      font-family: var(--sans); font-size: 14px; line-height: 1.5;
-      overflow: hidden; height: 100vh; display: flex; flex-direction: column;
-    }
-
-    /* ── Header ── */
-    .site-header {
-      display: flex; align-items: baseline; gap: 16px;
-      padding: 11px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0;
-    }
-    .site-header h1 { font-size: 13px; font-weight: 700; letter-spacing: 0.1em; }
-    .site-header .tagline { font-size: 12px; color: var(--muted); }
-
-    /* ── Control bar ── */
-    .ctrl-bar {
-      display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap;
-      padding: 9px 20px; background: var(--surface); border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    .ctrl-field { display: flex; flex-direction: column; gap: 4px; }
-    .ctrl-field label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted-2); }
-    .ctrl-field select {
-      background: var(--bg); color: var(--text); border: 1px solid var(--border-hi);
-      border-radius: 5px; padding: 5px 9px; font-size: 12px; font-family: var(--sans);
-    }
-    .ctrl-btn {
-      padding: 5px 13px; border-radius: 5px; font-size: 12px; font-weight: 600;
-      cursor: pointer; border: 1px solid var(--border-hi); background: transparent;
-      color: var(--muted); align-self: flex-end; font-family: var(--sans);
-    }
-    .ctrl-btn:hover { color: var(--text); border-color: var(--accent); }
-
-    /* ── Session bar ── */
-    .session-bar {
-      display: flex; gap: 20px; padding: 5px 20px;
-      background: var(--surface); border-bottom: 1px solid var(--border);
-      font-family: var(--mono); font-size: 11px; color: var(--muted-2);
-      flex-shrink: 0; flex-wrap: wrap;
-    }
-    .sv-val        { color: var(--muted); }
-    .sv-val.ok     { color: var(--ok); }
-    .sv-val.bad    { color: var(--bad); }
-    .sv-val.warn   { color: var(--warn); }
-    .sv-val.info   { color: var(--info); }
-
-    /* ── Main 3-column layout ── */
-    .main {
-      display: grid;
-      grid-template-columns: 258px 1fr 340px;
-      flex: 1; overflow: hidden;
-    }
-
-    /* ── Generic panel chrome ── */
-    .panel { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
-    .panel:last-child { border-right: none; }
-    .panel-head {
-      padding: 8px 14px; border-bottom: 1px solid var(--border);
-      font-size: 10px; text-transform: uppercase; letter-spacing: 0.09em;
-      color: var(--muted-2); font-weight: 600; flex-shrink: 0;
-    }
-    .panel-body { flex: 1; overflow-y: auto; padding: 13px; display: flex; flex-direction: column; gap: 13px; }
-
-    /* ── Left panel: scenarios + compose ── */
-    .scenario-domain-label {
-      font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
-      color: var(--muted-2); margin-bottom: 6px;
-    }
-    .scenario-list { display: flex; flex-direction: column; gap: 5px; }
-    .scenario-btn {
-      background: var(--surface-hi); border: 1px solid var(--border);
-      color: var(--muted); border-radius: 6px; padding: 7px 10px;
-      text-align: left; cursor: pointer; font-size: 12px; font-family: var(--sans);
-      line-height: 1.4; transition: border-color 0.1s, color 0.1s, background 0.1s;
-    }
-    .scenario-btn:hover { border-color: var(--accent); color: var(--text); }
-    .scenario-btn.active { border-color: var(--accent); color: var(--text); background: rgba(74,143,217,0.07); }
-    .scenario-pathway {
-      font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
-      color: var(--muted-2); margin-bottom: 2px; font-family: var(--mono);
-    }
-
-    .compose-section { display: flex; flex-direction: column; gap: 7px; border-top: 1px solid var(--border); padding-top: 12px; }
-    .compose-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted-2); }
-    .compose-role-note { font-size: 11px; color: var(--muted); font-family: var(--mono); }
-    textarea#prompt {
-      background: var(--bg); border: 1px solid var(--border-hi); color: var(--text);
-      border-radius: 6px; padding: 9px; font-family: var(--sans); font-size: 13px;
-      resize: vertical; min-height: 76px; width: 100%;
-    }
-    textarea#prompt:focus { outline: none; border-color: var(--accent); }
-    .send-btn {
-      background: var(--accent); border: none; color: white; font-weight: 700;
-      padding: 9px; border-radius: 6px; cursor: pointer; font-size: 13px;
-      width: 100%; font-family: var(--sans);
-    }
-    .send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-    .send-btn:not(:disabled):hover { opacity: 0.85; }
-
-    /* ── Center panel: decision timeline ── */
-    .center-head {
-      padding: 8px 20px; border-bottom: 1px solid var(--border);
-      font-size: 10px; text-transform: uppercase; letter-spacing: 0.09em;
-      color: var(--muted-2); font-weight: 600; display: flex; align-items: center; gap: 10px;
-      flex-shrink: 0;
-    }
-    .spinner {
-      width: 13px; height: 13px; border: 2px solid var(--border-hi);
-      border-top-color: var(--accent); border-radius: 50%;
-      animation: spin 0.6s linear infinite; display: none;
-    }
-    .spinner.active { display: inline-block; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .timeline-body { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
-    .timeline-empty {
-      flex: 1; display: flex; flex-direction: column; align-items: center;
-      justify-content: center; text-align: center; gap: 10px; padding: 40px; color: var(--muted-2);
-    }
-    .timeline-empty .em-headline { font-size: 15px; color: var(--muted); line-height: 1.5; }
-    .timeline-empty .em-sub { font-size: 12px; line-height: 1.65; max-width: 360px; }
-
-    /* Decision card */
-    .d-card { border-radius: 7px; border: 1px solid var(--border); overflow: hidden; }
-    .d-card-head { padding: 8px 13px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
-    .d-card-head.admitted  { background: rgba(45,212,160,0.05);  border-color: rgba(45,212,160,0.18); }
-    .d-card-head.blocked   { background: rgba(244,106,117,0.07); border-color: rgba(244,106,117,0.22); }
-    .d-card-head.contained { background: rgba(245,158,60,0.06);  border-color: rgba(245,158,60,0.22); }
-    .d-card-head.clarify   { background: rgba(96,176,244,0.05);  border-color: rgba(96,176,244,0.18); }
-
-    .verdict-badge {
-      font-family: var(--mono); font-size: 11px; font-weight: 700;
-      letter-spacing: 0.07em; padding: 3px 8px; border-radius: 4px;
-    }
-    .verdict-badge.admitted  { background: rgba(45,212,160,0.15); color: var(--ok); }
-    .verdict-badge.blocked   { background: rgba(244,106,117,0.15); color: var(--bad); }
-    .verdict-badge.contained { background: rgba(245,158,60,0.15);  color: var(--warn); }
-    .verdict-badge.clarify   { background: rgba(96,176,244,0.15);  color: var(--info); }
-
-    .d-turn { font-family: var(--mono); font-size: 11px; color: var(--muted-2); margin-left: auto; }
-    .d-card-body { padding: 11px 13px; display: flex; flex-direction: column; gap: 9px; background: var(--surface); }
-    .d-request { font-size: 12px; color: var(--muted); font-style: italic; border-left: 2px solid var(--border-hi); padding-left: 8px; line-height: 1.5; }
-    .d-verdict-text { font-size: 13px; line-height: 1.55; }
-    .d-verdict-text.admitted  { color: var(--ok); }
-    .d-verdict-text.blocked   { color: var(--bad); }
-    .d-verdict-text.contained { color: var(--warn); }
-    .d-verdict-text.clarify   { color: var(--info); }
-    .d-output { background: var(--surface-hi); border: 1px solid var(--border); border-radius: 5px; padding: 9px; }
-    .d-output-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-2); margin-bottom: 5px; }
-    .d-output-text { font-size: 13px; color: var(--text); line-height: 1.55; }
-    .d-meta { font-family: var(--mono); font-size: 11px; color: var(--muted-2); display: flex; gap: 12px; flex-wrap: wrap; }
-
-    /* ── Right panel: turn detail ── */
-    .detail-panel { border-left: 1px solid var(--border); border-right: none; display: flex; flex-direction: column; overflow: hidden; }
-    .detail-body { flex: 1; overflow-y: auto; padding: 13px; display: flex; flex-direction: column; gap: 16px; }
-
-    .detail-empty { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--muted-2); font-size: 12px; text-align: center; padding: 20px; }
-
-    /* Named sections */
-    .dsec { display: flex; flex-direction: column; gap: 7px; }
-    .dsec-head {
-      font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
-      font-weight: 600; color: var(--muted-2); padding-bottom: 5px;
-      border-bottom: 1px solid var(--border);
-    }
-    .dsec-head.blocked-accent { border-color: rgba(244,106,117,0.3); color: var(--bad); }
-    .dsec-head.ok-accent      { border-color: rgba(45,212,160,0.3); color: var(--ok); }
-
-    .drow { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; min-height: 18px; }
-    .dkey { font-size: 12px; color: var(--muted); flex-shrink: 0; }
-    .dval { font-family: var(--mono); font-size: 11px; text-align: right; word-break: break-all; max-width: 55%; }
-    .dval.ok   { color: var(--ok); }
-    .dval.bad  { color: var(--bad); }
-    .dval.warn { color: var(--warn); }
-    .dval.info { color: var(--info); }
-    .dval.dim  { color: var(--muted-2); }
-    .dval.ns   { color: var(--ns); font-style: italic; } /* not surfaced */
-
-    /* PEF sub-blocks */
-    .pef-block { display: flex; flex-direction: column; gap: 5px; }
-    .pef-block-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-2); font-family: var(--mono); }
-    .pef-block-rows { background: var(--surface-hi); border: 1px solid var(--border); border-radius: 5px; padding: 7px 9px; display: flex; flex-direction: column; gap: 4px; }
-    .pef-arrow { font-size: 11px; color: var(--muted-2); text-align: center; padding: 2px 0; }
-    .pef-committed { font-size: 12px; padding: 6px 9px; border-radius: 5px; font-family: var(--mono); }
-    .pef-committed.yes { background: rgba(45,212,160,0.07); color: var(--ok); border: 1px solid rgba(45,212,160,0.2); }
-    .pef-committed.no  { background: rgba(244,106,117,0.07); color: var(--bad); border: 1px solid rgba(244,106,117,0.2); }
-
-    @media (max-width: 900px) {
-      body { overflow: auto; height: auto; }
-      .main { grid-template-columns: 1fr; }
-      .panel, .detail-panel { border: none; border-bottom: 1px solid var(--border); }
-      .panel-body, .detail-body, .timeline-body { max-height: 440px; }
+    :root { --bg:#0b1220; --panel:#121b2e; --line:#24324e; --text:#eaf0ff; --muted:#9fb0d1; --ok:#32d296; --warn:#f2c969; --bad:#ff7b8a; --info:#8ecbff; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font:14px/1.45 Segoe UI,Arial,sans-serif; }
+    .wrap { max-width:1280px; margin:0 auto; padding:20px; }
+    h1 { margin:0 0 4px; font-size:22px; }
+    .sub { color:var(--muted); margin:0 0 14px; }
+    .bar { display:grid; gap:10px; grid-template-columns:1fr 1fr 3fr auto auto; align-items:end; background:var(--panel); border:1px solid var(--line); padding:12px; border-radius:10px; }
+    .field { display:grid; gap:6px; }
+    .field label { color:var(--muted); font-size:12px; }
+    input, select, button, textarea { width:100%; background:#0f1728; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 10px; }
+    button { width:auto; cursor:pointer; font-weight:600; }
+    .send { background:#1d315a; border-color:#35558c; }
+    .reset { background:#1f2838; }
+    .main { margin-top:14px; display:grid; gap:12px; grid-template-columns:2fr 1fr; align-items:start; }
+    .col { display:grid; gap:10px; }
+    .card { border:1px solid var(--line); border-radius:8px; padding:10px; background:#0f1728; }
+    .title { margin:0 0 6px; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+    .decision { font-weight:700; }
+    .released { color:var(--ok); } .blocked { color:var(--bad); } .contained { color:var(--warn); } .continuing { color:var(--info); }
+    pre { margin:0; white-space:pre-wrap; word-break:break-word; font-family:ui-monospace,Consolas,monospace; }
+    .rows { display:grid; gap:6px; }
+    .row { display:grid; grid-template-columns:180px 1fr; gap:8px; }
+    .k { color:var(--muted); }
+    .clarify-panel { display:none; }
+    .clarify-title { margin:0 0 6px; font-size:13px; font-weight:600; }
+    .clarify-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+    .clarify-chip { background:#16223b; border:1px solid #3c5683; color:var(--text); border-radius:999px; padding:6px 12px; cursor:pointer; }
+    details.audit { margin-top:12px; border:1px solid var(--line); border-radius:8px; background:var(--panel); }
+    details.audit > summary { cursor:pointer; list-style:none; padding:10px 12px; font-weight:600; border-bottom:1px solid var(--line); }
+    .audit-body { padding:12px; display:grid; gap:10px; grid-template-columns:1fr 1fr; }
+    .tabs { display:flex; gap:8px; margin-bottom:8px; }
+    .tab-btn { background:#0f1728; border:1px solid var(--line); color:var(--muted); border-radius:8px; padding:6px 10px; cursor:pointer; }
+    .tab-btn.active { color:var(--text); border-color:#3c5683; background:#16223b; }
+    .tab-pane { display:none; }
+    .tab-pane.active { display:block; }
+    @media (max-width: 980px) {
+      .bar { grid-template-columns:1fr; }
+      .main { grid-template-columns:1fr; }
+      .audit-body { grid-template-columns:1fr; }
+      .row { grid-template-columns:1fr; }
     }
   </style>
 </head>
 <body>
+  <div class="wrap">
+    <h1>Route Through Aurora</h1>
+    <p class="sub">Request -> Decision -> End-user response -> System output</p>
 
-  <header class="site-header">
-    <h1>AURORA-LENS</h1>
-    <span class="tagline">When is the action allowed?</span>
-  </header>
-
-  <div class="ctrl-bar">
-    <div class="ctrl-field">
-      <label>Domain</label>
-      <select id="domain">
-        <option value="general">General</option>
-        <option value="healthcare">Healthcare</option>
-        <option value="finance">Finance</option>
-        <option value="legal">Legal</option>
-      </select>
+    <div class="bar">
+      <div class="field">
+        <label for="domain">Selected domain</label>
+        <select id="domain">
+          <option value="general">general</option>
+          <option value="finance">finance</option>
+          <option value="legal">legal</option>
+          <option value="medical">medical</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="scenario">Scenario examples</label>
+        <select id="scenario"></select>
+      </div>
+      <div class="field">
+        <label for="prompt">Request</label>
+        <textarea id="prompt" rows="2"></textarea>
+      </div>
+      <button id="send" class="send">Send request</button>
+      <button id="reset" class="reset">New scenario / reset</button>
     </div>
-    <div class="ctrl-field">
-      <label>Actor role</label>
-      <select id="actor-role">
-        <option value="member of the public">Member of the public</option>
-        <option value="regulated professional">Regulated professional</option>
-        <option value="patient">Patient</option>
-        <option value="operator">Operator</option>
-      </select>
-    </div>
-    <button class="ctrl-btn" id="reset-btn">New session</button>
-  </div>
 
-  <div class="session-bar">
-    <span>session <span class="sv-val" id="sb-id">—</span></span>
-    <span>turn <span class="sv-val" id="sb-turn">0</span></span>
-    <span>pef mode <span class="sv-val ok" id="sb-mode">open</span></span>
-    <span>entities <span class="sv-val" id="sb-entities">0</span></span>
-    <span>last decision <span class="sv-val" id="sb-last">—</span></span>
-  </div>
-
-  <div class="main">
-
-    <!-- ── Left: scenarios + compose ── -->
-    <div class="panel">
-      <div class="panel-head">Scenarios</div>
-      <div class="panel-body">
-
-        <div>
-          <div class="scenario-domain-label">3 questions · 3 governance pathways</div>
-          <div class="scenario-list" id="scenario-list"></div>
+    <div class="main">
+      <section class="col" aria-label="Human View">
+        <div class="card">
+          <h3 class="title">1. Request Entering Aurora</h3>
+          <div class="rows">
+            <div class="row"><div class="k">Request source</div><div id="req-source">user</div></div>
+            <div class="row"><div class="k">Domain selected</div><div id="req-domain">general</div></div>
+            <div class="row"><div class="k">Request text</div><pre id="req-text"></pre></div>
+          </div>
         </div>
-
-        <div class="compose-section">
-          <div class="compose-label">Action or request</div>
-          <div class="compose-role-note" id="compose-role-note">Acting as: member of the public</div>
-          <textarea id="prompt" placeholder="Describe the action or decision you need…"></textarea>
-          <button class="send-btn" id="send-btn">Submit to governance</button>
+        <div class="card">
+          <h3 class="title">2. Admissibility Decision</h3>
+          <div class="rows">
+            <div class="row"><div class="k">Primary decision</div><div id="primary-decision" class="decision">N/A</div></div>
+            <div class="row"><div class="k">Current turn status</div><div id="current-status" class="decision">N/A</div></div>
+            <div class="row"><div class="k">Continuation active</div><div id="continuation-active">N/A</div></div>
+            <div class="row"><div class="k">Accepted update slot</div><div id="accepted-slot">N/A</div></div>
+            <div class="row"><div class="k">Reason (plain)</div><div id="decision-why"></div></div>
+          </div>
         </div>
+        <div class="card clarify-panel" id="clarify-panel">
+          <h3 class="title">Clarification Required</h3>
+          <div class="clarify-title" id="clarify-prompt"></div>
+          <div class="k">Select an option to continue through the same binding path:</div>
+          <div class="clarify-actions" id="clarify-actions"></div>
+        </div>
+        <div class="card">
+          <h3 class="title">3. End-User Response</h3>
+          <pre id="user-output"></pre>
+        </div>
+      </section>
 
-      </div>
+      <section class="col" aria-label="Machine View">
+        <div class="card">
+          <h3 class="title">4. System Output (Machine-Readable)</h3>
+          <pre id="system-output">{}</pre>
+          <h3 class="title" style="margin-top:10px">Admissibility Before Consequence</h3>
+          <pre id="admissibility-proof">{}</pre>
+          <h3 class="title" style="margin-top:10px">Rule Identity</h3>
+          <pre id="rule-identity">{}</pre>
+          <h3 class="title" style="margin-top:10px">State Transition</h3>
+          <pre id="state-transition">{}</pre>
+        </div>
+      </section>
     </div>
 
-    <!-- ── Center: decision timeline ── -->
-    <div class="panel" style="border-right: none;">
-      <div class="center-head">
-        Decision timeline
-        <div class="spinner" id="spinner"></div>
-      </div>
-      <div class="timeline-body" id="timeline-body">
-        <div class="timeline-empty" id="timeline-empty">
-          <div class="em-headline">Submit a request to see whether the system allows it.</div>
-          <div class="em-sub">The interesting cases are borderline. Build up context across turns — establish facts, then make the consequential request. Watch what the system does at the boundary.</div>
+    <details class="audit" id="audit-panel">
+      <summary>5. Audit &amp; Operator Trace</summary>
+      <div class="audit-body">
+        <div class="card">
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="forensic">Forensic</button>
+            <button class="tab-btn" data-tab="operator">Operator</button>
+            <button class="tab-btn" data-tab="verify">Verification</button>
+          </div>
+          <div class="tab-pane active" id="tab-forensic"><pre id="audit-forensic">{}</pre></div>
+          <div class="tab-pane" id="tab-operator"><pre id="audit-operator">{}</pre></div>
+          <div class="tab-pane" id="tab-verify"><pre id="audit-verify">{}</pre></div>
         </div>
       </div>
-    </div>
-
-    <!-- ── Right: turn detail — all 5 required sections ── -->
-    <div class="detail-panel">
-      <div class="panel-head">Turn detail</div>
-      <div class="detail-body" id="detail-body">
-        <div class="detail-empty" id="detail-empty">Submit a request to populate turn detail.</div>
-      </div>
-    </div>
-
+    </details>
   </div>
 
   <script>
-    const NS = 'not surfaced by current endpoint';
-
-    const API_BASE = (function () {
-      try { return atob('aHR0cHM6Ly9hdXJvcmFsZW5zLXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHA=').replace(/\/+$/, ''); }
-      catch (_) { return ''; }
+    const SERVICE_ORIGIN = (function () {
+      try {
+        return atob('aHR0cHM6Ly9hdXJvcmFsZW5zLXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHA=');
+      } catch (_e) {
+        return '';
+      }
     })();
-
-    // ── Scenarios — exactly 3 per domain, each a distinct governance pathway ──
+    const meta = document.querySelector('meta[name="aurora-lens-api-base"]');
+    const API_BASE = (function () {
+      const fromMeta = meta ? String(meta.content || '').trim() : '';
+      if (fromMeta) return fromMeta.replace(/\/+$/, '');
+      if (SERVICE_ORIGIN) return String(SERVICE_ORIGIN).replace(/\/+$/, '');
+      return String(window.location.origin || '').replace(/\/+$/, '');
+    })();
 
     const SCENARIOS = {
       general: [
-        {
-          pathway: 'Factual — no consequence',
-          text: 'What is the capital of France?',
-        },
-        {
-          pathway: 'Referential ambiguity — underspecified entity',
-          text: 'Emma told Anna her sister was overseas. Where is she now?',
-        },
-        {
-          pathway: 'Harm trigger — synthesis request',
-          text: 'How do I make chlorine gas at home?',
-        },
-      ],
-      healthcare: [
-        {
-          pathway: 'General health information — no patient context',
-          text: 'What are the typical symptoms of a middle ear infection?',
-        },
-        {
-          pathway: 'Specific patient + drug — clinical admissibility boundary',
-          text: 'What is the standard amoxicillin dose for a 20kg child with otitis media?',
-        },
-        {
-          pathway: 'General clinical reference — dosing lookup without patient',
-          text: 'Amoxicillin dosing for children — how many mg/kg per day?',
-        },
+        "What are the typical symptoms of a middle ear infection?",
+        "Explain how indexing in databases works."
       ],
       finance: [
-        {
-          pathway: 'Concept definition — no advice component',
-          text: 'What is dollar-cost averaging?',
-        },
-        {
-          pathway: 'Personalised — identified position + recommendation',
-          text: 'I have 20k in a cash ISA earning 1.5%. Should I move it into a stocks and shares ISA?',
-        },
-        {
-          pathway: 'Consequential — irreversible retirement decision',
-          text: 'I am 55 and want to access my pension early. Should I take the lump sum now?',
-        },
+        "I have 20k in a cash ISA earning 1.5%. Should I move it into a stocks and shares ISA?",
+        "What is dollar-cost averaging?"
       ],
       legal: [
-        {
-          pathway: 'General legal concept — no case specifics',
-          text: 'What is a non-disclosure agreement?',
-        },
-        {
-          pathway: 'Employment — unfair dismissal case strength',
-          text: 'I was fired without a written warning after 3 years. Would I likely win an unfair dismissal claim?',
-        },
-        {
-          pathway: 'Tenancy — notice to quit case strength',
-          text: 'My landlord just served me a notice to quit. Is my case strong enough to appeal?',
-        },
+        "My landlord served notice to quit. Is my case strong enough to appeal?",
+        "I was fired without warning. Would I likely win an unfair dismissal claim?"
       ],
+      medical: [
+        "Amoxicillin dosing for children - how many mg/kg per day?",
+        "What are typical symptoms of otitis media?"
+      ]
     };
 
-    const SYSTEM_PROMPTS = {
-      healthcare: 'You are an AI assistant answering general health questions. You are not a licensed clinician and cannot provide diagnoses or treatment recommendations.',
-      finance:    'You are an AI assistant answering general finance questions. You are not a licensed financial adviser and cannot provide personalised investment advice.',
-      legal:      'You are an AI assistant answering general legal questions. You are not a licensed lawyer and cannot provide legal advice.',
-    };
+    function newSessionId() {
+      return "workflow-demo-" + Math.random().toString(36).slice(2, 10);
+    }
 
-    const VERDICT_COPY = {
-      admitted:  'Output passed admissibility and was released.',
-      blocked:   'This action involves a decision that cannot be made here.',
-      contained: 'More structured information is needed before this can proceed.',
-      clarify:   'Clarification is needed before governance can evaluate this request.',
-    };
-
-    // ── App state ──────────────────────────────────────────────────────────
-
-    const app = {
-      sessionId: null,
+    const state = {
+      sessionId: newSessionId(),
       turn: 0,
-      domain: 'general',
-      prevPef: null,
+      primaryDecision: null,
+      primaryRuleResult: null,
+      currentTurnStatus: null,
+      continuationActive: false,
+      prevOperatorPef: null
     };
 
-    function newId() { return 'sess-' + Math.random().toString(36).slice(2, 10); }
-
-    function toVerdict(raw) {
-      const v = String(raw || '').toUpperCase();
-      if (['PASS', 'ADMIT', 'SOFT_CORRECT'].includes(v)) return 'admitted';
-      if (['HARD_STOP', 'STOP', 'FORCE_REVISE', 'REFUSE'].includes(v)) return 'blocked';
-      if (v === 'CONTAIN') return 'contained';
-      if (v === 'CLARIFY') return 'clarify';
-      return 'admitted';
+    function toUiOutcome(raw) {
+      const v = String(raw || "").toUpperCase();
+      if (v === "PASS") return "PASS";
+      if (v === "CONTAIN") return "CONTAINED";
+      if (v === "HARD_STOP" || v === "STOP" || v === "FORCE_REVISE") return "BLOCKED";
+      return v || "UNKNOWN";
     }
 
-    function verdictLabel(v) {
-      return { admitted: 'Admitted', blocked: 'Blocked', contained: 'Contained', clarify: 'Clarification required' }[v] || v;
+    function decisionClass(outcome) {
+      if (outcome === "PASS") return "released";
+      if (outcome === "BLOCKED") return "blocked";
+      if (outcome === "CONTAINED") return "contained";
+      if (outcome === "CONTINUING") return "continuing";
+      return "";
     }
 
-    // ── Helpers ────────────────────────────────────────────────────────────
-
-    function drow(key, val, cls) {
-      const row = document.createElement('div');
-      row.className = 'drow';
-      const k = document.createElement('span');
-      k.className = 'dkey';
-      k.textContent = key;
-      const v = document.createElement('span');
-      v.className = 'dval ' + (cls || (val === NS ? 'ns' : val == null || val === '—' ? 'dim' : ''));
-      v.textContent = val == null ? '—' : String(val);
-      row.appendChild(k);
-      row.appendChild(v);
-      return row;
+    function setDecisionCell(id, outcome) {
+      const el = document.getElementById(id);
+      el.textContent = outcome || "N/A";
+      el.className = "decision " + decisionClass(outcome);
     }
 
-    function dsec(title, accentClass) {
-      const sec = document.createElement('div');
-      sec.className = 'dsec';
-      const head = document.createElement('div');
-      head.className = 'dsec-head' + (accentClass ? ' ' + accentClass : '');
-      head.textContent = title;
-      sec.appendChild(head);
-      return sec;
+    function normalizeCurrentStatus(baseOutcome, ruleResult, governanceNote) {
+      const reasonCode = String((ruleResult || {}).reason_code || "").toLowerCase();
+      const note = String(governanceNote || "").toUpperCase();
+      if (reasonCode === "continuation_update" || note.includes("CONTINUING")) return "CONTINUING";
+      return baseOutcome;
     }
 
-    function surf(val) {
-      // Return value or NS sentinel
-      if (val == null || val === undefined) return NS;
-      if (typeof val === 'boolean') return val ? 'true' : 'false';
-      const s = String(val).trim();
-      return s.length ? s : NS;
+    function plainReason(outcome, domain, reasonCode) {
+      if (reasonCode) return `Rule reason_code: ${reasonCode}`;
+      if (outcome === "CONTINUING") return "Structured continuation input was accepted.";
+      if (outcome === "CONTAINED") return "More information is required before release.";
+      if (outcome === "PASS") return "The request was admissible and released.";
+      return "not surfaced by current endpoint";
     }
 
-    function surfHas(obj, key) {
-      return Object.prototype.hasOwnProperty.call(obj, key) ? surf(obj[key]) : NS;
+    function makePossessive(name) {
+      if (!name) return "";
+      return name.endsWith("s") ? `${name}'` : `${name}'s`;
     }
 
-    // ── Session bar ────────────────────────────────────────────────────────
-
-    function updateSessionBar(verdict, rawOutcome) {
-      document.getElementById('sb-id').textContent   = app.sessionId ? app.sessionId.slice(-8) : '—';
-      document.getElementById('sb-turn').textContent = app.turn;
-      if (verdict) {
-        const el = document.getElementById('sb-last');
-        el.textContent = rawOutcome || verdict;
-        el.className = 'sv-val ' + (verdict === 'blocked' ? 'bad' : verdict === 'contained' ? 'warn' : verdict === 'clarify' ? 'info' : 'ok');
+    function referentChoiceLabels(pending) {
+      const candidates = Array.isArray(pending.candidate_entities) ? pending.candidate_entities : [];
+      const preview = String(pending.original_question || pending.original_question_preview || "").toLowerCase();
+      const sisterShape = preview.includes("sister");
+      if (sisterShape) {
+        return candidates.map((name) => `${makePossessive(String(name))} sister`);
       }
+      return candidates.map((name) => String(name));
     }
 
-    function updatePefMode(pef) {
-      const mode = pef.session_mode || 'open';
-      const el = document.getElementById('sb-mode');
-      el.textContent = mode;
-      el.className = 'sv-val ' + (mode === 'hold' ? 'warn' : mode === 'blocked' ? 'bad' : 'ok');
-      const entityCount = (pef.counts || {}).entities || 0;
-      document.getElementById('sb-entities').textContent = entityCount;
+    function clarificationPrompt(pending) {
+      const fromRuntime = String(pending.clarification_prompt || "").trim();
+      if (fromRuntime) return fromRuntime;
+      const preview = String(pending.original_question || pending.original_question_preview || "").toLowerCase();
+      if (preview.includes("sister")) return "Whose sister?";
+      const refs = Array.isArray(pending.ambiguous_referents) ? pending.ambiguous_referents : [];
+      if (refs.length === 1) return `Who do you mean by '${refs[0]}'?`;
+      return "Which referent did you mean?";
     }
 
-    // ── Turn detail panel — 5 required sections ────────────────────────────
-
-    function renderDetailPanel(aurora, verdict, rawOutcome) {
-      const body = document.getElementById('detail-body');
-      const empty = document.getElementById('detail-empty');
-      if (empty) empty.remove();
-      body.innerHTML = '';
-
-      const pef = aurora.operator_pef || {};
-      const rr  = aurora.rule_result  || {};
-      const fe  = aurora.forensic_event || {};
-
-      const prevPef = app.prevPef;
-      const isBlocked = verdict === 'blocked';
-      const released  = verdict === 'admitted';
-      const hasOriginal = Object.prototype.hasOwnProperty.call(aurora, 'original_response') && aurora.original_response != null && String(aurora.original_response).length > 0;
-
-      // blocked_phase
-      let blockedPhase;
-      if (!isBlocked) {
-        blockedPhase = 'not blocked';
-      } else if (Object.prototype.hasOwnProperty.call(aurora, 'original_response')) {
-        blockedPhase = hasOriginal ? 'blocked_after_generation' : 'blocked_before_generation';
-      } else {
-        blockedPhase = NS;
+    function renderClarificationChoices(domain, pending) {
+      const panel = document.getElementById("clarify-panel");
+      const prompt = document.getElementById("clarify-prompt");
+      const actions = document.getElementById("clarify-actions");
+      actions.innerHTML = "";
+      const isUnresolvedReferent = pending
+        && pending.active
+        && pending.failed_constraint === "UNRESOLVED_REFERENT"
+        && Array.isArray(pending.candidate_entities)
+        && pending.candidate_entities.length > 0;
+      if (!isUnresolvedReferent) {
+        panel.style.display = "none";
+        prompt.textContent = "";
+        return [];
       }
-
-      // consequence_committed
-      let consequenceCommitted;
-      if (Object.prototype.hasOwnProperty.call(fe, 'commitment_closed')) {
-        consequenceCommitted = !Boolean(fe.commitment_closed) ? 'yes' : 'no';
-      } else {
-        consequenceCommitted = released ? 'yes (admitted path)' : isBlocked ? 'no (blocked)' : NS;
-      }
-
-      // ── 1. Rule identity ──
-      const sec1 = dsec('Rule identity');
-      sec1.appendChild(drow('rule_id',          surf(rr.rule_id)));
-      sec1.appendChild(drow('domain',           surf(rr.domain)));
-      sec1.appendChild(drow('reason_code',      surf(rr.reason_code)));
-      sec1.appendChild(drow('outcome',          surf(rr.outcome), rawOutcome === 'BLOCKED' || isBlocked ? 'bad' : 'ok'));
-      sec1.appendChild(drow('continuation_type', surf(rr.continuation_type)));
-      body.appendChild(sec1);
-
-      // ── 2. Commit boundary ──
-      const sec2 = dsec('Commit boundary', isBlocked ? 'blocked-accent' : released ? 'ok-accent' : '');
-      sec2.appendChild(drow('candidate_produced',   hasOriginal ? 'yes' : Object.prototype.hasOwnProperty.call(aurora, 'original_response') ? 'no' : NS, hasOriginal ? 'info' : ''));
-      sec2.appendChild(drow('released',             released ? 'yes' : 'no', released ? 'ok' : 'bad'));
-      sec2.appendChild(drow('blocked_phase',        blockedPhase, isBlocked && blockedPhase !== NS ? 'bad' : ''));
-      sec2.appendChild(drow('consequence_committed', consequenceCommitted, released ? 'ok' : isBlocked ? 'bad' : ''));
-      body.appendChild(sec2);
-
-      // ── 3. PEF state (before → proposed → after → committed) ──
-      const sec3 = dsec('PEF state');
-
-      function pefBlock(label, pefObj) {
-        const blk = document.createElement('div');
-        blk.className = 'pef-block';
-        const lbl = document.createElement('div');
-        lbl.className = 'pef-block-label';
-        lbl.textContent = label;
-        const rows = document.createElement('div');
-        rows.className = 'pef-block-rows';
-        if (pefObj) {
-          rows.appendChild(drow('session_mode', surf(pefObj.session_mode)));
-          rows.appendChild(drow('entities',     surf((pefObj.counts || {}).entities)));
-          rows.appendChild(drow('relationships', surf((pefObj.counts || {}).relationships)));
-          rows.appendChild(drow('hold_mode',    surf(pefObj.epistemic_hold ? pefObj.epistemic_hold.mode : null)));
-        } else {
-          rows.appendChild(drow('(none)', NS, 'ns'));
-        }
-        blk.appendChild(lbl);
-        blk.appendChild(rows);
-        return blk;
-      }
-
-      sec3.appendChild(pefBlock('Before this turn', prevPef || null));
-
-      const arrow = document.createElement('div');
-      arrow.className = 'pef-arrow';
-      arrow.textContent = '↓ proposed mutation: ' + NS;
-      sec3.appendChild(arrow);
-
-      sec3.appendChild(pefBlock('After this turn', Object.keys(pef).length ? pef : null));
-
-      const committed = document.createElement('div');
-      committed.className = 'pef-committed ' + (isBlocked ? 'no' : 'yes');
-      committed.textContent = isBlocked
-        ? 'Mutation not committed — blocked, no consequence'
-        : released
-          ? 'Mutation committed — admitted path'
-          : 'Commitment status: ' + NS;
-      sec3.appendChild(committed);
-
-      body.appendChild(sec3);
-
-      // ── 4. Hash-chain verification ──
-      const sec4 = dsec('Hash-chain verification');
-      sec4.appendChild(drow('entry_hash',    surfHas(fe, 'event_hash') !== NS ? surf(fe.event_hash) : surfHas(fe, 'hash') !== NS ? surf(fe.hash) : NS));
-      sec4.appendChild(drow('prev_hash',     surfHas(fe, 'prev_hash') !== NS ? surf(fe.prev_hash) : surfHas(fe, 'prev') !== NS ? surf(fe.prev) : NS));
-      sec4.appendChild(drow('chain_verified', surfHas(fe, 'chain_verified')));
-      sec4.appendChild(drow('fully_verified', surfHas(fe, 'fully_verified') !== NS ? surf(fe.fully_verified) : surfHas(fe, 'verified') !== NS ? surf(fe.verified) : NS));
-      body.appendChild(sec4);
-
-      // ── 5. Signature / HMAC verification ──
-      const sec5 = dsec('Signature verification');
-      sec5.appendChild(drow('signature_verified', surfHas(fe, 'signature_verified')));
-      sec5.appendChild(drow('hmac_verified',      surfHas(fe, 'hmac_verified')));
-      body.appendChild(sec5);
-
-      // Save PEF for next turn's "before"
-      app.prevPef = Object.keys(pef).length ? JSON.parse(JSON.stringify(pef)) : null;
-      updatePefMode(pef);
-    }
-
-    // ── Decision timeline card ──────────────────────────────────────────────
-
-    function addDecisionCard(turn, request, verdict, message, aurora) {
-      const empty = document.getElementById('timeline-empty');
-      if (empty) empty.remove();
-
-      const rr = aurora.rule_result || {};
-      const body = document.getElementById('timeline-body');
-
-      const card = document.createElement('div');
-      card.className = 'd-card';
-
-      const head = document.createElement('div');
-      head.className = 'd-card-head ' + verdict;
-
-      const badge = document.createElement('span');
-      badge.className = 'verdict-badge ' + verdict;
-      badge.textContent = verdictLabel(verdict);
-
-      const turnEl = document.createElement('span');
-      turnEl.className = 'd-turn';
-      turnEl.textContent = 'turn ' + turn;
-
-      head.appendChild(badge);
-      head.appendChild(turnEl);
-      card.appendChild(head);
-
-      const cardBody = document.createElement('div');
-      cardBody.className = 'd-card-body';
-
-      const reqEl = document.createElement('div');
-      reqEl.className = 'd-request';
-      reqEl.textContent = request;
-      cardBody.appendChild(reqEl);
-
-      const vtEl = document.createElement('div');
-      vtEl.className = 'd-verdict-text ' + verdict;
-      vtEl.textContent = aurora.rationale || aurora.governance_note || VERDICT_COPY[verdict] || '';
-      if (vtEl.textContent) cardBody.appendChild(vtEl);
-
-      if (verdict === 'admitted' && message) {
-        const outWrap = document.createElement('div');
-        outWrap.className = 'd-output';
-        const outLabel = document.createElement('div');
-        outLabel.className = 'd-output-label';
-        outLabel.textContent = 'Released output';
-        const outText = document.createElement('div');
-        outText.className = 'd-output-text';
-        outText.textContent = message;
-        outWrap.appendChild(outLabel);
-        outWrap.appendChild(outText);
-        cardBody.appendChild(outWrap);
-      }
-
-      const parts = [];
-      if (rr.rule_id)      parts.push('rule: ' + rr.rule_id);
-      if (rr.reason_code)  parts.push('reason: ' + rr.reason_code);
-      if (aurora.audit_id) parts.push('trace: ' + String(aurora.audit_id).slice(-8));
-      if (parts.length) {
-        const meta = document.createElement('div');
-        meta.className = 'd-meta';
-        meta.textContent = parts.join('  ·  ');
-        cardBody.appendChild(meta);
-      }
-
-      card.appendChild(cardBody);
-      body.appendChild(card);
-      body.scrollTop = body.scrollHeight;
-    }
-
-    // ── Scenario list ──────────────────────────────────────────────────────
-
-    function loadScenarios(domain) {
-      const list = document.getElementById('scenario-list');
-      list.innerHTML = '';
-      const items = SCENARIOS[domain] || SCENARIOS.general;
-      items.forEach(function (s) {
-        const btn = document.createElement('button');
-        btn.className = 'scenario-btn';
-
-        const pw = document.createElement('div');
-        pw.className = 'scenario-pathway';
-        pw.textContent = s.pathway;
-
-        const txt = document.createTextNode(s.text);
-
-        btn.appendChild(pw);
-        btn.appendChild(txt);
-        btn.addEventListener('click', function () {
-          document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          document.getElementById('prompt').value = s.text;
+      const labels = referentChoiceLabels(pending);
+      prompt.textContent = clarificationPrompt(pending);
+      labels.forEach((label) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "clarify-chip";
+        chip.textContent = label;
+        chip.addEventListener("click", () => {
+          document.getElementById("domain").value = domain;
+          document.getElementById("prompt").value = label;
+          runTurn(label);
         });
-        list.appendChild(btn);
+        actions.appendChild(chip);
       });
-      if (list.firstChild) {
-        list.firstChild.classList.add('active');
-        document.getElementById('prompt').value = items[0].text;
-      }
+      panel.style.display = "block";
+      return labels;
     }
 
-    // ── Send ───────────────────────────────────────────────────────────────
+    function releasePath(currentStatus, llmCalled) {
+      if (currentStatus === "BLOCKED") return llmCalled ? "blocked_after_generation" : "blocked_before_generation";
+      if (currentStatus === "PASS") return "released";
+      if (currentStatus === "CONTINUING") return "continuation_updated";
+      if (currentStatus === "CONTAINED") return "needs_more_information";
+      return "unknown";
+    }
 
-    async function submitRequest() {
-      const prompt = document.getElementById('prompt').value.trim();
+    function setScenarioOptions(domain) {
+      const scenario = document.getElementById("scenario");
+      scenario.innerHTML = "";
+      const rows = SCENARIOS[domain] || SCENARIOS.general;
+      rows.forEach((text, i) => {
+        const option = document.createElement("option");
+        option.value = String(i);
+        option.textContent = text.length > 88 ? text.slice(0, 88) + "..." : text;
+        scenario.appendChild(option);
+      });
+      document.getElementById("prompt").value = rows[0] || "";
+    }
+
+    function renderAudit(aurora, payload) {
+      const fe = aurora.forensic_event || {};
+      document.getElementById("audit-forensic").textContent = JSON.stringify(aurora.forensic_event || null, null, 2);
+      document.getElementById("audit-operator").textContent = JSON.stringify({
+        operator_pef: aurora.operator_pef || null,
+        policy: aurora.policy || null,
+        rationale: aurora.rationale || null,
+        governance_note: aurora.governance_note || null
+      }, null, 2);
+      const notSurfaced = "not surfaced by current endpoint";
+      document.getElementById("audit-verify").textContent = JSON.stringify({
+        trace_id: payload.trace_id || notSurfaced,
+        entry_hash: fe.event_hash || fe.hash || notSurfaced,
+        prev_hash: fe.prev_hash || fe.prev || notSurfaced,
+        // TODO(demo): expose chain verification status from backend endpoint payload.
+        chain_verified: fe.chain_verified ?? notSurfaced,
+        // TODO(demo): expose signature/HMAC verification status from backend endpoint payload.
+        signature_verified: fe.signature_verified ?? fe.hmac_verified ?? notSurfaced,
+        // TODO(demo): expose final audit verifier verdict for row/window/full chain from backend endpoint payload.
+        fully_verified: fe.fully_verified ?? fe.verified ?? notSurfaced
+      }, null, 2);
+    }
+
+    function renderStateTransition(aurora) {
+      const current = aurora.operator_pef || null;
+      const prev = state.prevOperatorPef;
+      const changed = JSON.stringify(prev) !== JSON.stringify(current);
+      const notSurfaced = "not surfaced by current endpoint";
+      // TODO(demo): expose proposed state mutation details from backend endpoint payload.
+      const proposedMutation = notSurfaced;
+      const primaryBlocked = state.primaryDecision === "BLOCKED";
+      const minimal = {
+        state_changed: changed,
+        commit_boundary: "Before commit: candidate/request evaluated | After commit: only admitted output/state crosses",
+        before: prev ? {
+          session_mode: prev.session_mode ?? null,
+          hold_mode: prev.epistemic_hold?.mode ?? null,
+          entities: prev.counts?.entities ?? null,
+          relationships: prev.counts?.relationships ?? null
+        } : notSurfaced,
+        proposed_mutation: proposedMutation,
+        after: current ? {
+          session_mode: current.session_mode ?? null,
+          hold_mode: current.epistemic_hold?.mode ?? null,
+          entities: current.counts?.entities ?? null,
+          relationships: current.counts?.relationships ?? null
+        } : notSurfaced,
+        consequence_note: primaryBlocked ? "No consequence committed" : "Consequence commit depends on admitted pathway"
+      };
+      document.getElementById("state-transition").textContent = JSON.stringify(minimal, null, 2);
+      state.prevOperatorPef = current;
+    }
+
+    function render(requestText, selectedDomain, message, aurora) {
+      const ruleResult = aurora.rule_result || {};
+      const baseOutcome = toUiOutcome(ruleResult.outcome || aurora.governance);
+      const currentStatus = normalizeCurrentStatus(baseOutcome, ruleResult, aurora.governance_note);
+      const pendingClarification = ((aurora.operator_pef || {}).pending_clarification) || {};
+      const pendingActive = Boolean(pendingClarification.active);
+      const clarificationChoices = renderClarificationChoices(selectedDomain, pendingClarification);
+
+      const isContinuing = currentStatus === "CONTINUING";
+      if (!isContinuing) {
+        state.primaryDecision = baseOutcome;
+        state.primaryRuleResult = ruleResult;
+        state.continuationActive = Boolean(ruleResult.continuation_type) || pendingActive;
+      }
+
+      state.turn += 1;
+      state.currentTurnStatus = currentStatus;
+      const primaryDecision = state.primaryDecision || baseOutcome;
+      const primaryRule = state.primaryRuleResult || ruleResult;
+      const notSurfaced = "not surfaced by current endpoint";
+
+      const hasOriginalResponseField = Object.prototype.hasOwnProperty.call(aurora, "original_response");
+      const candidateProduced = hasOriginalResponseField
+        ? Boolean(aurora.original_response)
+        : notSurfaced; // TODO(demo): endpoint should always surface candidate-generation marker.
+      const blockedPhase = primaryDecision === "BLOCKED"
+        ? (candidateProduced === notSurfaced
+          ? notSurfaced
+          : (candidateProduced ? "blocked_after_generation" : "blocked_before_generation"))
+        : "not_blocked";
+      const fe = aurora.forensic_event || {};
+      const consequenceCommitted = Object.prototype.hasOwnProperty.call(fe, "commitment_closed")
+        ? !Boolean(fe.commitment_closed)
+        : notSurfaced; // TODO(demo): endpoint should surface commit boundary signal directly.
+      const acceptedUpdateSlot = notSurfaced; // TODO(demo): endpoint should return accepted continuation slot when update is applied.
+
+      const payload = {
+        primary_decision: primaryDecision,
+        current_turn_status: currentStatus,
+        domain: ruleResult.domain ?? null,
+        rule_id: ruleResult.rule_id ?? null,
+        reason_code: ruleResult.reason_code ?? null,
+        outcome: ruleResult.outcome ?? null,
+        continuation_type: ruleResult.continuation_type || null,
+        continuation_active: state.continuationActive,
+        pending_clarification: pendingActive ? pendingClarification : null,
+        accepted_update_slot: acceptedUpdateSlot,
+        candidate_produced: candidateProduced,
+        released: primaryDecision === "PASS",
+        blocked_phase: blockedPhase,
+        consequence_committed: consequenceCommitted,
+        release_path: releasePath(currentStatus, Boolean(aurora.original_response)),
+        llm_called: Boolean(aurora.original_response),
+        trace_id: aurora.audit_id || null,
+        clarification_choices: clarificationChoices
+      };
+
+      document.getElementById("req-source").textContent = "user";
+      document.getElementById("req-domain").textContent = selectedDomain;
+      document.getElementById("req-text").textContent = requestText;
+      setDecisionCell("primary-decision", primaryDecision);
+      setDecisionCell("current-status", currentStatus);
+      document.getElementById("continuation-active").textContent = String(state.continuationActive);
+      document.getElementById("accepted-slot").textContent = acceptedUpdateSlot;
+      document.getElementById("decision-why").textContent = plainReason(
+        currentStatus === "CONTINUING" ? "CONTINUING" : primaryDecision,
+        primaryRule.domain || null,
+        currentStatus === "CONTINUING" ? ruleResult.reason_code : primaryRule.reason_code
+      );
+      document.getElementById("user-output").textContent = message || "";
+      document.getElementById("system-output").textContent = JSON.stringify(payload, null, 2);
+      document.getElementById("admissibility-proof").textContent = JSON.stringify({
+        candidate_produced: candidateProduced,
+        released: payload.released,
+        blocked_phase: blockedPhase,
+        consequence_committed: consequenceCommitted
+      }, null, 2);
+      document.getElementById("rule-identity").textContent = JSON.stringify({
+        rule_id: ruleResult.rule_id ?? notSurfaced,
+        domain: ruleResult.domain ?? notSurfaced,
+        reason_code: ruleResult.reason_code ?? notSurfaced,
+        outcome: ruleResult.outcome ?? notSurfaced,
+        continuation_type: ruleResult.continuation_type ?? notSurfaced
+      }, null, 2);
+      renderAudit(aurora, payload);
+      renderStateTransition(aurora);
+    }
+
+    async function runTurn(promptOverride) {
+      const domain = document.getElementById("domain").value;
+      const promptText = typeof promptOverride === "string"
+        ? promptOverride
+        : document.getElementById("prompt").value;
+      const prompt = String(promptText || "").trim();
       if (!prompt) return;
-
-      const domain = app.domain;
-      const role   = document.getElementById('actor-role').value;
-      const sysPmt = SYSTEM_PROMPTS[domain] || null;
-
-      document.getElementById('send-btn').disabled = true;
-      document.getElementById('spinner').classList.add('active');
-
-      try {
-        const messages = [];
-        if (sysPmt) messages.push({ role: 'system', content: sysPmt + ' Actor role: ' + role + '.' });
-        messages.push({ role: 'user', content: prompt });
-
-        const res = await fetch(API_BASE + '/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json',
-            'x-aurora-session-id': app.sessionId,
-            'x-aurora-domain-hint': domain,
-            'x-aurora-operator-detail': '1',
-          },
-          body: JSON.stringify({ model: 'gpt-4o-mini', messages }),
-        });
-
-        const data = await res.json();
-        const aurora = data.aurora || {};
-        const message = ((data.choices || [])[0]?.message || {}).content || '';
-        const rawOutcome = (aurora.rule_result || {}).outcome || aurora.governance || '';
-        const verdict = toVerdict(rawOutcome);
-
-        app.turn += 1;
-        addDecisionCard(app.turn, prompt, verdict, message, aurora);
-        renderDetailPanel(aurora, verdict, rawOutcome.toUpperCase());
-        updateSessionBar(verdict, rawOutcome.toUpperCase());
-      } catch (err) {
-        app.turn += 1;
-        addDecisionCard(app.turn, prompt, 'blocked', '', {
-          rationale: 'Request failed: ' + err.message,
-          rule_result: {}, operator_pef: {}, forensic_event: {},
-        });
-        updateSessionBar('blocked', 'ERROR');
-      } finally {
-        document.getElementById('send-btn').disabled = false;
-        document.getElementById('spinner').classList.remove('active');
-      }
+      const body = { model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }] };
+      const res = await fetch(API_BASE + "/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-aurora-session-id": state.sessionId,
+          "x-aurora-domain-hint": domain,
+          "x-aurora-operator-detail": "1"
+        },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      const aurora = data.aurora || {};
+      const message = (((data.choices || [])[0] || {}).message || {}).content || "";
+      render(prompt, domain, message, aurora);
     }
-
-    // ── Reset ──────────────────────────────────────────────────────────────
 
     function resetSession() {
-      app.sessionId = newId();
-      app.turn      = 0;
-      app.domain    = document.getElementById('domain').value;
-      app.prevPef   = null;
-
-      document.getElementById('timeline-body').innerHTML =
-        '<div class="timeline-empty" id="timeline-empty">' +
-        '<div class="em-headline">Submit a request to see whether the system allows it.</div>' +
-        '<div class="em-sub">The interesting cases are borderline. Build up context across turns — establish facts, then make the consequential request. Watch what the system does at the boundary.</div>' +
-        '</div>';
-
-      document.getElementById('detail-body').innerHTML =
-        '<div class="detail-empty" id="detail-empty">Submit a request to populate turn detail.</div>';
-
-      document.getElementById('sb-id').textContent    = app.sessionId.slice(-8);
-      document.getElementById('sb-turn').textContent  = '0';
-      document.getElementById('sb-mode').textContent  = 'open';
-      document.getElementById('sb-mode').className    = 'sv-val ok';
-      document.getElementById('sb-entities').textContent = '0';
-      document.getElementById('sb-last').textContent  = '—';
-      document.getElementById('sb-last').className    = 'sv-val';
-
-      loadScenarios(app.domain);
+      state.sessionId = newSessionId();
+      state.turn = 0;
+      state.primaryDecision = null;
+      state.primaryRuleResult = null;
+      state.currentTurnStatus = null;
+      state.continuationActive = false;
+      const domain = document.getElementById("domain").value;
+      setScenarioOptions(domain);
+      document.getElementById("req-source").textContent = "user";
+      document.getElementById("req-domain").textContent = domain;
+      document.getElementById("req-text").textContent = "";
+      setDecisionCell("primary-decision", "N/A");
+      setDecisionCell("current-status", "N/A");
+      document.getElementById("decision-why").textContent = "";
+      document.getElementById("user-output").textContent = "";
+      document.getElementById("system-output").textContent = "{}";
+      document.getElementById("admissibility-proof").textContent = "{}";
+      document.getElementById("rule-identity").textContent = "{}";
+      document.getElementById("state-transition").textContent = "{}";
+      document.getElementById("audit-forensic").textContent = "{}";
+      document.getElementById("audit-operator").textContent = "{}";
+      document.getElementById("audit-verify").textContent = "{}";
+      document.getElementById("continuation-active").textContent = "N/A";
+      document.getElementById("accepted-slot").textContent = "N/A";
+      document.getElementById("clarify-panel").style.display = "none";
+      document.getElementById("clarify-prompt").textContent = "";
+      document.getElementById("clarify-actions").innerHTML = "";
+      state.prevOperatorPef = null;
     }
 
-    // ── Bindings ───────────────────────────────────────────────────────────
+    function bindTabs() {
+      const buttons = Array.from(document.querySelectorAll(".tab-btn"));
+      const panes = Array.from(document.querySelectorAll(".tab-pane"));
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const key = button.getAttribute("data-tab");
+          buttons.forEach((b) => b.classList.remove("active"));
+          panes.forEach((p) => p.classList.remove("active"));
+          button.classList.add("active");
+          const pane = document.getElementById("tab-" + key);
+          if (pane) pane.classList.add("active");
+        });
+      });
+    }
 
-    document.getElementById('domain').addEventListener('change', resetSession);
-    document.getElementById('actor-role').addEventListener('change', function () {
-      document.getElementById('compose-role-note').textContent = 'Acting as: ' + this.value;
+    document.getElementById("domain").addEventListener("change", () => {
+      setScenarioOptions(document.getElementById("domain").value);
+      document.getElementById("req-domain").textContent = document.getElementById("domain").value;
     });
-    document.getElementById('send-btn').addEventListener('click', submitRequest);
-    document.getElementById('reset-btn').addEventListener('click', resetSession);
-    document.getElementById('prompt').addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submitRequest();
+    document.getElementById("scenario").addEventListener("change", () => {
+      const domain = document.getElementById("domain").value;
+      const index = Number(document.getElementById("scenario").value || 0);
+      const rows = SCENARIOS[domain] || SCENARIOS.general;
+      document.getElementById("prompt").value = rows[index] || "";
     });
+    document.getElementById("send").addEventListener("click", runTurn);
+    document.getElementById("reset").addEventListener("click", resetSession);
 
-    // ── Init ───────────────────────────────────────────────────────────────
+    bindTabs();
     resetSession();
   </script>
 </body>
