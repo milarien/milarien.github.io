@@ -5,31 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Aurora Lens - Governance Workflow Demo</title>
   <style>
-    :root { --bg:#0b1220; --panel:#121b2e; --line:#24324e; --text:#eaf0ff; --muted:#9fb0d1; --ok:#32d296; --warn:#f2c969; --bad:#ff7b8a; }
+    :root { --bg:#0b1220; --panel:#121b2e; --line:#24324e; --text:#eaf0ff; --muted:#9fb0d1; --ok:#32d296; --warn:#f2c969; --bad:#ff7b8a; --info:#8ecbff; }
     * { box-sizing: border-box; }
     body { margin:0; background:var(--bg); color:var(--text); font:14px/1.45 Segoe UI,Arial,sans-serif; }
-    .wrap { max-width:1200px; margin:0 auto; padding:20px; }
+    .wrap { max-width:1280px; margin:0 auto; padding:20px; }
     h1 { margin:0 0 4px; font-size:22px; }
     .sub { color:var(--muted); margin:0 0 14px; }
-    .bar { display:flex; gap:10px; align-items:flex-end; background:var(--panel); border:1px solid var(--line); padding:12px; border-radius:10px; }
-    .field { display:grid; gap:6px; flex:1; }
+    .bar { display:grid; gap:10px; grid-template-columns:1fr 1fr 3fr auto auto; align-items:end; background:var(--panel); border:1px solid var(--line); padding:12px; border-radius:10px; }
+    .field { display:grid; gap:6px; }
     .field label { color:var(--muted); font-size:12px; }
     input, select, button, textarea { width:100%; background:#0f1728; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 10px; }
     button { width:auto; cursor:pointer; font-weight:600; }
-    .flow { margin-top:14px; display:grid; gap:12px; }
-    .turn { border:1px solid var(--line); border-radius:10px; padding:12px; background:var(--panel); display:grid; gap:10px; }
-    .grid { display:grid; gap:10px; grid-template-columns:1fr 1fr; }
+    .send { background:#1d315a; border-color:#35558c; }
+    .reset { background:#1f2838; }
+    .main { margin-top:14px; display:grid; gap:12px; grid-template-columns:2fr 1fr; align-items:start; }
+    .col { display:grid; gap:10px; }
     .card { border:1px solid var(--line); border-radius:8px; padding:10px; background:#0f1728; }
     .title { margin:0 0 6px; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
     .decision { font-weight:700; }
-    .released { color:var(--ok); } .blocked { color:var(--bad); } .contained { color:var(--warn); } .continuing { color:#8ecbff; }
+    .released { color:var(--ok); } .blocked { color:var(--bad); } .contained { color:var(--warn); } .continuing { color:var(--info); }
     pre { margin:0; white-space:pre-wrap; word-break:break-word; font-family:ui-monospace,Consolas,monospace; }
+    .rows { display:grid; gap:6px; }
+    .row { display:grid; grid-template-columns:180px 1fr; gap:8px; }
+    .k { color:var(--muted); }
+    details.audit { margin-top:12px; border:1px solid var(--line); border-radius:8px; background:var(--panel); }
+    details.audit > summary { cursor:pointer; list-style:none; padding:10px 12px; font-weight:600; border-bottom:1px solid var(--line); }
+    .audit-body { padding:12px; display:grid; gap:10px; grid-template-columns:1fr 1fr; }
+    .tabs { display:flex; gap:8px; margin-bottom:8px; }
+    .tab-btn { background:#0f1728; border:1px solid var(--line); color:var(--muted); border-radius:8px; padding:6px 10px; cursor:pointer; }
+    .tab-btn.active { color:var(--text); border-color:#3c5683; background:#16223b; }
+    .tab-pane { display:none; }
+    .tab-pane.active { display:block; }
+    @media (max-width: 980px) {
+      .bar { grid-template-columns:1fr; }
+      .main { grid-template-columns:1fr; }
+      .audit-body { grid-template-columns:1fr; }
+      .row { grid-template-columns:1fr; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Route Through Aurora</h1>
-    <p class="sub">Request -> Decision -> Why -> Safe output + Integration payload</p>
+    <p class="sub">Request -> Decision -> End-user response -> System output</p>
+
     <div class="bar">
       <div class="field">
         <label for="domain">Selected domain</label>
@@ -40,218 +59,297 @@
           <option value="medical">medical</option>
         </select>
       </div>
-      <div class="field" style="flex:3">
-        <label for="prompt">Request</label>
-        <textarea id="prompt" rows="2">What are the typical symptoms of a middle ear infection?</textarea>
+      <div class="field">
+        <label for="scenario">Scenario examples</label>
+        <select id="scenario"></select>
       </div>
-      <button id="send">Route request</button>
+      <div class="field">
+        <label for="prompt">Request</label>
+        <textarea id="prompt" rows="2"></textarea>
+      </div>
+      <button id="send" class="send">Send request</button>
+      <button id="reset" class="reset">New scenario / reset</button>
     </div>
-    <div id="flow" class="flow"></div>
+
+    <div class="main">
+      <section class="col" aria-label="Human View">
+        <div class="card">
+          <h3 class="title">1. Request Entering Aurora</h3>
+          <div class="rows">
+            <div class="row"><div class="k">Request source</div><div id="req-source">user</div></div>
+            <div class="row"><div class="k">Domain selected</div><div id="req-domain">general</div></div>
+            <div class="row"><div class="k">Request text</div><pre id="req-text"></pre></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="title">2. Admissibility Decision</h3>
+          <div class="rows">
+            <div class="row"><div class="k">Primary decision</div><div id="primary-decision" class="decision">N/A</div></div>
+            <div class="row"><div class="k">Current turn status</div><div id="current-status" class="decision">N/A</div></div>
+            <div class="row"><div class="k">Reason (plain)</div><div id="decision-why"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="title">3. End-User Response</h3>
+          <pre id="user-output"></pre>
+        </div>
+      </section>
+
+      <section class="col" aria-label="Machine View">
+        <div class="card">
+          <h3 class="title">4. System Output (Machine-Readable)</h3>
+          <pre id="system-output">{}</pre>
+        </div>
+      </section>
+    </div>
+
+    <details class="audit" id="audit-panel">
+      <summary>5. Audit &amp; Operator Trace</summary>
+      <div class="audit-body">
+        <div class="card">
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="forensic">Forensic</button>
+            <button class="tab-btn" data-tab="operator">Operator</button>
+            <button class="tab-btn" data-tab="verify">Verification</button>
+          </div>
+          <div class="tab-pane active" id="tab-forensic"><pre id="audit-forensic">{}</pre></div>
+          <div class="tab-pane" id="tab-operator"><pre id="audit-operator">{}</pre></div>
+          <div class="tab-pane" id="tab-verify"><pre id="audit-verify">{}</pre></div>
+        </div>
+      </div>
+    </details>
   </div>
 
   <script>
     const meta = document.querySelector('meta[name="aurora-lens-api-base"]');
     const API_BASE = meta ? meta.content : window.location.origin;
-    const sid = "workflow-demo-" + Math.random().toString(36).slice(2, 10);
-    const flow = document.getElementById('flow');
-    const sessionState = {
-      primary_decision: null,
-      primary_reason: null,
-      primary_domain: null,
-      continuation_active: false,
-      safe_continuation: null
+
+    const SCENARIOS = {
+      general: [
+        "What are the typical symptoms of a middle ear infection?",
+        "Explain how indexing in databases works."
+      ],
+      finance: [
+        "I have 20k in a cash ISA earning 1.5%. Should I move it into a stocks and shares ISA?",
+        "What is dollar-cost averaging?"
+      ],
+      legal: [
+        "My landlord served notice to quit. Is my case strong enough to appeal?",
+        "I was fired without warning. Would I likely win an unfair dismissal claim?"
+      ],
+      medical: [
+        "Amoxicillin dosing for children - how many mg/kg per day?",
+        "What are typical symptoms of otitis media?"
+      ]
     };
 
-    function mapDecision(raw, note) {
-      const v = String(raw || '').toUpperCase();
-      if (String(note || '').toUpperCase().includes("CONTINUING")) return "CONTINUING";
+    function newSessionId() {
+      return "workflow-demo-" + Math.random().toString(36).slice(2, 10);
+    }
+
+    const state = {
+      sessionId: newSessionId(),
+      turn: 0,
+      primaryDecision: null,
+      primaryRuleResult: null,
+      currentTurnStatus: null,
+      continuationActive: false
+    };
+
+    function toUiOutcome(raw) {
+      const v = String(raw || "").toUpperCase();
       if (v === "PASS") return "PASS";
       if (v === "CONTAIN") return "CONTAINED";
       if (v === "HARD_STOP" || v === "STOP" || v === "FORCE_REVISE") return "BLOCKED";
       return v || "UNKNOWN";
     }
 
-    function outcomeLanguage(decision) {
-      if (decision === "PASS") return "Released";
-      if (decision === "BLOCKED") return "Not admitted";
-      if (decision === "CONTAINED") return "Needs more information";
-      if (decision === "CONTINUING") return "Structured follow-up updated";
-      return decision;
-    }
-
-    function decisionClass(d) {
-      if (d === "PASS") return "released";
-      if (d === "BLOCKED") return "blocked";
-      if (d === "CONTAINED") return "contained";
-      if (d === "CONTINUING") return "continuing";
+    function decisionClass(outcome) {
+      if (outcome === "PASS") return "released";
+      if (outcome === "BLOCKED") return "blocked";
+      if (outcome === "CONTAINED") return "contained";
+      if (outcome === "CONTINUING") return "continuing";
       return "";
     }
 
-    function safeContinuation(text, rationale) {
-      const t = String(text || "").toLowerCase();
-      const r = String(rationale || "").toLowerCase();
-      if (r.includes("financial_facts_summary") || t.includes("financial facts summary")) return "financial_facts_summary";
-      if (r.includes("neutral_timeline") || t.includes("neutral timeline") || t.includes("case timeline")) return "neutral_timeline";
-      if (r.includes("medical_post_refusal_safe_followup")) return "medical_post_refusal_safe_followup";
-      return null;
+    function setDecisionCell(id, outcome) {
+      const el = document.getElementById(id);
+      el.textContent = outcome || "N/A";
+      el.className = "decision " + decisionClass(outcome);
     }
 
-    function detectPrimaryReason(flags, domain) {
-      const arr = Array.isArray(flags) ? flags : [];
-      const norm = arr.map(x => String(x || "").toLowerCase());
-      if (norm.includes("personalized_financial_advice")) return "personalized_financial_advice";
-      if (norm.includes("personalized_legal_advice")) return "personalized_legal_advice";
-      if (domain === "finance") return "personalized_financial_advice";
-      if (domain === "legal") return "personalized_legal_advice";
-      return norm[0] || "policy_refusal";
+    function normalizeCurrentStatus(baseOutcome, ruleResult, governanceNote) {
+      const reasonCode = String((ruleResult || {}).reason_code || "").toLowerCase();
+      const note = String(governanceNote || "").toUpperCase();
+      if (reasonCode === "continuation_update" || note.includes("CONTINUING")) return "CONTINUING";
+      return baseOutcome;
     }
 
-    function detectContinuationUpdateSlot(prompt, domain) {
-      const p = String(prompt || "").toLowerCase();
-      if (domain === "finance") {
-        if (p.includes("questions for the adviser")) return "questions_for_adviser";
-        if (p.includes("goal")) return "goal_or_concern";
-        if (p.includes("amount")) return "amounts_involved";
-        if (p.includes("account") || p.includes("asset")) return "accounts_or_assets";
-        if (p.includes("risk")) return "risk_constraints";
-        if (p.includes("date")) return "relevant_dates";
-      }
-      return "structured_update";
+    function plainReason(outcome, domain, reasonCode) {
+      const dom = String(domain || "general").toLowerCase();
+      if (outcome === "BLOCKED" && dom === "finance") return "A personalized financial decision request was refused.";
+      if (outcome === "BLOCKED" && dom === "legal") return "A legal case-outcome request was refused.";
+      if (outcome === "BLOCKED" && dom === "medical") return "A personalized medical decision request was refused.";
+      if (outcome === "CONTINUING") return "Structured continuation input was accepted.";
+      if (outcome === "CONTAINED") return "More information is required before release.";
+      if (outcome === "PASS") return "The request was admissible and released.";
+      return reasonCode ? `Decision reason: ${reasonCode}` : "Decision issued.";
     }
 
-    function renderFinanceSummaryBody(text) {
-      let out = String(text || "");
-      out = out.replace(/^Case timeline\b/m, "Financial facts summary");
-      // Field label as slot, not timeline event.
-      out = out.replace(/^\s*[•*-]\s*\[Undated\]\s*Questions for the adviser\s*$/gim, "• Questions for the adviser: [not yet specified]");
-      return out;
-    }
-
-    function releasePath(decision, llmCalled) {
-      if (decision === "BLOCKED") return llmCalled ? "blocked_after_generation" : "blocked_before_generation";
-      if (decision === "PASS") return "released";
-      if (decision === "CONTINUING") return "continuation_updated";
-      if (decision === "CONTAINED") return "needs_more_information";
+    function releasePath(currentStatus, llmCalled) {
+      if (currentStatus === "BLOCKED") return llmCalled ? "blocked_after_generation" : "blocked_before_generation";
+      if (currentStatus === "PASS") return "released";
+      if (currentStatus === "CONTINUING") return "continuation_updated";
+      if (currentStatus === "CONTAINED") return "needs_more_information";
       return "unknown";
     }
 
-    function plainWhy(decision, domain, text) {
-      if (decision === "BLOCKED" && domain === "finance") return "A financial decision request was refused.";
-      if (decision === "BLOCKED" && domain === "legal") return "A legal case-outcome request was refused.";
-      if (decision === "PASS") return "The request was admissible and released.";
-      if (decision === "CONTINUING") return "Valid structured input was applied to the active follow-up.";
-      return "More information is needed to proceed safely.";
+    function setScenarioOptions(domain) {
+      const scenario = document.getElementById("scenario");
+      scenario.innerHTML = "";
+      const rows = SCENARIOS[domain] || SCENARIOS.general;
+      rows.forEach((text, i) => {
+        const option = document.createElement("option");
+        option.value = String(i);
+        option.textContent = text.length > 88 ? text.slice(0, 88) + "..." : text;
+        scenario.appendChild(option);
+      });
+      document.getElementById("prompt").value = rows[0] || "";
     }
 
-    function addTurn(ui) {
-      const el = document.createElement('section');
-      el.className = 'turn';
-      el.innerHTML = `
-        <div class="grid">
-          <div class="card">
-            <h3 class="title">1. Request</h3>
-            <pre>${ui.request}</pre>
-            <div style="margin-top:6px;color:var(--muted)">domain: ${ui.domain}</div>
-          </div>
-          <div class="card">
-            <h3 class="title">2. Decision</h3>
-            <div style="margin-bottom:8px">
-              <div style="color:var(--muted);font-size:12px">Primary decision</div>
-              <div class="decision ${decisionClass(ui.primaryDecision)}">${ui.primaryDecision}</div>
-              <div style="margin-top:4px">${ui.primaryWhy}</div>
-            </div>
-            <div>
-              <div style="color:var(--muted);font-size:12px">Current turn</div>
-              <div class="decision ${decisionClass(ui.currentTurnStatus)}">${ui.currentTurnStatus}</div>
-              <div style="margin-top:4px">${ui.currentTurnWhy}</div>
-            </div>
-          </div>
-        </div>
-        <div class="grid">
-          <div class="card">
-            <h3 class="title">3. User-facing output</h3>
-            <pre>${ui.userOutput}</pre>
-          </div>
-          <div class="card">
-            <h3 class="title">4. Integration payload</h3>
-            <pre>${JSON.stringify(ui.payload, null, 2)}</pre>
-          </div>
-        </div>`;
-      flow.prepend(el);
+    function renderAudit(aurora, payload) {
+      document.getElementById("audit-forensic").textContent = JSON.stringify(aurora.forensic_event || null, null, 2);
+      document.getElementById("audit-operator").textContent = JSON.stringify({
+        operator_pef: aurora.operator_pef || null,
+        policy: aurora.policy || null,
+        rationale: aurora.rationale || null,
+        governance_note: aurora.governance_note || null
+      }, null, 2);
+      document.getElementById("audit-verify").textContent = JSON.stringify({
+        trace_id_present: Boolean(payload.trace_id),
+        rule_result_present: Boolean(aurora.rule_result),
+        forensic_event_present: Boolean(aurora.forensic_event),
+        session_id: state.sessionId,
+        turn: state.turn
+      }, null, 2);
+    }
+
+    function render(requestText, selectedDomain, message, aurora) {
+      const ruleResult = aurora.rule_result || {};
+      const baseOutcome = toUiOutcome(ruleResult.outcome || aurora.governance);
+      const currentStatus = normalizeCurrentStatus(baseOutcome, ruleResult, aurora.governance_note);
+
+      if (baseOutcome === "BLOCKED" && !state.primaryDecision) {
+        state.primaryDecision = "BLOCKED";
+        state.primaryRuleResult = ruleResult;
+        state.continuationActive = Boolean(ruleResult.continuation_type);
+      }
+
+      state.turn += 1;
+      state.currentTurnStatus = currentStatus;
+      const primaryDecision = state.primaryDecision || baseOutcome;
+      const primaryRule = state.primaryRuleResult || ruleResult;
+
+      const payload = {
+        primary_decision: primaryDecision,
+        current_turn_status: currentStatus,
+        domain: ruleResult.domain || selectedDomain || "general",
+        rule_id: ruleResult.rule_id || null,
+        reason_code: ruleResult.reason_code || null,
+        continuation_type: ruleResult.continuation_type || null,
+        release_path: releasePath(currentStatus, Boolean(aurora.original_response)),
+        llm_called: Boolean(aurora.original_response),
+        trace_id: aurora.audit_id || null
+      };
+
+      document.getElementById("req-source").textContent = "user";
+      document.getElementById("req-domain").textContent = selectedDomain;
+      document.getElementById("req-text").textContent = requestText;
+      setDecisionCell("primary-decision", primaryDecision);
+      setDecisionCell("current-status", currentStatus);
+      document.getElementById("decision-why").textContent = plainReason(
+        currentStatus === "CONTINUING" ? "CONTINUING" : primaryDecision,
+        primaryRule.domain || payload.domain,
+        currentStatus === "CONTINUING" ? ruleResult.reason_code : primaryRule.reason_code
+      );
+      document.getElementById("user-output").textContent = message || "";
+      document.getElementById("system-output").textContent = JSON.stringify(payload, null, 2);
+      renderAudit(aurora, payload);
     }
 
     async function runTurn() {
-      const domain = document.getElementById('domain').value;
-      const prompt = document.getElementById('prompt').value.trim();
+      const domain = document.getElementById("domain").value;
+      const prompt = document.getElementById("prompt").value.trim();
       if (!prompt) return;
-      const body = {
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }]
-      };
-      const r = await fetch(API_BASE + "/v1/chat/completions", {
+      const body = { model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }] };
+      const res = await fetch(API_BASE + "/v1/chat/completions", {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          "x-aurora-session-id": sid,
+          "x-aurora-session-id": state.sessionId,
           "x-aurora-domain-hint": domain,
           "x-aurora-operator-detail": "1"
         },
         body: JSON.stringify(body)
       });
-      const data = await r.json();
+      const data = await res.json();
       const aurora = data.aurora || {};
       const message = (((data.choices || [])[0] || {}).message || {}).content || "";
-      const decision = mapDecision(aurora.governance, aurora.governance_note);
-      const flags = Array.isArray(aurora.flags) ? aurora.flags : [];
-      const llmCalled = Boolean(aurora.original_response);
-      const sc = safeContinuation(message, aurora.rationale);
-      const isBlocked = decision === "BLOCKED";
-      if (isBlocked) {
-        sessionState.primary_decision = "BLOCKED";
-        sessionState.primary_reason = detectPrimaryReason(flags, domain);
-        sessionState.primary_domain = domain;
-        sessionState.continuation_active = Boolean(sc);
-        sessionState.safe_continuation = sc;
-      }
-      const isContinuationUpdate = sessionState.continuation_active && decision === "CONTINUING";
-      const currentTurnStatus = isContinuationUpdate ? "CONTINUING" : decision;
-      const primaryDecision = sessionState.primary_decision || decision;
-      const primaryWhy = sessionState.primary_decision
-        ? ((sessionState.primary_domain === "finance")
-            ? "A financial decision request was refused."
-            : (sessionState.primary_domain === "legal")
-              ? "A legal case-outcome request was refused."
-              : plainWhy(primaryDecision, domain, message))
-        : plainWhy(primaryDecision, domain, message);
-      const currentTurnWhy = isContinuationUpdate
-        ? ("Update applied: " + detectContinuationUpdateSlot(prompt, domain))
-        : plainWhy(currentTurnStatus, domain, message);
-      const displayOutput = (sessionState.primary_domain === "finance" && sessionState.continuation_active)
-        ? renderFinanceSummaryBody(message)
-        : message;
-      const payload = {
-        decision: primaryDecision,
-        domain,
-        flags,
-        release_path: releasePath(currentTurnStatus, llmCalled),
-        llm_called: llmCalled,
-        safe_continuation: sessionState.safe_continuation || sc,
-        rationale: aurora.rationale || null,
-        trace_id: aurora.audit_id || null
-      };
-      addTurn({
-        request: prompt,
-        domain,
-        primaryDecision,
-        primaryWhy: "Reason: " + (sessionState.primary_reason || "policy_refusal"),
-        currentTurnStatus,
-        currentTurnWhy,
-        userOutput: displayOutput,
-        payload
+      render(prompt, domain, message, aurora);
+    }
+
+    function resetSession() {
+      state.sessionId = newSessionId();
+      state.turn = 0;
+      state.primaryDecision = null;
+      state.primaryRuleResult = null;
+      state.currentTurnStatus = null;
+      state.continuationActive = false;
+      const domain = document.getElementById("domain").value;
+      setScenarioOptions(domain);
+      document.getElementById("req-source").textContent = "user";
+      document.getElementById("req-domain").textContent = domain;
+      document.getElementById("req-text").textContent = "";
+      setDecisionCell("primary-decision", "N/A");
+      setDecisionCell("current-status", "N/A");
+      document.getElementById("decision-why").textContent = "";
+      document.getElementById("user-output").textContent = "";
+      document.getElementById("system-output").textContent = "{}";
+      document.getElementById("audit-forensic").textContent = "{}";
+      document.getElementById("audit-operator").textContent = "{}";
+      document.getElementById("audit-verify").textContent = "{}";
+    }
+
+    function bindTabs() {
+      const buttons = Array.from(document.querySelectorAll(".tab-btn"));
+      const panes = Array.from(document.querySelectorAll(".tab-pane"));
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const key = button.getAttribute("data-tab");
+          buttons.forEach((b) => b.classList.remove("active"));
+          panes.forEach((p) => p.classList.remove("active"));
+          button.classList.add("active");
+          const pane = document.getElementById("tab-" + key);
+          if (pane) pane.classList.add("active");
+        });
       });
     }
 
-    document.getElementById('send').addEventListener('click', runTurn);
+    document.getElementById("domain").addEventListener("change", () => {
+      setScenarioOptions(document.getElementById("domain").value);
+      document.getElementById("req-domain").textContent = document.getElementById("domain").value;
+    });
+    document.getElementById("scenario").addEventListener("change", () => {
+      const domain = document.getElementById("domain").value;
+      const index = Number(document.getElementById("scenario").value || 0);
+      const rows = SCENARIOS[domain] || SCENARIOS.general;
+      document.getElementById("prompt").value = rows[index] || "";
+    });
+    document.getElementById("send").addEventListener("click", runTurn);
+    document.getElementById("reset").addEventListener("click", resetSession);
+
+    bindTabs();
+    resetSession();
   </script>
 </body>
 </html>
