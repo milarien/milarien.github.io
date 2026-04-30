@@ -121,8 +121,20 @@
   </div>
 
   <script>
+    const SERVICE_ORIGIN = (function () {
+      try {
+        return atob('aHR0cHM6Ly9hdXJvcmFsZW5zLXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHA=');
+      } catch (_e) {
+        return '';
+      }
+    })();
     const meta = document.querySelector('meta[name="aurora-lens-api-base"]');
-    const API_BASE = meta ? meta.content : window.location.origin;
+    const API_BASE = (function () {
+      const fromMeta = meta ? String(meta.content || '').trim() : '';
+      if (fromMeta) return fromMeta.replace(/\/+$/, '');
+      if (SERVICE_ORIGIN) return String(SERVICE_ORIGIN).replace(/\/+$/, '');
+      return String(window.location.origin || '').replace(/\/+$/, '');
+    })();
 
     const SCENARIOS = {
       general: [
