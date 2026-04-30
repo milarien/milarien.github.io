@@ -1,558 +1,259 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Aurora Lens - Governance Workflow Demo</title>
-  <style>
-    :root { --bg:#0b1220; --panel:#121b2e; --line:#24324e; --text:#eaf0ff; --muted:#9fb0d1; --ok:#32d296; --warn:#f2c969; --bad:#ff7b8a; --info:#8ecbff; }
-    * { box-sizing: border-box; }
-    body { margin:0; background:var(--bg); color:var(--text); font:14px/1.45 Segoe UI,Arial,sans-serif; }
-    .wrap { max-width:1280px; margin:0 auto; padding:20px; }
-    h1 { margin:0 0 4px; font-size:22px; }
-    .sub { color:var(--muted); margin:0 0 14px; }
-    .bar { display:grid; gap:10px; grid-template-columns:1fr 1fr 3fr auto auto; align-items:end; background:var(--panel); border:1px solid var(--line); padding:12px; border-radius:10px; }
-    .field { display:grid; gap:6px; }
-    .field label { color:var(--muted); font-size:12px; }
-    input, select, button, textarea { width:100%; background:#0f1728; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 10px; }
-    button { width:auto; cursor:pointer; font-weight:600; }
-    .send { background:#1d315a; border-color:#35558c; }
-    .reset { background:#1f2838; }
-    .main { margin-top:14px; display:grid; gap:12px; grid-template-columns:2fr 1fr; align-items:start; }
-    .col { display:grid; gap:10px; }
-    .card { border:1px solid var(--line); border-radius:8px; padding:10px; background:#0f1728; }
-    .title { margin:0 0 6px; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
-    .decision { font-weight:700; }
-    .released { color:var(--ok); } .blocked { color:var(--bad); } .contained { color:var(--warn); } .continuing { color:var(--info); }
-    pre { margin:0; white-space:pre-wrap; word-break:break-word; font-family:ui-monospace,Consolas,monospace; }
-    .rows { display:grid; gap:6px; }
-    .row { display:grid; grid-template-columns:180px 1fr; gap:8px; }
-    .k { color:var(--muted); }
-    .clarify-panel { display:none; }
-    .clarify-title { margin:0 0 6px; font-size:13px; font-weight:600; }
-    .clarify-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
-    .clarify-chip { background:#16223b; border:1px solid #3c5683; color:var(--text); border-radius:999px; padding:6px 12px; cursor:pointer; }
-    details.audit { margin-top:12px; border:1px solid var(--line); border-radius:8px; background:var(--panel); }
-    details.audit > summary { cursor:pointer; list-style:none; padding:10px 12px; font-weight:600; border-bottom:1px solid var(--line); }
-    .audit-body { padding:12px; display:grid; gap:10px; grid-template-columns:1fr 1fr; }
-    .tabs { display:flex; gap:8px; margin-bottom:8px; }
-    .tab-btn { background:#0f1728; border:1px solid var(--line); color:var(--muted); border-radius:8px; padding:6px 10px; cursor:pointer; }
-    .tab-btn.active { color:var(--text); border-color:#3c5683; background:#16223b; }
-    .tab-pane { display:none; }
-    .tab-pane.active { display:block; }
-    @media (max-width: 980px) {
-      .bar { grid-template-columns:1fr; }
-      .main { grid-template-columns:1fr; }
-      .audit-body { grid-template-columns:1fr; }
-      .row { grid-template-columns:1fr; }
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="aurora-lens-api-base" content="" />
+<title>Aurora-Lens Demo</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #eee;
+    margin: 0;
+}
+
+header {
+    padding: 12px;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px;
+}
+
+.panel {
+    background: #1b1b1b;
+    border: 1px solid #333;
+    padding: 10px;
+}
+
+h3 {
+    margin-top: 0;
+}
+
+.blocked {
+    background: #2a1414;
+    border: 1px solid #aa4444;
+    padding: 8px;
+}
+
+.allowed {
+    background: #142a14;
+    border: 1px solid #44aa44;
+    padding: 8px;
+}
+
+.audit {
+    font-family: monospace;
+    font-size: 12px;
+}
+
+button {
+    margin: 4px;
+    padding: 6px 10px;
+    background: #333;
+    color: #eee;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #555;
+}
+
+input {
+    width: 80%;
+    padding: 6px;
+}
+</style>
 </head>
+
 <body>
-  <div class="wrap">
-    <h1>Route Through Aurora</h1>
-    <p class="sub">Request -> Decision -> End-user response -> System output</p>
 
-    <div class="bar">
-      <div class="field">
-        <label for="domain">Selected domain</label>
-        <select id="domain">
-          <option value="general">general</option>
-          <option value="finance">finance</option>
-          <option value="legal">legal</option>
-          <option value="medical">medical</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="scenario">Scenario examples</label>
-        <select id="scenario"></select>
-      </div>
-      <div class="field">
-        <label for="prompt">Request</label>
-        <textarea id="prompt" rows="2"></textarea>
-      </div>
-      <button id="send" class="send">Send request</button>
-      <button id="reset" class="reset">New scenario / reset</button>
-    </div>
+<header>
+<strong>Aurora-Lens</strong> — Admissibility before consequence  
+<span id="authority"></span>
+</header>
 
-    <div class="main">
-      <section class="col" aria-label="Human View">
-        <div class="card">
-          <h3 class="title">1. Request Entering Aurora</h3>
-          <div class="rows">
-            <div class="row"><div class="k">Request source</div><div id="req-source">user</div></div>
-            <div class="row"><div class="k">Domain selected</div><div id="req-domain">general</div></div>
-            <div class="row"><div class="k">Request text</div><pre id="req-text"></pre></div>
-          </div>
-        </div>
-        <div class="card">
-          <h3 class="title">2. Admissibility Decision</h3>
-          <div class="rows">
-            <div class="row"><div class="k">Primary decision</div><div id="primary-decision" class="decision">N/A</div></div>
-            <div class="row"><div class="k">Current turn status</div><div id="current-status" class="decision">N/A</div></div>
-            <div class="row"><div class="k">Continuation active</div><div id="continuation-active">N/A</div></div>
-            <div class="row"><div class="k">Accepted update slot</div><div id="accepted-slot">N/A</div></div>
-            <div class="row"><div class="k">Reason (plain)</div><div id="decision-why"></div></div>
-          </div>
-        </div>
-        <div class="card clarify-panel" id="clarify-panel">
-          <h3 class="title">Clarification Required</h3>
-          <div class="clarify-title" id="clarify-prompt"></div>
-          <div class="k">Select an option to continue through the same binding path:</div>
-          <div class="clarify-actions" id="clarify-actions"></div>
-        </div>
-        <div class="card">
-          <h3 class="title">3. End-User Response</h3>
-          <pre id="user-output"></pre>
-        </div>
-      </section>
+<div class="container">
 
-      <section class="col" aria-label="Machine View">
-        <div class="card">
-          <h3 class="title">4. System Output (Machine-Readable)</h3>
-          <pre id="system-output">{}</pre>
-          <h3 class="title" style="margin-top:10px">Admissibility Before Consequence</h3>
-          <pre id="admissibility-proof">{}</pre>
-          <h3 class="title" style="margin-top:10px">Rule Identity</h3>
-          <pre id="rule-identity">{}</pre>
-          <h3 class="title" style="margin-top:10px">State Transition</h3>
-          <pre id="state-transition">{}</pre>
-        </div>
-      </section>
-    </div>
+<!-- Conversation -->
+<div class="panel">
+<h3>Conversation</h3>
+<div id="messages"></div>
 
-    <details class="audit" id="audit-panel">
-      <summary>5. Audit &amp; Operator Trace</summary>
-      <div class="audit-body">
-        <div class="card">
-          <div class="tabs">
-            <button class="tab-btn active" data-tab="forensic">Forensic</button>
-            <button class="tab-btn" data-tab="operator">Operator</button>
-            <button class="tab-btn" data-tab="verify">Verification</button>
-          </div>
-          <div class="tab-pane active" id="tab-forensic"><pre id="audit-forensic">{}</pre></div>
-          <div class="tab-pane" id="tab-operator"><pre id="audit-operator">{}</pre></div>
-          <div class="tab-pane" id="tab-verify"><pre id="audit-verify">{}</pre></div>
-        </div>
-      </div>
-    </details>
-  </div>
+<div id="clarification" style="display:none;"></div>
 
-  <script>
-    const SERVICE_ORIGIN = (function () {
-      try {
-        return atob('aHR0cHM6Ly9hdXJvcmFsZW5zLXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHA=');
-      } catch (_e) {
-        return '';
-      }
-    })();
-    const meta = document.querySelector('meta[name="aurora-lens-api-base"]');
-    const API_BASE = (function () {
-      const fromMeta = meta ? String(meta.content || '').trim() : '';
-      if (fromMeta) return fromMeta.replace(/\/+$/, '');
-      if (SERVICE_ORIGIN) return String(SERVICE_ORIGIN).replace(/\/+$/, '');
-      return String(window.location.origin || '').replace(/\/+$/, '');
-    })();
+<div id="inputBox">
+<input id="prompt" placeholder="Ask something..." />
+<button onclick="run()">Run</button>
+</div>
+</div>
 
-    const SCENARIOS = {
-      general: [
-        "What are the typical symptoms of a middle ear infection?",
-        "Explain how indexing in databases works."
-      ],
-      finance: [
-        "I have 20k in a cash ISA earning 1.5%. Should I move it into a stocks and shares ISA?",
-        "What is dollar-cost averaging?"
-      ],
-      legal: [
-        "My landlord served notice to quit. Is my case strong enough to appeal?",
-        "I was fired without warning. Would I likely win an unfair dismissal claim?"
-      ],
-      medical: [
-        "Amoxicillin dosing for children - how many mg/kg per day?",
-        "What are typical symptoms of otitis media?"
-      ]
-    };
+<!-- Model Output -->
+<div class="panel">
+<h3>Model Output</h3>
 
-    function newSessionId() {
-      return "workflow-demo-" + Math.random().toString(36).slice(2, 10);
+<div id="blocked" class="blocked" style="display:none;"></div>
+<div id="released" class="allowed"></div>
+
+</div>
+
+<!-- Governance -->
+<div class="panel">
+<h3>Governance Decision</h3>
+<div id="governance"></div>
+</div>
+
+<!-- Audit -->
+<div class="panel audit">
+<h3>Forensic Audit</h3>
+<div id="audit"></div>
+</div>
+
+</div>
+
+<script>
+
+let sessionId = null;
+const SERVICE_ORIGIN = (function () {
+    try {
+        return atob("aHR0cHM6Ly9hdXJvcmFsZW5zLXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHA=");
+    } catch (_e) {
+        return "";
     }
+})();
+const metaApiBase = document.querySelector('meta[name="aurora-lens-api-base"]');
+const API_BASE = (function () {
+    const fromMeta = metaApiBase ? String(metaApiBase.content || "").trim() : "";
+    if (fromMeta) return fromMeta.replace(/\/+$/, "");
+    if (SERVICE_ORIGIN) return String(SERVICE_ORIGIN).replace(/\/+$/, "");
+    return String(window.location.origin || "").replace(/\/+$/, "");
+})();
 
-    const state = {
-      sessionId: newSessionId(),
-      turn: 0,
-      primaryDecision: null,
-      primaryRuleResult: null,
-      currentTurnStatus: null,
-      continuationActive: false,
-      prevOperatorPef: null
-    };
+async function run(text=null) {
 
-    function toUiOutcome(raw) {
-      const v = String(raw || "").toUpperCase();
-      if (v === "PASS") return "PASS";
-      if (v === "CONTAIN") return "CONTAINED";
-      if (v === "HARD_STOP" || v === "STOP" || v === "FORCE_REVISE") return "BLOCKED";
-      return v || "UNKNOWN";
-    }
+    const prompt = text || document.getElementById("prompt").value;
+    if (!String(prompt || "").trim()) return;
+    const headers = {"Content-Type": "application/json"};
+    if (sessionId) headers["x-aurora-session-id"] = sessionId;
+    headers["x-aurora-operator-detail"] = "1";
 
-    function decisionClass(outcome) {
-      if (outcome === "PASS") return "released";
-      if (outcome === "BLOCKED") return "blocked";
-      if (outcome === "CONTAINED") return "contained";
-      if (outcome === "CONTINUING") return "continuing";
-      return "";
-    }
-
-    function setDecisionCell(id, outcome) {
-      const el = document.getElementById(id);
-      el.textContent = outcome || "N/A";
-      el.className = "decision " + decisionClass(outcome);
-    }
-
-    function normalizeCurrentStatus(baseOutcome, ruleResult, governanceNote) {
-      const reasonCode = String((ruleResult || {}).reason_code || "").toLowerCase();
-      const note = String(governanceNote || "").toUpperCase();
-      if (reasonCode === "continuation_update" || note.includes("CONTINUING")) return "CONTINUING";
-      return baseOutcome;
-    }
-
-    function plainReason(outcome, domain, reasonCode) {
-      if (reasonCode) return `Rule reason_code: ${reasonCode}`;
-      if (outcome === "CONTINUING") return "Structured continuation input was accepted.";
-      if (outcome === "CONTAINED") return "More information is required before release.";
-      if (outcome === "PASS") return "The request was admissible and released.";
-      return "not surfaced by current endpoint";
-    }
-
-    function makePossessive(name) {
-      if (!name) return "";
-      return name.endsWith("s") ? `${name}'` : `${name}'s`;
-    }
-
-    function referentChoiceLabels(pending) {
-      const candidates = Array.isArray(pending.candidate_entities) ? pending.candidate_entities : [];
-      const preview = String(pending.original_question || pending.original_question_preview || "").toLowerCase();
-      const sisterShape = preview.includes("sister");
-      if (sisterShape) {
-        return candidates.map((name) => `${makePossessive(String(name))} sister`);
-      }
-      return candidates.map((name) => String(name));
-    }
-
-    function clarificationPrompt(pending) {
-      const fromRuntime = String(pending.clarification_prompt || "").trim();
-      if (fromRuntime) return fromRuntime;
-      const preview = String(pending.original_question || pending.original_question_preview || "").toLowerCase();
-      if (preview.includes("sister")) return "Whose sister?";
-      const refs = Array.isArray(pending.ambiguous_referents) ? pending.ambiguous_referents : [];
-      if (refs.length === 1) return `Who do you mean by '${refs[0]}'?`;
-      return "Which referent did you mean?";
-    }
-
-    function renderClarificationChoices(domain, pending) {
-      const panel = document.getElementById("clarify-panel");
-      const prompt = document.getElementById("clarify-prompt");
-      const actions = document.getElementById("clarify-actions");
-      actions.innerHTML = "";
-      const isUnresolvedReferent = pending
-        && pending.active
-        && pending.failed_constraint === "UNRESOLVED_REFERENT"
-        && Array.isArray(pending.candidate_entities)
-        && pending.candidate_entities.length > 0;
-      if (!isUnresolvedReferent) {
-        panel.style.display = "none";
-        prompt.textContent = "";
-        return [];
-      }
-      const labels = referentChoiceLabels(pending);
-      prompt.textContent = clarificationPrompt(pending);
-      labels.forEach((label) => {
-        const chip = document.createElement("button");
-        chip.type = "button";
-        chip.className = "clarify-chip";
-        chip.textContent = label;
-        chip.addEventListener("click", () => {
-          document.getElementById("domain").value = domain;
-          document.getElementById("prompt").value = label;
-          runTurn(label);
-        });
-        actions.appendChild(chip);
-      });
-      panel.style.display = "block";
-      return labels;
-    }
-
-    function setClarificationInteractionMode(pending, labels) {
-      const promptInput = document.getElementById("prompt");
-      const sendButton = document.getElementById("send");
-      const isActive = pending
-        && pending.active
-        && pending.failed_constraint === "UNRESOLVED_REFERENT"
-        && Array.isArray(labels)
-        && labels.length > 0;
-      if (isActive) {
-        promptInput.value = "";
-        promptInput.readOnly = true;
-        promptInput.placeholder = "Clarification required: choose one option below.";
-        sendButton.disabled = true;
-        return;
-      }
-      promptInput.readOnly = false;
-      promptInput.placeholder = "";
-      sendButton.disabled = false;
-    }
-
-    function releasePath(currentStatus, llmCalled) {
-      if (currentStatus === "BLOCKED") return llmCalled ? "blocked_after_generation" : "blocked_before_generation";
-      if (currentStatus === "PASS") return "released";
-      if (currentStatus === "CONTINUING") return "continuation_updated";
-      if (currentStatus === "CONTAINED") return "needs_more_information";
-      return "unknown";
-    }
-
-    function setScenarioOptions(domain) {
-      const scenario = document.getElementById("scenario");
-      scenario.innerHTML = "";
-      const rows = SCENARIOS[domain] || SCENARIOS.general;
-      rows.forEach((text, i) => {
-        const option = document.createElement("option");
-        option.value = String(i);
-        option.textContent = text.length > 88 ? text.slice(0, 88) + "..." : text;
-        scenario.appendChild(option);
-      });
-      document.getElementById("prompt").value = rows[0] || "";
-    }
-
-    function renderAudit(aurora, payload) {
-      const fe = aurora.forensic_event || {};
-      document.getElementById("audit-forensic").textContent = JSON.stringify(aurora.forensic_event || null, null, 2);
-      document.getElementById("audit-operator").textContent = JSON.stringify({
-        operator_pef: aurora.operator_pef || null,
-        policy: aurora.policy || null,
-        rationale: aurora.rationale || null,
-        governance_note: aurora.governance_note || null
-      }, null, 2);
-      const notSurfaced = "not surfaced by current endpoint";
-      document.getElementById("audit-verify").textContent = JSON.stringify({
-        trace_id: payload.trace_id || notSurfaced,
-        entry_hash: fe.event_hash || fe.hash || notSurfaced,
-        prev_hash: fe.prev_hash || fe.prev || notSurfaced,
-        // TODO(demo): expose chain verification status from backend endpoint payload.
-        chain_verified: fe.chain_verified ?? notSurfaced,
-        // TODO(demo): expose signature/HMAC verification status from backend endpoint payload.
-        signature_verified: fe.signature_verified ?? fe.hmac_verified ?? notSurfaced,
-        // TODO(demo): expose final audit verifier verdict for row/window/full chain from backend endpoint payload.
-        fully_verified: fe.fully_verified ?? fe.verified ?? notSurfaced
-      }, null, 2);
-    }
-
-    function renderStateTransition(aurora) {
-      const current = aurora.operator_pef || null;
-      const prev = state.prevOperatorPef;
-      const changed = JSON.stringify(prev) !== JSON.stringify(current);
-      const notSurfaced = "not surfaced by current endpoint";
-      // TODO(demo): expose proposed state mutation details from backend endpoint payload.
-      const proposedMutation = notSurfaced;
-      const primaryBlocked = state.primaryDecision === "BLOCKED";
-      const minimal = {
-        state_changed: changed,
-        commit_boundary: "Before commit: candidate/request evaluated | After commit: only admitted output/state crosses",
-        before: prev ? {
-          session_mode: prev.session_mode ?? null,
-          hold_mode: prev.epistemic_hold?.mode ?? null,
-          entities: prev.counts?.entities ?? null,
-          relationships: prev.counts?.relationships ?? null
-        } : notSurfaced,
-        proposed_mutation: proposedMutation,
-        after: current ? {
-          session_mode: current.session_mode ?? null,
-          hold_mode: current.epistemic_hold?.mode ?? null,
-          entities: current.counts?.entities ?? null,
-          relationships: current.counts?.relationships ?? null
-        } : notSurfaced,
-        consequence_note: primaryBlocked ? "No consequence committed" : "Consequence commit depends on admitted pathway"
-      };
-      document.getElementById("state-transition").textContent = JSON.stringify(minimal, null, 2);
-      state.prevOperatorPef = current;
-    }
-
-    function render(requestText, selectedDomain, message, aurora) {
-      const ruleResult = aurora.rule_result || {};
-      const baseOutcome = toUiOutcome(ruleResult.outcome || aurora.governance);
-      const currentStatus = normalizeCurrentStatus(baseOutcome, ruleResult, aurora.governance_note);
-      const pendingClarification = ((aurora.operator_pef || {}).pending_clarification) || {};
-      const pendingActive = Boolean(pendingClarification.active);
-      const clarificationChoices = renderClarificationChoices(selectedDomain, pendingClarification);
-      setClarificationInteractionMode(pendingClarification, clarificationChoices);
-
-      const isContinuing = currentStatus === "CONTINUING";
-      if (!isContinuing) {
-        state.primaryDecision = baseOutcome;
-        state.primaryRuleResult = ruleResult;
-        state.continuationActive = Boolean(ruleResult.continuation_type) || pendingActive;
-      }
-
-      state.turn += 1;
-      state.currentTurnStatus = currentStatus;
-      const primaryDecision = state.primaryDecision || baseOutcome;
-      const primaryRule = state.primaryRuleResult || ruleResult;
-      const notSurfaced = "not surfaced by current endpoint";
-
-      const hasOriginalResponseField = Object.prototype.hasOwnProperty.call(aurora, "original_response");
-      const candidateProduced = hasOriginalResponseField
-        ? Boolean(aurora.original_response)
-        : notSurfaced; // TODO(demo): endpoint should always surface candidate-generation marker.
-      const blockedPhase = primaryDecision === "BLOCKED"
-        ? (candidateProduced === notSurfaced
-          ? notSurfaced
-          : (candidateProduced ? "blocked_after_generation" : "blocked_before_generation"))
-        : "not_blocked";
-      const fe = aurora.forensic_event || {};
-      const consequenceCommitted = Object.prototype.hasOwnProperty.call(fe, "commitment_closed")
-        ? !Boolean(fe.commitment_closed)
-        : notSurfaced; // TODO(demo): endpoint should surface commit boundary signal directly.
-      const acceptedUpdateSlot = notSurfaced; // TODO(demo): endpoint should return accepted continuation slot when update is applied.
-
-      const payload = {
-        primary_decision: primaryDecision,
-        current_turn_status: currentStatus,
-        domain: ruleResult.domain ?? null,
-        rule_id: ruleResult.rule_id ?? null,
-        reason_code: ruleResult.reason_code ?? null,
-        outcome: ruleResult.outcome ?? null,
-        continuation_type: ruleResult.continuation_type || null,
-        continuation_active: state.continuationActive,
-        pending_clarification: pendingActive ? pendingClarification : null,
-        accepted_update_slot: acceptedUpdateSlot,
-        candidate_produced: candidateProduced,
-        released: primaryDecision === "PASS",
-        blocked_phase: blockedPhase,
-        consequence_committed: consequenceCommitted,
-        release_path: releasePath(currentStatus, Boolean(aurora.original_response)),
-        llm_called: Boolean(aurora.original_response),
-        trace_id: aurora.audit_id || null,
-        clarification_choices: clarificationChoices
-      };
-
-      document.getElementById("req-source").textContent = "user";
-      document.getElementById("req-domain").textContent = selectedDomain;
-      document.getElementById("req-text").textContent = requestText;
-      setDecisionCell("primary-decision", primaryDecision);
-      setDecisionCell("current-status", currentStatus);
-      document.getElementById("continuation-active").textContent = String(state.continuationActive);
-      document.getElementById("accepted-slot").textContent = acceptedUpdateSlot;
-      document.getElementById("decision-why").textContent = plainReason(
-        currentStatus === "CONTINUING" ? "CONTINUING" : primaryDecision,
-        primaryRule.domain || null,
-        currentStatus === "CONTINUING" ? ruleResult.reason_code : primaryRule.reason_code
-      );
-      document.getElementById("user-output").textContent = message || "";
-      document.getElementById("system-output").textContent = JSON.stringify(payload, null, 2);
-      document.getElementById("admissibility-proof").textContent = JSON.stringify({
-        candidate_produced: candidateProduced,
-        released: payload.released,
-        blocked_phase: blockedPhase,
-        consequence_committed: consequenceCommitted
-      }, null, 2);
-      document.getElementById("rule-identity").textContent = JSON.stringify({
-        rule_id: ruleResult.rule_id ?? notSurfaced,
-        domain: ruleResult.domain ?? notSurfaced,
-        reason_code: ruleResult.reason_code ?? notSurfaced,
-        outcome: ruleResult.outcome ?? notSurfaced,
-        continuation_type: ruleResult.continuation_type ?? notSurfaced
-      }, null, 2);
-      renderAudit(aurora, payload);
-      renderStateTransition(aurora);
-    }
-
-    async function runTurn(promptOverride) {
-      const domain = document.getElementById("domain").value;
-      const promptText = typeof promptOverride === "string"
-        ? promptOverride
-        : document.getElementById("prompt").value;
-      const prompt = String(promptText || "").trim();
-      if (!prompt) return;
-      const body = { model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }] };
-      const res = await fetch(API_BASE + "/v1/chat/completions", {
+    const res = await fetch(API_BASE + "/v1/chat/completions", {
         method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-aurora-session-id": state.sessionId,
-          "x-aurora-domain-hint": domain,
-          "x-aurora-operator-detail": "1"
-        },
-        body: JSON.stringify(body)
-      });
-      const data = await res.json();
-      const aurora = data.aurora || {};
-      const message = (((data.choices || [])[0] || {}).message || {}).content || "";
-      render(prompt, domain, message, aurora);
-    }
+        headers,
+        body: JSON.stringify({
+            messages: [{role: "user", content: prompt}],
+            session_id: sessionId
+        })
+    });
 
-    function resetSession() {
-      state.sessionId = newSessionId();
-      state.turn = 0;
-      state.primaryDecision = null;
-      state.primaryRuleResult = null;
-      state.currentTurnStatus = null;
-      state.continuationActive = false;
-      const domain = document.getElementById("domain").value;
-      setScenarioOptions(domain);
-      document.getElementById("req-source").textContent = "user";
-      document.getElementById("req-domain").textContent = domain;
-      document.getElementById("req-text").textContent = "";
-      setDecisionCell("primary-decision", "N/A");
-      setDecisionCell("current-status", "N/A");
-      document.getElementById("decision-why").textContent = "";
-      document.getElementById("user-output").textContent = "";
-      document.getElementById("system-output").textContent = "{}";
-      document.getElementById("admissibility-proof").textContent = "{}";
-      document.getElementById("rule-identity").textContent = "{}";
-      document.getElementById("state-transition").textContent = "{}";
-      document.getElementById("audit-forensic").textContent = "{}";
-      document.getElementById("audit-operator").textContent = "{}";
-      document.getElementById("audit-verify").textContent = "{}";
-      document.getElementById("continuation-active").textContent = "N/A";
-      document.getElementById("accepted-slot").textContent = "N/A";
-      document.getElementById("clarify-panel").style.display = "none";
-      document.getElementById("clarify-prompt").textContent = "";
-      document.getElementById("clarify-actions").innerHTML = "";
-      document.getElementById("prompt").readOnly = false;
-      document.getElementById("prompt").placeholder = "";
-      document.getElementById("send").disabled = false;
-      state.prevOperatorPef = null;
-    }
+    const data = await res.json();
 
-    function bindTabs() {
-      const buttons = Array.from(document.querySelectorAll(".tab-btn"));
-      const panes = Array.from(document.querySelectorAll(".tab-pane"));
-      buttons.forEach((button) => {
-        button.addEventListener("click", () => {
-          const key = button.getAttribute("data-tab");
-          buttons.forEach((b) => b.classList.remove("active"));
-          panes.forEach((p) => p.classList.remove("active"));
-          button.classList.add("active");
-          const pane = document.getElementById("tab-" + key);
-          if (pane) pane.classList.add("active");
+    sessionId = data.session_id;
+
+    render(data);
+}
+
+function render(data) {
+    const payload = data.aurora || data;
+    const governance = data.governance || payload.governance || {};
+    const operatorPef = data.operator_pef || payload.operator_pef || {};
+    const audit = data.audit || payload.audit || {};
+    const output = data.output
+        || ((((data.choices || [])[0] || {}).message || {}).content)
+        || payload.response_message
+        || "";
+    const inputText = data.input || "";
+    const blockedOutput = data.blocked_output || payload.original_response || "";
+    const authorityClass = data.authority_class || payload.authority_class || "unknown";
+    const domain = data.domain || payload.domain || "unknown";
+
+    const msgDiv = document.getElementById("messages");
+    const clarDiv = document.getElementById("clarification");
+    const blockedDiv = document.getElementById("blocked");
+    const releasedDiv = document.getElementById("released");
+    const govDiv = document.getElementById("governance");
+    const auditDiv = document.getElementById("audit");
+    const authority = document.getElementById("authority");
+
+    authority.innerText = " | Authority: " + authorityClass;
+
+    msgDiv.innerHTML += `<div><strong>User:</strong> ${inputText}</div>`;
+
+    // ------------------
+    // CLARIFICATION
+    // ------------------
+    if (operatorPef?.pending_clarification?.active) {
+
+        const pc = operatorPef.pending_clarification;
+        const candidates = Array.isArray(pc.candidate_entities) ? pc.candidate_entities : [];
+
+        clarDiv.style.display = "block";
+        document.getElementById("inputBox").style.display = "none";
+
+        clarDiv.innerHTML = `
+        <strong>Clarification required</strong><br><br>
+        ${pc.clarification_prompt}<br><br>
+        ${candidates.map(c =>
+            `<button type="button" class="clarify-option" data-value="${encodeURIComponent(c)}">${c}</button>`
+        ).join("")}
+        `;
+        clarDiv.querySelectorAll(".clarify-option").forEach((btn) => {
+            btn.addEventListener("click", () => run(decodeURIComponent(btn.dataset.value || "")));
         });
-      });
+
+    } else {
+        clarDiv.style.display = "none";
+        document.getElementById("inputBox").style.display = "block";
     }
 
-    document.getElementById("domain").addEventListener("change", () => {
-      setScenarioOptions(document.getElementById("domain").value);
-      document.getElementById("req-domain").textContent = document.getElementById("domain").value;
-    });
-    document.getElementById("scenario").addEventListener("change", () => {
-      const domain = document.getElementById("domain").value;
-      const index = Number(document.getElementById("scenario").value || 0);
-      const rows = SCENARIOS[domain] || SCENARIOS.general;
-      document.getElementById("prompt").value = rows[index] || "";
-    });
-    document.getElementById("send").addEventListener("click", runTurn);
-    document.getElementById("reset").addEventListener("click", resetSession);
+    // ------------------
+    // MODEL OUTPUT
+    // ------------------
+    if (blockedOutput) {
+        blockedDiv.style.display = "block";
+        blockedDiv.innerHTML =
+            "<strong>Blocked model output</strong><br>" +
+            blockedOutput;
+    } else {
+        blockedDiv.style.display = "none";
+    }
 
-    bindTabs();
-    resetSession();
-  </script>
+    releasedDiv.innerHTML =
+        "<strong>Released</strong><br>" + output;
+
+    // ------------------
+    // GOVERNANCE
+    // ------------------
+    govDiv.innerHTML = `
+    Status: ${governance.status}<br>
+    Authority: ${authorityClass}<br>
+    Domain: ${domain}<br>
+    Failed constraints: ${JSON.stringify(governance.audit_flags)}<br><br>
+    <strong>Allowed continuation</strong><br>
+    ${governance.allowed_continuation || "None"}
+    `;
+
+    // ------------------
+    // AUDIT
+    // ------------------
+    auditDiv.innerHTML = `
+    trace_id: ${audit?.trace_id}<br>
+    HMAC verified: ${audit?.hmac_verified}<br>
+    Chain verified: ${audit?.chain_verified}<br>
+    Fully verified: ${audit?.fully_verified}<br>
+    prev_hash: ${audit?.prev_hash}<br>
+    hash: ${audit?.hash}
+    `;
+}
+
+</script>
+
 </body>
 </html>
