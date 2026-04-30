@@ -1423,8 +1423,8 @@
         panel.appendChild(el);
       });
 
-      // Continuation options — suppressed for hard blocks (no path forward from this turn)
-      if (options.length && !isBlocked) {
+      // Continuation options — allowed after the boundary is stated
+      if (options.length) {
         const opts = document.createElement('div');
         opts.className = 'governed-options';
         options.forEach(function(opt) {
