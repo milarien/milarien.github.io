@@ -282,6 +282,26 @@
       return labels;
     }
 
+    function setClarificationInteractionMode(pending, labels) {
+      const promptInput = document.getElementById("prompt");
+      const sendButton = document.getElementById("send");
+      const isActive = pending
+        && pending.active
+        && pending.failed_constraint === "UNRESOLVED_REFERENT"
+        && Array.isArray(labels)
+        && labels.length > 0;
+      if (isActive) {
+        promptInput.value = "";
+        promptInput.readOnly = true;
+        promptInput.placeholder = "Clarification required: choose one option below.";
+        sendButton.disabled = true;
+        return;
+      }
+      promptInput.readOnly = false;
+      promptInput.placeholder = "";
+      sendButton.disabled = false;
+    }
+
     function releasePath(currentStatus, llmCalled) {
       if (currentStatus === "BLOCKED") return llmCalled ? "blocked_after_generation" : "blocked_before_generation";
       if (currentStatus === "PASS") return "released";
@@ -363,6 +383,7 @@
       const pendingClarification = ((aurora.operator_pef || {}).pending_clarification) || {};
       const pendingActive = Boolean(pendingClarification.active);
       const clarificationChoices = renderClarificationChoices(selectedDomain, pendingClarification);
+      setClarificationInteractionMode(pendingClarification, clarificationChoices);
 
       const isContinuing = currentStatus === "CONTINUING";
       if (!isContinuing) {
@@ -496,6 +517,9 @@
       document.getElementById("clarify-panel").style.display = "none";
       document.getElementById("clarify-prompt").textContent = "";
       document.getElementById("clarify-actions").innerHTML = "";
+      document.getElementById("prompt").readOnly = false;
+      document.getElementById("prompt").placeholder = "";
+      document.getElementById("send").disabled = false;
       state.prevOperatorPef = null;
     }
 
