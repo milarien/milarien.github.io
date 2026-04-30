@@ -1020,7 +1020,7 @@
       <!-- GOVERNANCE -->
       <div class="panel">
         <div class="panel-head">
-          <h2 class="panel-title">Governance decision</h2>
+          <h2 class="panel-title">Decision</h2>
           <span class="panel-sub">Last turn</span>
         </div>
         <div class="gov-body" id="gov-body">
@@ -1215,15 +1215,15 @@
     };
 
     const OUTCOME_GLOSS = {
-      PASS:         'Output cleared all admissibility checks and was released as shown.',
-      ADMIT:        'Output cleared all admissibility checks and was released as shown.',
+      PASS:         'Output passed all checks and was released as shown.',
+      ADMIT:        'Output passed all checks and was released as shown.',
       SOFT_CORRECT: 'A minor correction was applied. The chat shows the admitted wording.',
-      FORCE_REVISE: 'Governance materially revised or replaced the candidate before release.',
-      HARD_STOP:    'The candidate was not admitted. Consequence-bearing output from this path was withheld.',
-      STOP:         'The candidate was not admitted. Consequence-bearing output from this path was withheld.',
-      CONTAIN:      'Release withheld — session may be held pending clarification or containment.',
-      REFUSE:       'Request refused by governance before or after generation.',
-      CLARIFY:      'Clarification was requested before governance could proceed.',
+      FORCE_REVISE: 'Governance revised the output before release.',
+      HARD_STOP:    'This request involves a decision that cannot be made here.',
+      STOP:         'This request involves a decision that cannot be made here.',
+      CONTAIN:      'More structured information is needed before this can proceed.',
+      REFUSE:       'This request was refused.',
+      CLARIFY:      'Clarification is needed before this can proceed.',
     };
 
     const ACTION_LABELS = {
@@ -1367,35 +1367,37 @@
 
     function renderGovernedPanel(content, action) {
       const a = (action || '').toUpperCase();
-      const panelClass = (a === 'CONTAIN' || a === 'REFUSE' || a === 'HARD_STOP' || a === 'STOP')
-        ? 'is-block' : 'is-warn';
+      const isBlocked = a === 'HARD_STOP' || a === 'STOP';
+      const isRefused = a === 'REFUSE';
+      const panelClass = (isBlocked || isRefused) ? 'is-block' : 'is-warn';
 
       const panel = document.createElement('div');
       panel.className = 'governed-panel ' + panelClass;
 
-      let headingSet = false;
-      const bodyLines = [];
-      const options = [];
-      let actionLine = null;
-      let statusLine = null;
+      // Outcome header — always first, never overridden by model content
+      const h = document.createElement('div');
+      h.className = 'governed-heading';
+      if (isBlocked)      h.textContent = 'Blocked — not admissible';
+      else if (isRefused) h.textContent = 'Refused';
+      else if (a === 'CONTAIN')  h.textContent = 'Contained — more information required';
+      else if (a === 'CLARIFY')  h.textContent = 'Clarification required';
+      else                       h.textContent = a.charAt(0) + a.slice(1).toLowerCase();
+      panel.appendChild(h);
+
+      // Parse content — no first-line hijack
+      const bodyLines = [], options = [];
+      let actionLine = null, statusLine = null;
 
       (content || '').split('\n').forEach(function(line) {
         const trimmed = line.trim();
         if (!trimmed) return;
-        if (!headingSet) {
-          const h = document.createElement('div');
-          h.className = 'governed-heading';
-          h.textContent = trimmed;
-          panel.appendChild(h);
-          headingSet = true;
-          return;
-        }
         if (/^Action:/i.test(trimmed)) { actionLine = trimmed; return; }
         if (/^Status:/i.test(trimmed))  { statusLine = trimmed; return; }
         if (/^- /.test(trimmed))        { options.push(trimmed.slice(2).trim()); return; }
         bodyLines.push(trimmed);
       });
 
+      // Reason / body
       if (bodyLines.length) {
         const b = document.createElement('div');
         b.className = 'governed-body';
@@ -1403,6 +1405,7 @@
         panel.appendChild(b);
       }
 
+      // Action / Status metadata rows
       [['governed-action', actionLine], ['governed-status', statusLine]].forEach(function(pair) {
         const cls = pair[0], raw = pair[1];
         if (!raw) return;
@@ -1420,7 +1423,8 @@
         panel.appendChild(el);
       });
 
-      if (options.length) {
+      // Continuation options — suppressed for hard blocks (no path forward from this turn)
+      if (options.length && !isBlocked) {
         const opts = document.createElement('div');
         opts.className = 'governed-options';
         options.forEach(function(opt) {
@@ -1646,8 +1650,8 @@
       }
       document.getElementById('gov-llm').textContent = llmCalled ? 'Yes' : 'No';
       document.getElementById('gov-llm-note').textContent = llmCalled
-        ? 'Upstream model produced a candidate; Lens evaluated it on this turn.'
-        : 'No upstream call on this governance path.';
+        ? 'The model was called on this turn.'
+        : 'No model call on this governance path.';
 
       // Release path
       const secRelease = document.getElementById('sec-release');
@@ -1658,10 +1662,10 @@
         relNote  = 'Final text for this turn cleared admissibility.';
       } else if (!llmCalled && !hasRaw) {
         relLabel = 'Blocked before generation';
-        relNote  = 'Governance intervened before an upstream candidate was produced.';
+        relNote  = 'No output was produced on this path.';
       } else {
         relLabel = 'Blocked after generation';
-        relNote  = 'An upstream candidate existed; governance acted before user-visible release.';
+        relNote  = 'Output was generated but not released.';
       }
       secRelease.style.display = 'block';
       document.getElementById('gov-release').textContent = relLabel;
@@ -1686,7 +1690,7 @@
         document.getElementById('gov-original').textContent = aurora.original_response;
         const origNote = document.getElementById('gov-original-note');
         if (blocked) {
-          origNote.textContent = 'Raw upstream candidate — not admitted on this path.';
+          origNote.textContent = 'Output was generated but not released on this path.';
           origNote.style.display = 'block';
         } else {
           origNote.style.display = 'none';
