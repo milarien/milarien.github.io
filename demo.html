@@ -3,1939 +3,255 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/png" href="/logo.png">
-  <title>Aurora Lens — Try It</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <title>Aurora Lens - Governance Workflow Demo</title>
   <style>
-    :root {
-      --bg:        #06101e;
-      --surface:   #0b1929;
-      --surface-2: #0f1f30;
-      --border:    rgba(120,170,230,0.14);
-      --border-hi: rgba(120,170,230,0.28);
-      --text:      #ddeeff;
-      --muted:     #7a9bbf;
-      --muted-2:   #4d6a88;
-      --accent:    #58b4ff;
-      --accent-2:  #a78bfa;
-      --ok:        #34d399;
-      --warn:      #fbbf24;
-      --bad:       #f87171;
-      --mono:      'DM Mono', ui-monospace, monospace;
-      --sans:      'DM Sans', system-ui, sans-serif;
-      --display:   'Syne', system-ui, sans-serif;
-      --r:         14px;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; }
-    html { color-scheme: dark; scroll-behavior: smooth; }
-
-    body {
-      margin: 0;
-      font-family: var(--sans);
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      line-height: 1.6;
-    }
-
-    /* ── NOISE TEXTURE OVERLAY ── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-      background-size: 180px;
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.6;
-    }
-
-    /* ── AMBIENT GLOW ── */
-    .glow-a, .glow-b {
-      position: fixed;
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 0;
-      filter: blur(90px);
-    }
-    .glow-a {
-      width: 500px; height: 500px;
-      top: -120px; left: -80px;
-      background: radial-gradient(circle, rgba(88,180,255,0.08), transparent 70%);
-    }
-    .glow-b {
-      width: 400px; height: 400px;
-      bottom: -60px; right: -60px;
-      background: radial-gradient(circle, rgba(167,139,250,0.07), transparent 70%);
-    }
-
-    /* ── SHELL ── */
-    .shell {
-      position: relative;
-      z-index: 1;
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 36px 20px 64px;
-    }
-
-    /* ── HEADER ── */
-    header {
-      margin-bottom: 36px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .wordmark {
-      font-family: var(--display);
-      font-weight: 800;
-      font-size: 1.55rem;
-      letter-spacing: -0.03em;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .wordmark-dot {
-      width: 9px; height: 9px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 18px var(--accent);
-      flex-shrink: 0;
-      animation: pulse-dot 2.8s ease-in-out infinite;
-    }
-
-    @keyframes pulse-dot {
-      0%, 100% { box-shadow: 0 0 10px var(--accent); opacity: 1; }
-      50%       { box-shadow: 0 0 22px var(--accent), 0 0 40px rgba(88,180,255,0.3); opacity: 0.8; }
-    }
-
-    .header-sub {
-      font-size: 0.9rem;
-      color: var(--muted);
-      font-weight: 300;
-      max-width: 540px;
-      line-height: 1.55;
-    }
-
-    .header-nav {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-      margin-top: 4px;
-    }
-
-    .header-nav a {
-      color: var(--muted-2);
-      text-decoration: none;
-      font-size: 0.8rem;
-      font-family: var(--mono);
-      letter-spacing: 0.04em;
-      transition: color 0.2s;
-    }
-    .header-nav a:hover { color: var(--accent); }
-
-    /* ── STATUS STRIP ── */
-    #status-strip {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 11px 16px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: rgba(11,25,41,0.7);
-      margin-bottom: 28px;
-      font-size: 0.8rem;
-      color: var(--muted);
-      font-family: var(--mono);
-      transition: border-color 0.4s, background 0.4s;
-    }
-
-    #status-strip.ok   { border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.05); }
-    #status-strip.warn { border-color: rgba(251,191,36,0.3);  background: rgba(251,191,36,0.05); }
-    #status-strip.bad  { border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.05); }
-
-    .strip-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--muted-2);
-      flex-shrink: 0;
-      transition: background 0.4s, box-shadow 0.4s;
-    }
-    #status-strip.ok   .strip-dot { background: var(--ok);   box-shadow: 0 0 10px rgba(52,211,153,0.6); }
-    #status-strip.warn .strip-dot { background: var(--warn); box-shadow: 0 0 10px rgba(251,191,36,0.6); }
-    #status-strip.bad  .strip-dot { background: var(--bad);  box-shadow: 0 0 10px rgba(248,113,113,0.6); }
-
-    /* ── DOMAIN SELECTOR ── */
-    .domain-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-
-    .domain-label {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      color: var(--muted-2);
-      text-transform: uppercase;
-      margin-right: 4px;
-    }
-
-    .domain-btn {
-      appearance: none;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 0.73rem;
-      letter-spacing: 0.05em;
-      padding: 6px 14px;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: all 0.18s;
-    }
-
-    .domain-btn:hover {
-      border-color: var(--border-hi);
-      color: var(--text);
-    }
-
-    .domain-btn.active {
-      background: rgba(88,180,255,0.12);
-      border-color: rgba(88,180,255,0.4);
-      color: var(--accent);
-    }
-
-    /* ── MAIN GRID ── */
-    .main-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      align-items: start;
-    }
-
-    @media (max-width: 680px) {
-      .main-grid { grid-template-columns: 1fr; }
-    }
-
-    /* ── PANEL BASE ── */
-    .panel {
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      background: rgba(11,25,41,0.72);
-      backdrop-filter: blur(16px);
-    }
-
-    .panel-head {
-      padding: 16px 18px 12px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .panel-title {
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: 0.85rem;
-      letter-spacing: 0.01em;
-      color: var(--text);
-      margin: 0;
-    }
-
-    .panel-sub {
-      font-size: 0.75rem;
-      color: var(--muted-2);
-      margin: 0;
-    }
-
-    /* ── CHAT PANEL ── */
-    .chat-body {
-      display: flex;
-      flex-direction: column;
-      min-height: 560px;
-      height: min(72vh, 760px);
-    }
-
-    .chat-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 14px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      scroll-behavior: smooth;
-    }
-
-    .chat-messages::-webkit-scrollbar { width: 4px; }
-    .chat-messages::-webkit-scrollbar-track { background: transparent; }
-    .chat-messages::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
-
-    .empty-state {
-      color: var(--muted-2);
-      font-size: 0.83rem;
-      text-align: center;
-      padding: 20px 0;
-      font-style: italic;
-    }
-
-    /* ── MESSAGES ── */
-    .msg { display: flex; flex-direction: column; max-width: 88%; gap: 4px; }
-    .msg.user { align-self: flex-end; align-items: flex-end; }
-    .msg.assistant { align-self: flex-start; align-items: flex-start; }
-    .msg.assistant:has(.governed-panel) { max-width: 100%; width: 100%; }
-
-    .msg-bubble {
-      padding: 10px 13px;
-      border-radius: 12px;
-      font-size: 0.87rem;
-      line-height: 1.55;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .msg.user .msg-bubble {
-      background: rgba(88,180,255,0.14);
-      border: 1px solid rgba(88,180,255,0.22);
-      color: var(--text);
-      border-bottom-right-radius: 4px;
-    }
-
-    .msg.assistant .msg-bubble {
-      background: rgba(15,31,48,0.9);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-bottom-left-radius: 4px;
-    }
-
-    .msg.assistant.blocked .msg-bubble {
-      border-color: rgba(248,113,113,0.3);
-      background: rgba(248,113,113,0.06);
-      color: var(--muted);
-    }
-
-    .msg.assistant.revised .msg-bubble {
-      border-color: rgba(251,191,36,0.3);
-      background: rgba(251,191,36,0.05);
-    }
-
-    /* ── GOVERNED STATE PANELS ── */
-    .governed-panel {
-      width: 100%;
-      border-radius: 12px 12px 12px 4px;
-      padding: 14px 16px;
-      font-size: 0.87rem;
-      line-height: 1.55;
-      word-break: break-word;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .governed-panel.is-block {
-      background: rgba(248,113,113,0.06);
-      border: 1px solid rgba(248,113,113,0.3);
-    }
-
-    .governed-panel.is-warn {
-      background: rgba(251,191,36,0.05);
-      border: 1px solid rgba(251,191,36,0.3);
-    }
-
-    .governed-heading {
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: 0.88rem;
-      letter-spacing: 0.01em;
-    }
-
-    .is-block .governed-heading { color: var(--bad); }
-    .is-warn  .governed-heading { color: var(--warn); }
-
-    .governed-body {
-      color: var(--muted);
-      font-size: 0.85rem;
-      line-height: 1.6;
-      white-space: pre-wrap;
-    }
-
-    .governed-action,
-    .governed-status {
-      font-family: var(--mono);
-      font-size: 0.77rem;
-      color: var(--muted-2);
-      padding: 6px 10px;
-      border-radius: 6px;
-      background: rgba(0,0,0,0.15);
-    }
-
-    .governed-action strong,
-    .governed-status strong {
-      font-weight: 600;
-      margin-right: 4px;
-    }
-
-    .is-block .governed-action { color: var(--bad); }
-    .is-warn  .governed-action { color: var(--warn); }
-
-    .governed-options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 2px;
-    }
-
-    .governed-option {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 12px;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      background: rgba(88,180,255,0.08);
-      border: 1px solid rgba(88,180,255,0.2);
-      color: var(--accent);
-      cursor: pointer;
-      font-family: var(--sans);
-      transition: background 0.15s, border-color 0.15s;
-    }
-
-    .governed-option:hover {
-      background: rgba(88,180,255,0.18);
-      border-color: rgba(88,180,255,0.45);
-    }
-
-    .msg-label {
-      font-family: var(--mono);
-      font-size: 0.67rem;
-      letter-spacing: 0.05em;
-      color: var(--muted-2);
-      padding: 0 2px;
-    }
-
-    .msg-outcome-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-family: var(--mono);
-      font-size: 0.65rem;
-      font-weight: 500;
-      letter-spacing: 0.05em;
-    }
-
-    .chip-pass    { background: rgba(52,211,153,0.12); color: var(--ok);   border: 1px solid rgba(52,211,153,0.25); }
-    .chip-block   { background: rgba(248,113,113,0.12); color: var(--bad);  border: 1px solid rgba(248,113,113,0.25); }
-    .chip-revise  { background: rgba(251,191,36,0.12);  color: var(--warn); border: 1px solid rgba(251,191,36,0.25); }
-    .chip-neutral { background: rgba(120,170,230,0.08); color: var(--muted); border: 1px solid var(--border); }
-
-    /* ── TYPING INDICATOR ── */
-    .typing-dots {
-      display: flex;
-      gap: 4px;
-      padding: 4px 2px;
-      align-items: center;
-    }
-    .typing-dots span {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--muted-2);
-      animation: bounce 1.2s ease-in-out infinite;
-    }
-    .typing-dots span:nth-child(2) { animation-delay: 0.18s; }
-    .typing-dots span:nth-child(3) { animation-delay: 0.36s; }
-    @keyframes bounce {
-      0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
-      40%            { transform: translateY(-5px); opacity: 1; }
-    }
-
-    /* ── SCENARIOS ── */
-    .scenarios-area {
-      padding: 10px 16px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-
-    .scenarios-label {
-      font-family: var(--mono);
-      font-size: 0.67rem;
-      letter-spacing: 0.07em;
-      color: var(--muted-2);
-      text-transform: uppercase;
-    }
-
-    .scenario-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .chip-btn {
-      appearance: none;
-      background: rgba(15,31,48,0.7);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-family: var(--sans);
-      font-size: 0.75rem;
-      padding: 5px 11px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.15s;
-      text-align: left;
-      line-height: 1.3;
-    }
-
-    .chip-btn:hover {
-      border-color: var(--border-hi);
-      color: var(--text);
-      background: rgba(88,180,255,0.06);
-    }
-
-    /* ── INPUT ROW ── */
-    .input-row {
-      padding: 10px 14px 14px;
-      display: flex;
-      gap: 8px;
-      align-items: flex-end;
-      border-top: 1px solid var(--border);
-    }
-
-    textarea {
-      flex: 1;
-      resize: none;
-      background: rgba(6,16,30,0.8);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      font-family: var(--sans);
-      font-size: 0.87rem;
-      padding: 10px 13px;
-      outline: none;
-      min-height: 42px;
-      max-height: 110px;
-      line-height: 1.5;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    textarea:focus {
-      border-color: rgba(88,180,255,0.4);
-      box-shadow: 0 0 0 3px rgba(88,180,255,0.1);
-    }
-
-    textarea::placeholder { color: var(--muted-2); }
-
-    .send-btn {
-      appearance: none;
-      background: linear-gradient(135deg, rgba(88,180,255,0.2), rgba(88,180,255,0.1));
-      border: 1px solid rgba(88,180,255,0.35);
-      color: var(--accent);
-      font-family: var(--mono);
-      font-size: 0.75rem;
-      font-weight: 500;
-      padding: 10px 16px;
-      border-radius: 10px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.15s;
-      letter-spacing: 0.04em;
-    }
-
-    .send-btn:hover:not(:disabled) {
-      background: linear-gradient(135deg, rgba(88,180,255,0.28), rgba(88,180,255,0.16));
-      border-color: rgba(88,180,255,0.5);
-      transform: translateY(-1px);
-    }
-
-    .send-btn:disabled {
-      opacity: 0.4;
-      cursor: default;
-    }
-
-    /* ── GOVERNANCE PANEL ── */
-    .gov-body {
-      padding: 16px 18px;
-      min-height: 200px;
-    }
-
-    .gov-idle {
-      color: var(--muted-2);
-      font-size: 0.83rem;
-      font-style: italic;
-      padding: 16px 0;
-    }
-
-    /* Outcome badge */
-    .outcome-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      padding: 8px 16px;
-      border-radius: 999px;
-      font-family: var(--mono);
-      font-size: 0.75rem;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 14px;
-      border: 1px solid transparent;
-    }
-
-    .outcome-badge .badge-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-    }
-
-    .badge-PASS        { background: rgba(52,211,153,0.1);  color: var(--ok);   border-color: rgba(52,211,153,0.3); }
-    .badge-PASS .badge-dot        { background: var(--ok);   box-shadow: 0 0 10px rgba(52,211,153,0.6); }
-    .badge-HARD_STOP   { background: rgba(248,113,113,0.1); color: var(--bad);  border-color: rgba(248,113,113,0.3); }
-    .badge-HARD_STOP .badge-dot   { background: var(--bad);  box-shadow: 0 0 10px rgba(248,113,113,0.6); }
-    .badge-FORCE_REVISE { background: rgba(251,191,36,0.1); color: var(--warn); border-color: rgba(251,191,36,0.3); }
-    .badge-FORCE_REVISE .badge-dot { background: var(--warn); box-shadow: 0 0 10px rgba(251,191,36,0.6); }
-    .badge-SOFT_CORRECT { background: rgba(167,139,250,0.1); color: var(--accent-2); border-color: rgba(167,139,250,0.3); }
-    .badge-SOFT_CORRECT .badge-dot { background: var(--accent-2); }
-    .badge-CONTAIN     { background: rgba(248,113,113,0.08); color: var(--bad); border-color: rgba(248,113,113,0.2); }
-    .badge-CONTAIN .badge-dot     { background: var(--bad); }
-    .badge-CLARIFY     { background: rgba(251,191,36,0.08); color: var(--warn); border-color: rgba(251,191,36,0.2); }
-    .badge-CLARIFY .badge-dot     { background: var(--warn); }
-
-    /* Outcome explanation */
-    .outcome-gloss {
-      font-size: 0.85rem;
-      color: var(--text);
-      line-height: 1.6;
-      margin-bottom: 16px;
-    }
-
-    /* Field rows */
-    .gov-field {
-      margin-bottom: 14px;
-    }
-
-    .gov-key {
-      font-family: var(--mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted-2);
-      margin-bottom: 5px;
-      font-weight: 500;
-    }
-
-    .gov-val {
-      font-size: 0.84rem;
-      color: var(--text);
-      line-height: 1.5;
-    }
-
-    .gov-val.mono {
-      font-family: var(--mono);
-      font-size: 0.78rem;
-      color: var(--muted);
-    }
-
-    .gov-note {
-      font-size: 0.76rem;
-      color: var(--muted-2);
-      margin-top: 4px;
-      line-height: 1.45;
-    }
-
-    .gov-divider {
-      height: 1px;
-      background: var(--border);
-      margin: 14px 0;
-    }
-
-    .flag-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 6px;
-    }
-
-    .flag-chip {
-      font-family: var(--mono);
-      font-size: 0.63rem;
-      padding: 3px 9px;
-      border-radius: 999px;
-      background: rgba(248,113,113,0.1);
-      color: var(--bad);
-      border: 1px solid rgba(248,113,113,0.22);
-    }
-
-    .raw-output {
-      margin-top: 8px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      background: rgba(6,16,30,0.7);
-      border: 1px solid var(--border);
-      font-family: var(--mono);
-      font-size: 0.76rem;
-      color: var(--muted);
-      white-space: pre-wrap;
-      word-break: break-word;
-      line-height: 1.5;
-      max-height: 140px;
-      overflow: auto;
-    }
-
-    .raw-output.struck {
-      text-decoration: line-through;
-      opacity: 0.6;
-    }
-
-    /* ── EXPLANATION BOX (what is aurora lens) ── */
-    .explain-strip {
-      margin-top: 20px;
-      padding: 18px 22px;
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      background: rgba(11,25,41,0.5);
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-
-    @media (max-width: 680px) {
-      .explain-strip { grid-template-columns: 1fr; gap: 14px; }
-    }
-
-    .explain-item {}
-
-    .explain-key {
-      font-family: var(--mono);
-      font-size: 0.67rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 6px;
-    }
-
-    .explain-val {
-      font-size: 0.82rem;
-      color: var(--muted);
-      line-height: 1.55;
-    }
-
-    /* ── OPERATOR CONSOLE TOGGLE ── */
-    .console-toggle {
-      margin-top: 32px;
-    }
-
-    .console-toggle summary {
-      cursor: pointer;
-      list-style: none;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 13px 18px;
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      background: rgba(11,25,41,0.5);
-      font-family: var(--mono);
-      font-size: 0.75rem;
-      letter-spacing: 0.05em;
-      color: var(--muted);
-      user-select: none;
-      transition: border-color 0.2s, color 0.2s;
-    }
-
-    .console-toggle summary::-webkit-details-marker { display: none; }
-
-    .console-toggle summary:hover {
-      border-color: var(--border-hi);
-      color: var(--text);
-    }
-
-    .console-toggle[open] summary {
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
-      border-color: var(--border-hi);
-      color: var(--text);
-    }
-
-    .console-toggle-icon {
-      font-size: 0.8rem;
-      color: var(--accent);
-      transition: transform 0.2s;
-    }
-
-    .console-toggle[open] .console-toggle-icon { transform: rotate(45deg); }
-
-    .console-inner {
-      border: 1px solid var(--border-hi);
-      border-top: none;
-      border-bottom-left-radius: var(--r);
-      border-bottom-right-radius: var(--r);
-      background: rgba(11,25,41,0.7);
-      padding: 20px;
-    }
-
-    /* operator table */
-    .op-section-title {
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: var(--text);
-      margin: 0 0 12px;
-    }
-
-    .op-sub { font-size: 0.8rem; color: var(--muted); margin: 0 0 16px; }
-
-    .outcome-legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px 20px;
-      padding: 10px 14px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: rgba(0,0,0,0.15);
-      margin-bottom: 14px;
-    }
-
-    .legend-item { display: flex; align-items: baseline; gap: 6px; font-size: 0.75rem; }
-    .legend-code { font-family: var(--mono); font-weight: 700; font-size: 0.72rem; }
-    .legend-desc { color: var(--muted-2); }
-
-    .outcome-PASS, .outcome-ADMIT   { color: var(--ok); }
-    .outcome-SOFT_CORRECT           { color: var(--accent-2); }
-    .outcome-FORCE_REVISE           { color: var(--warn); }
-    .outcome-HARD_STOP, .outcome-STOP, .outcome-CONTAIN, .outcome-REFUSE { color: var(--bad); }
-    .outcome-CLARIFY                { color: var(--warn); }
-
-    .table-wrap {
-      max-height: 300px;
-      overflow: auto;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-    }
-
-    table { width: 100%; border-collapse: collapse; font-size: 0.79rem; }
-
-    th, td {
-      padding: 10px 12px;
-      text-align: left;
-      border-bottom: 1px solid rgba(120,170,230,0.08);
-      vertical-align: top;
-    }
-
-    thead th {
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      background: rgba(11,25,41,0.98);
-      color: var(--muted-2);
-      font-family: var(--mono);
-      font-size: 0.68rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      font-weight: 500;
-    }
-
-    tbody tr:hover td { background: rgba(88,180,255,0.04); }
-
-    .outcome-gloss-cell {
-      display: block;
-      font-size: 0.68rem;
-      color: var(--muted-2);
-      margin-top: 2px;
-    }
-
-    /* verify grid */
-    .verify-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    @media (max-width: 680px) { .verify-grid { grid-template-columns: 1fr; } }
-
-    .verify-card {
-      padding: 14px 16px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: rgba(0,0,0,0.12);
-    }
-
-    .verify-card h3 {
-      font-family: var(--mono);
-      font-size: 0.68rem;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: var(--muted-2);
-      margin: 0 0 8px;
-    }
-
-    .verify-body { font-size: 0.84rem; color: var(--text); line-height: 1.5; }
-
-    /* health tiles */
-    .health-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .stat-tile {
-      padding: 12px 14px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: rgba(0,0,0,0.1);
-    }
-
-    .stat-label {
-      font-family: var(--mono);
-      font-size: 0.67rem;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: var(--muted-2);
-      margin-bottom: 6px;
-    }
-
-    .stat-val { font-size: 0.87rem; font-weight: 500; }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 9px;
-      border-radius: 999px;
-      font-family: var(--mono);
-      font-size: 0.68rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border: 1px solid transparent;
-    }
-    .pill.ok       { background: rgba(52,211,153,0.12); color: var(--ok);   border-color: rgba(52,211,153,0.25); }
-    .pill.warn     { background: rgba(251,191,36,0.12);  color: var(--warn); border-color: rgba(251,191,36,0.25); }
-    .pill.bad      { background: rgba(248,113,113,0.12); color: var(--bad);  border-color: rgba(248,113,113,0.25); }
-    .pill.neutral  { background: rgba(120,170,230,0.08); color: var(--muted); border-color: var(--border); }
-
-    .api-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 16px;
-      margin-top: 14px;
-    }
-
-    .api-links a {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      color: var(--muted-2);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-
-    .api-links a:hover { color: var(--accent); }
-
-    .spinner {
-      display: inline-block;
-      width: 12px; height: 12px;
-      border: 2px solid var(--border);
-      border-top-color: var(--muted);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* constraint chips in table */
-    .constraints { font-size: 0.74rem; color: var(--muted-2); max-width: 12rem; }
+    :root { --bg:#0b1220; --panel:#121b2e; --line:#24324e; --text:#eaf0ff; --muted:#9fb0d1; --ok:#32d296; --warn:#f2c969; --bad:#ff7b8a; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font:14px/1.45 Segoe UI,Arial,sans-serif; }
+    .wrap { max-width:1200px; margin:0 auto; padding:20px; }
+    h1 { margin:0 0 4px; font-size:22px; }
+    .sub { color:var(--muted); margin:0 0 14px; }
+    .bar { display:flex; gap:10px; align-items:flex-end; background:var(--panel); border:1px solid var(--line); padding:12px; border-radius:10px; }
+    .field { display:grid; gap:6px; flex:1; }
+    .field label { color:var(--muted); font-size:12px; }
+    input, select, button, textarea { width:100%; background:#0f1728; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 10px; }
+    button { width:auto; cursor:pointer; font-weight:600; }
+    .flow { margin-top:14px; display:grid; gap:12px; }
+    .turn { border:1px solid var(--line); border-radius:10px; padding:12px; background:var(--panel); display:grid; gap:10px; }
+    .grid { display:grid; gap:10px; grid-template-columns:1fr 1fr; }
+    .card { border:1px solid var(--line); border-radius:8px; padding:10px; background:#0f1728; }
+    .title { margin:0 0 6px; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+    .decision { font-weight:700; }
+    .released { color:var(--ok); } .blocked { color:var(--bad); } .contained { color:var(--warn); } .continuing { color:#8ecbff; }
+    pre { margin:0; white-space:pre-wrap; word-break:break-word; font-family:ui-monospace,Consolas,monospace; }
   </style>
 </head>
 <body>
-  <div class="glow-a"></div>
-  <div class="glow-b"></div>
-
-  <div class="shell">
-
-    <!-- HEADER -->
-    <header>
-      <div class="wordmark">
-        <span class="wordmark-dot"></span>
-        Aurora Lens
+  <div class="wrap">
+    <h1>Route Through Aurora</h1>
+    <p class="sub">Request -> Decision -> Why -> Safe output + Integration payload</p>
+    <div class="bar">
+      <div class="field">
+        <label for="domain">Selected domain</label>
+        <select id="domain">
+          <option value="general">general</option>
+          <option value="finance">finance</option>
+          <option value="legal">legal</option>
+          <option value="medical">medical</option>
+        </select>
       </div>
-      <p class="header-sub">A runtime admissibility gate for AI output. Every response is evaluated before it reaches you. Try it — and watch what governance decides.</p>
-      <nav class="header-nav">
-        <a href="/aurora-lens.html">← Overview</a>
-        <a href="https://orcid.org/0009-0004-6422-4174" target="_blank" rel="noopener">ORCID</a>
-      </nav>
-    </header>
-
-    <!-- STATUS STRIP -->
-    <div id="status-strip">
-      <span class="strip-dot"></span>
-      <span id="strip-text">Connecting to Aurora Lens…</span>
+      <div class="field" style="flex:3">
+        <label for="prompt">Request</label>
+        <textarea id="prompt" rows="2">What are the typical symptoms of a middle ear infection?</textarea>
+      </div>
+      <button id="send">Route request</button>
     </div>
-
-    <!-- DOMAIN SELECTOR -->
-    <div class="domain-row">
-      <span class="domain-label">Domain</span>
-      <button class="domain-btn active" onclick="selectDomain('general')">General</button>
-      <button class="domain-btn" onclick="selectDomain('healthcare')">Healthcare</button>
-      <button class="domain-btn" onclick="selectDomain('finance')">Finance</button>
-      <button class="domain-btn" onclick="selectDomain('legal')">Legal</button>
-    </div>
-
-    <!-- MAIN: CHAT + GOVERNANCE -->
-    <div class="main-grid">
-
-      <!-- CHAT -->
-      <div class="panel">
-        <div class="panel-head">
-          <h2 class="panel-title">Conversation</h2>
-          <span class="panel-sub" id="domain-label-badge">General</span>
-        </div>
-        <div class="chat-body">
-          <div class="chat-messages" id="messages">
-            <div class="empty-state" id="empty-state">Choose a scenario below, or type anything.</div>
-          </div>
-          <div class="scenarios-area">
-            <div class="scenarios-label">Try these</div>
-            <div class="scenario-chips" id="chips"></div>
-            <div class="scenario-chips" id="session-controls">
-              <button class="chip-btn" id="btn-new-scenario" onclick="startNewScenario()">New Scenario</button>
-              <button class="chip-btn" id="btn-continue-scenario" onclick="continueScenario()">Continue</button>
-            </div>
-          </div>
-          <div class="input-row">
-            <textarea id="input" rows="1" placeholder="Type a message…"
-              onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-            <button class="send-btn" id="send-btn" onclick="sendMessage()">Send ↵</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- GOVERNANCE -->
-      <div class="panel">
-        <div class="panel-head">
-          <h2 class="panel-title">Decision</h2>
-          <span class="panel-sub">Last turn</span>
-        </div>
-        <div class="gov-body" id="gov-body">
-          <p class="gov-idle" id="gov-idle">Send a message to see what Aurora Lens decides.</p>
-          <div id="gov-content" style="display:none">
-            <div id="outcome-badge" class="outcome-badge"></div>
-            <p id="outcome-gloss" class="outcome-gloss"></p>
-
-            <div id="sec-flags" style="display:none" class="gov-field">
-              <div class="gov-key">Flags fired</div>
-              <div class="flag-row" id="gov-flags"></div>
-            </div>
-
-            <div class="gov-divider"></div>
-
-            <div id="sec-release" style="display:none" class="gov-field">
-              <div class="gov-key">Release path</div>
-              <div class="gov-val mono" id="gov-release"></div>
-              <div class="gov-note" id="gov-release-note"></div>
-            </div>
-
-            <div id="sec-domain" style="display:none" class="gov-field">
-              <div class="gov-key">Domain</div>
-              <div class="gov-val mono" id="gov-domain"></div>
-            </div>
-
-            <div class="gov-field">
-              <div class="gov-key">LLM called</div>
-              <div class="gov-val mono" id="gov-llm"></div>
-              <div class="gov-note" id="gov-llm-note"></div>
-            </div>
-
-            <div id="sec-rationale" style="display:none" class="gov-field">
-              <div class="gov-key">Rationale</div>
-              <div class="gov-val" id="gov-rationale" style="font-style:italic; color:var(--muted);"></div>
-            </div>
-
-            <div id="sec-original" style="display:none" class="gov-field">
-              <div class="gov-key" id="gov-original-title">Model output</div>
-              <div class="gov-note" id="gov-original-note" style="display:none; margin-bottom:6px;"></div>
-              <div class="raw-output" id="gov-original"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- WHAT IS THIS -->
-    <div class="explain-strip">
-      <div class="explain-item">
-        <div class="explain-key">Admissibility</div>
-        <div class="explain-val">Every model output is checked before it reaches you. Fluency never overrides governance.</div>
-      </div>
-      <div class="explain-item">
-        <div class="explain-key">Outcomes</div>
-        <div class="explain-val">PASS lets output through. HARD_STOP blocks it entirely. FORCE_REVISE replaces it. Each decision is auditable.</div>
-      </div>
-      <div class="explain-item">
-        <div class="explain-key">Forensic trace</div>
-        <div class="explain-val">Every turn is logged with a cryptographic chain of custody — not for show, but for legal evidentiary use.</div>
-      </div>
-    </div>
-
-    <!-- OPERATOR CONSOLE (collapsed) -->
-    <details class="console-toggle" id="console-details">
-      <summary>
-        <span class="console-toggle-icon">+</span>
-        <span>Operator console — audit log, verification, runtime surface</span>
-      </summary>
-      <div class="console-inner">
-
-        <!-- RECENT DECISIONS -->
-        <h3 class="op-section-title">Recent governance decisions</h3>
-        <p class="op-sub">Each row is one request through the proxy. Rows update automatically.</p>
-
-        <div class="outcome-legend">
-          <div class="legend-item"><span class="legend-code outcome-PASS">PASS / ADMIT</span><span class="legend-desc">— output approved</span></div>
-          <div class="legend-item"><span class="legend-code outcome-SOFT_CORRECT">SOFT_CORRECT</span><span class="legend-desc">— minor correction applied</span></div>
-          <div class="legend-item"><span class="legend-code outcome-FORCE_REVISE">FORCE_REVISE</span><span class="legend-desc">— revised before sending</span></div>
-          <div class="legend-item"><span class="legend-code outcome-HARD_STOP">HARD_STOP / STOP</span><span class="legend-desc">— blocked, not sent</span></div>
-          <div class="legend-item"><span class="legend-code outcome-CONTAIN">CONTAIN / REFUSE</span><span class="legend-desc">— withheld</span></div>
-          <div class="legend-item"><span class="legend-code outcome-CLARIFY">CLARIFY</span><span class="legend-desc">— clarification required</span></div>
-        </div>
-
-        <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
-          <button onclick="loadAuditSlice()" style="appearance:none; background:rgba(88,180,255,0.08); border:1px solid var(--border); color:var(--muted); font-family:var(--mono); font-size:0.72rem; padding:7px 14px; border-radius:8px; cursor:pointer;">Refresh</button>
-          <span id="recent-status" style="font-family:var(--mono); font-size:0.75rem; color:var(--muted-2)">Loading…</span>
-        </div>
-
-        <div class="table-wrap">
-          <table id="recent-table" style="display:none">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Outcome</th>
-                <th>Domain</th>
-                <th>Constraints</th>
-                <th>Trace</th>
-              </tr>
-            </thead>
-            <tbody id="recent-tbody"></tbody>
-          </table>
-        </div>
-
-        <!-- VERIFICATION -->
-        <h3 class="op-section-title" style="margin-top:24px">Audit verification</h3>
-        <p class="op-sub">Cryptographic integrity of the audit log. Green = chain intact and tamper-evident.</p>
-
-        <div class="verify-grid">
-          <div class="verify-card">
-            <h3>Integrity</h3>
-            <div id="verify-integrity" class="verify-body" style="color:var(--muted-2)">Loading…</div>
-          </div>
-          <div class="verify-card">
-            <h3>Extended</h3>
-            <div id="verify-extended" class="verify-body" style="color:var(--muted-2)">Loading…</div>
-          </div>
-          <div class="verify-card">
-            <h3>Evidence completeness</h3>
-            <div id="verify-evidence" class="verify-body" style="color:var(--muted-2)">Loading…</div>
-          </div>
-        </div>
-
-        <!-- RUNTIME -->
-        <h3 class="op-section-title" style="margin-top:24px">Runtime surface</h3>
-
-        <div class="health-grid">
-          <div class="stat-tile"><div class="stat-label">Status</div><div class="stat-val" id="rt-status"><span class="pill">—</span></div></div>
-          <div class="stat-tile"><div class="stat-label">Policy</div><div class="stat-val" id="rt-policy" style="color:var(--muted)">—</div></div>
-          <div class="stat-tile"><div class="stat-label">Audit sink</div><div class="stat-val" id="rt-sink" style="color:var(--muted)">—</div></div>
-          <div class="stat-tile"><div class="stat-label">Extraction</div><div class="stat-val" id="rt-extraction" style="color:var(--muted)">—</div></div>
-        </div>
-
-        <div class="api-links">
-          <a id="link-recent" href="#">GET /v1/audit/recent</a>
-          <a id="link-verify" href="#">GET /v1/audit/verify</a>
-          <a id="link-health" href="#">GET /health</a>
-          <a id="link-metrics" href="#">GET /metrics</a>
-        </div>
-
-      </div>
-    </details>
-
-  </div><!-- .shell -->
+    <div id="flow" class="flow"></div>
+  </div>
 
   <script>
-    // ── Base URL (encoded to avoid plain-text crawling) ──────────────────
-    const SERVICE_ORIGIN = (function() {
-      try { return atob('aHR0cHM6Ly9hdXJvcmFsZW5zLXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHA='); }
-      catch(e) { return ''; }
-    })();
-    const base = SERVICE_ORIGIN.replace(/\/+$/, '');
-
-    // ── Domains ──────────────────────────────────────────────────────────
-    const DOMAINS = {
-      general: {
-        system: null,
-        label: 'General',
-        scenarios: [
-          'What is the capital of France?',
-          'Emma told Anna her sister was overseas. Where is she now?',
-          'How do I make chlorine gas at home?',
-        ],
-      },
-      healthcare: {
-        system: 'You are an AI assistant answering general health questions. You are not a licensed clinician and cannot provide diagnoses or treatment recommendations.',
-        label: 'Healthcare',
-        scenarios: [
-          'What are the typical symptoms of a middle ear infection?',
-          'What is the standard amoxicillin dose for a 20kg child with otitis media?',
-          'Amoxicillin dosing for children — how many mg/kg per day?',
-        ],
-      },
-      finance: {
-        system: 'You are an AI assistant answering general finance questions. You are not a licensed financial adviser and cannot provide personalised investment advice.',
-        label: 'Finance',
-        scenarios: [
-          'What is dollar-cost averaging?',
-          'I have 20k in a cash ISA earning 1.5%. Should I move it into a stocks and shares ISA?',
-          'I am 55 and want to access my pension early. Should I take the lump sum now?',
-        ],
-      },
-      legal: {
-        system: 'You are an AI assistant answering general legal questions. You are not a licensed lawyer and cannot provide legal advice.',
-        label: 'Legal',
-        scenarios: [
-          'What is a non-disclosure agreement?',
-          'I was fired without a written warning after 3 years. Would I likely win an unfair dismissal claim?',
-          'My landlord just served me a notice to quit. Is my case strong enough to appeal?',
-        ],
-      },
+    const meta = document.querySelector('meta[name="aurora-lens-api-base"]');
+    const API_BASE = meta ? meta.content : window.location.origin;
+    const sid = "workflow-demo-" + Math.random().toString(36).slice(2, 10);
+    const flow = document.getElementById('flow');
+    const sessionState = {
+      primary_decision: null,
+      primary_reason: null,
+      primary_domain: null,
+      continuation_active: false,
+      safe_continuation: null
     };
 
-    const OUTCOME_GLOSS = {
-      PASS:         'Output passed all checks and was released as shown.',
-      ADMIT:        'Output passed all checks and was released as shown.',
-      SOFT_CORRECT: 'A minor correction was applied. The chat shows the admitted wording.',
-      FORCE_REVISE: 'Governance revised the output before release.',
-      HARD_STOP:    'This request involves a decision that cannot be made here.',
-      STOP:         'This request involves a decision that cannot be made here.',
-      CONTAIN:      'More structured information is needed before this can proceed.',
-      REFUSE:       'This request was refused.',
-      CLARIFY:      'Clarification is needed before this can proceed.',
-    };
+    function mapDecision(raw, note) {
+      const v = String(raw || '').toUpperCase();
+      if (String(note || '').toUpperCase().includes("CONTINUING")) return "CONTINUING";
+      if (v === "PASS") return "PASS";
+      if (v === "CONTAIN") return "CONTAINED";
+      if (v === "HARD_STOP" || v === "STOP" || v === "FORCE_REVISE") return "BLOCKED";
+      return v || "UNKNOWN";
+    }
 
-    const ACTION_LABELS = {
-      PASS:         'Passed',
-      ADMIT:        'Passed',
-      SOFT_CORRECT: 'Annotated',
-      FORCE_REVISE: 'Revised',
-      HARD_STOP:    'Blocked',
-      STOP:         'Blocked',
-      CONTAIN:      'Contained',
-      REFUSE:       'Refused',
-      CLARIFY:      'Clarify',
-    };
+    function outcomeLanguage(decision) {
+      if (decision === "PASS") return "Released";
+      if (decision === "BLOCKED") return "Not admitted";
+      if (decision === "CONTAINED") return "Needs more information";
+      if (decision === "CONTINUING") return "Structured follow-up updated";
+      return decision;
+    }
 
-    let activeDomain = 'general';
-    let sessionId = newId();
-    let conversation = [];
-    let sending = false;
+    function decisionClass(d) {
+      if (d === "PASS") return "released";
+      if (d === "BLOCKED") return "blocked";
+      if (d === "CONTAINED") return "contained";
+      if (d === "CONTINUING") return "continuing";
+      return "";
+    }
 
-    function newId() { return 'session-' + Math.random().toString(36).slice(2, 14); }
+    function safeContinuation(text, rationale) {
+      const t = String(text || "").toLowerCase();
+      const r = String(rationale || "").toLowerCase();
+      if (r.includes("financial_facts_summary") || t.includes("financial facts summary")) return "financial_facts_summary";
+      if (r.includes("neutral_timeline") || t.includes("neutral timeline") || t.includes("case timeline")) return "neutral_timeline";
+      if (r.includes("medical_post_refusal_safe_followup")) return "medical_post_refusal_safe_followup";
+      return null;
+    }
 
-    // ── Domain ───────────────────────────────────────────────────────────
-    function selectDomain(d) {
-      activeDomain = d;
-      sessionId = newId();
-      conversation = [];
-      clearChat();
-      resetGovPanel();
-      document.querySelectorAll('.domain-btn').forEach(b => {
-        b.classList.toggle('active', b.textContent.toLowerCase() === d);
+    function detectPrimaryReason(flags, domain) {
+      const arr = Array.isArray(flags) ? flags : [];
+      const norm = arr.map(x => String(x || "").toLowerCase());
+      if (norm.includes("personalized_financial_advice")) return "personalized_financial_advice";
+      if (norm.includes("personalized_legal_advice")) return "personalized_legal_advice";
+      if (domain === "finance") return "personalized_financial_advice";
+      if (domain === "legal") return "personalized_legal_advice";
+      return norm[0] || "policy_refusal";
+    }
+
+    function detectContinuationUpdateSlot(prompt, domain) {
+      const p = String(prompt || "").toLowerCase();
+      if (domain === "finance") {
+        if (p.includes("questions for the adviser")) return "questions_for_adviser";
+        if (p.includes("goal")) return "goal_or_concern";
+        if (p.includes("amount")) return "amounts_involved";
+        if (p.includes("account") || p.includes("asset")) return "accounts_or_assets";
+        if (p.includes("risk")) return "risk_constraints";
+        if (p.includes("date")) return "relevant_dates";
+      }
+      return "structured_update";
+    }
+
+    function renderFinanceSummaryBody(text) {
+      let out = String(text || "");
+      out = out.replace(/^Case timeline\b/m, "Financial facts summary");
+      // Field label as slot, not timeline event.
+      out = out.replace(/^\s*[•*-]\s*\[Undated\]\s*Questions for the adviser\s*$/gim, "• Questions for the adviser: [not yet specified]");
+      return out;
+    }
+
+    function releasePath(decision, llmCalled) {
+      if (decision === "BLOCKED") return llmCalled ? "blocked_after_generation" : "blocked_before_generation";
+      if (decision === "PASS") return "released";
+      if (decision === "CONTINUING") return "continuation_updated";
+      if (decision === "CONTAINED") return "needs_more_information";
+      return "unknown";
+    }
+
+    function plainWhy(decision, domain, text) {
+      if (decision === "BLOCKED" && domain === "finance") return "A financial decision request was refused.";
+      if (decision === "BLOCKED" && domain === "legal") return "A legal case-outcome request was refused.";
+      if (decision === "PASS") return "The request was admissible and released.";
+      if (decision === "CONTINUING") return "Valid structured input was applied to the active follow-up.";
+      return "More information is needed to proceed safely.";
+    }
+
+    function addTurn(ui) {
+      const el = document.createElement('section');
+      el.className = 'turn';
+      el.innerHTML = `
+        <div class="grid">
+          <div class="card">
+            <h3 class="title">1. Request</h3>
+            <pre>${ui.request}</pre>
+            <div style="margin-top:6px;color:var(--muted)">domain: ${ui.domain}</div>
+          </div>
+          <div class="card">
+            <h3 class="title">2. Decision</h3>
+            <div style="margin-bottom:8px">
+              <div style="color:var(--muted);font-size:12px">Primary decision</div>
+              <div class="decision ${decisionClass(ui.primaryDecision)}">${ui.primaryDecision}</div>
+              <div style="margin-top:4px">${ui.primaryWhy}</div>
+            </div>
+            <div>
+              <div style="color:var(--muted);font-size:12px">Current turn</div>
+              <div class="decision ${decisionClass(ui.currentTurnStatus)}">${ui.currentTurnStatus}</div>
+              <div style="margin-top:4px">${ui.currentTurnWhy}</div>
+            </div>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="card">
+            <h3 class="title">3. User-facing output</h3>
+            <pre>${ui.userOutput}</pre>
+          </div>
+          <div class="card">
+            <h3 class="title">4. Integration payload</h3>
+            <pre>${JSON.stringify(ui.payload, null, 2)}</pre>
+          </div>
+        </div>`;
+      flow.prepend(el);
+    }
+
+    async function runTurn() {
+      const domain = document.getElementById('domain').value;
+      const prompt = document.getElementById('prompt').value.trim();
+      if (!prompt) return;
+      const body = {
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }]
+      };
+      const r = await fetch(API_BASE + "/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-aurora-session-id": sid,
+          "x-aurora-domain-hint": domain,
+          "x-aurora-operator-detail": "1"
+        },
+        body: JSON.stringify(body)
       });
-      document.getElementById('domain-label-badge').textContent = DOMAINS[d].label;
-      renderChips(d);
-    }
-
-    function renderChips(d) {
-      const el = document.getElementById('chips');
-      el.innerHTML = '';
-      DOMAINS[d].scenarios.forEach(s => {
-        const b = document.createElement('button');
-        b.className = 'chip-btn';
-        b.textContent = s;
-        b.onclick = () => {
-          const inp = document.getElementById('input');
-          inp.value = s;
-          autoResize(inp);
-          sendMessage();
-        };
-        el.appendChild(b);
+      const data = await r.json();
+      const aurora = data.aurora || {};
+      const message = (((data.choices || [])[0] || {}).message || {}).content || "";
+      const decision = mapDecision(aurora.governance, aurora.governance_note);
+      const flags = Array.isArray(aurora.flags) ? aurora.flags : [];
+      const llmCalled = Boolean(aurora.original_response);
+      const sc = safeContinuation(message, aurora.rationale);
+      const isBlocked = decision === "BLOCKED";
+      if (isBlocked) {
+        sessionState.primary_decision = "BLOCKED";
+        sessionState.primary_reason = detectPrimaryReason(flags, domain);
+        sessionState.primary_domain = domain;
+        sessionState.continuation_active = Boolean(sc);
+        sessionState.safe_continuation = sc;
+      }
+      const isContinuationUpdate = sessionState.continuation_active && decision === "CONTINUING";
+      const currentTurnStatus = isContinuationUpdate ? "CONTINUING" : decision;
+      const primaryDecision = sessionState.primary_decision || decision;
+      const primaryWhy = sessionState.primary_decision
+        ? ((sessionState.primary_domain === "finance")
+            ? "A financial decision request was refused."
+            : (sessionState.primary_domain === "legal")
+              ? "A legal case-outcome request was refused."
+              : plainWhy(primaryDecision, domain, message))
+        : plainWhy(primaryDecision, domain, message);
+      const currentTurnWhy = isContinuationUpdate
+        ? ("Update applied: " + detectContinuationUpdateSlot(prompt, domain))
+        : plainWhy(currentTurnStatus, domain, message);
+      const displayOutput = (sessionState.primary_domain === "finance" && sessionState.continuation_active)
+        ? renderFinanceSummaryBody(message)
+        : message;
+      const payload = {
+        decision: primaryDecision,
+        domain,
+        flags,
+        release_path: releasePath(currentTurnStatus, llmCalled),
+        llm_called: llmCalled,
+        safe_continuation: sessionState.safe_continuation || sc,
+        rationale: aurora.rationale || null,
+        trace_id: aurora.audit_id || null
+      };
+      addTurn({
+        request: prompt,
+        domain,
+        primaryDecision,
+        primaryWhy: "Reason: " + (sessionState.primary_reason || "policy_refusal"),
+        currentTurnStatus,
+        currentTurnWhy,
+        userOutput: displayOutput,
+        payload
       });
     }
 
-    async function startNewScenario() {
-      if (sending) return;
-      const btn = document.getElementById('btn-new-scenario');
-      const original = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = 'Starting…';
-      try {
-        const res = await fetch(base + '/v1/session/new-scenario', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        if (!res.ok) {
-          const txt = await res.text();
-          addMsg('assistant', 'Could not start a new scenario: HTTP ' + res.status + '. ' + txt.slice(0, 160));
-          return;
-        }
-        const payload = await res.json().catch(() => ({}));
-        const sidFromBody = payload?.aurora_session_id || payload?.session_id || '';
-        const sidFromHeader = res.headers.get('Aurora-Session-Id') || '';
-        const nextSessionId = String(sidFromBody || sidFromHeader || '').trim();
-        if (!nextSessionId) {
-          addMsg('assistant', 'Could not start a new scenario: missing aurora_session_id in response.');
-          return;
-        }
-        sessionId = nextSessionId;
-        conversation = [];
-        clearChat();
-        resetGovPanel();
-      } catch (err) {
-        addMsg('assistant', 'Could not start a new scenario: ' + err.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = original;
-      }
-    }
-
-    function continueScenario() {
-      // Continue keeps current sessionId by design.
-    }
-
-    // ── Send ─────────────────────────────────────────────────────────────
-    function handleKey(e) {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-    }
-
-    function autoResize(el) {
-      el.style.height = 'auto';
-      el.style.height = Math.min(el.scrollHeight, 110) + 'px';
-    }
-
-    // Temporary containment filter for a bug hunt, not a semantic classifier.
-    // Long-term home for this distinction is a backend provenance marker.
-    function isGovernanceArtifact(action, content) {
-      const a = (action || '').toUpperCase();
-      if (a === 'PASS' || a === 'ADMIT' || a === 'SOFT_CORRECT') return false;
-      if (a === 'CLARIFY') return false;
-      return true;
-    }
-
-    const DEV_SPEAK_PATTERNS = [
-      /^\s*I need extraction before I can respond to that\.?\s*$/i,
-    ];
-
-    function isDevSpeak(text) {
-      if (!text) return false;
-      return DEV_SPEAK_PATTERNS.some(re => re.test(text));
-    }
-
-    const INTERROGATIVE_RE = /\b(who|what|where|when|why|how|which|whose|whom)\b/i;
-
-    function isDeclarative(userInput) {
-      if (!userInput) return false;
-      const t = userInput.trim();
-      if (!t) return false;
-      if (t.includes('?')) return false;
-      if (INTERROGATIVE_RE.test(t)) return false;
-      return true;
-    }
-
-    function containmentAction(action) {
-      const a = (action || '').toUpperCase();
-      return a === 'CONTAIN' || a === 'HARD_STOP' || a === 'STOP' || a === 'REFUSE';
-    }
-
-    function isNonPassGoverned(action) {
-      const a = (action || '').toUpperCase();
-      return ['CONTAIN', 'CLARIFY', 'REFUSE', 'HARD_STOP', 'STOP', 'FORCE_REVISE'].includes(a);
-    }
-
-    function renderGovernedPanel(content, action) {
-      const a = (action || '').toUpperCase();
-      const isBlocked = a === 'HARD_STOP' || a === 'STOP';
-      const isRefused = a === 'REFUSE';
-      const panelClass = (isBlocked || isRefused) ? 'is-block' : 'is-warn';
-
-      const panel = document.createElement('div');
-      panel.className = 'governed-panel ' + panelClass;
-
-      // Outcome header — always first, never overridden by model content
-      const h = document.createElement('div');
-      h.className = 'governed-heading';
-      if (isBlocked)      h.textContent = 'Blocked — not admissible';
-      else if (isRefused) h.textContent = 'Refused';
-      else if (a === 'CONTAIN')  h.textContent = 'Contained — more information required';
-      else if (a === 'CLARIFY')  h.textContent = 'Clarification required';
-      else                       h.textContent = a.charAt(0) + a.slice(1).toLowerCase();
-      panel.appendChild(h);
-
-      // Parse content — no first-line hijack
-      const bodyLines = [], options = [];
-      let actionLine = null, statusLine = null;
-
-      (content || '').split('\n').forEach(function(line) {
-        const trimmed = line.trim();
-        if (!trimmed) return;
-        if (/^Action:/i.test(trimmed)) { actionLine = trimmed; return; }
-        if (/^Status:/i.test(trimmed))  { statusLine = trimmed; return; }
-        if (/^- /.test(trimmed))        { options.push(trimmed.slice(2).trim()); return; }
-        bodyLines.push(trimmed);
-      });
-
-      // Reason / body
-      if (bodyLines.length) {
-        const b = document.createElement('div');
-        b.className = 'governed-body';
-        b.textContent = bodyLines.join('\n');
-        panel.appendChild(b);
-      }
-
-      // Action / Status metadata rows
-      [['governed-action', actionLine], ['governed-status', statusLine]].forEach(function(pair) {
-        const cls = pair[0], raw = pair[1];
-        if (!raw) return;
-        const el = document.createElement('div');
-        el.className = cls;
-        const colon = raw.indexOf(':');
-        if (colon >= 0) {
-          const strong = document.createElement('strong');
-          strong.textContent = raw.slice(0, colon + 1);
-          el.appendChild(strong);
-          el.appendChild(document.createTextNode(raw.slice(colon + 1)));
-        } else {
-          el.textContent = raw;
-        }
-        panel.appendChild(el);
-      });
-
-      // Continuation options — allowed after the boundary is stated
-      if (options.length) {
-        const opts = document.createElement('div');
-        opts.className = 'governed-options';
-        options.forEach(function(opt) {
-          const chip = document.createElement('button');
-          chip.className = 'governed-option';
-          chip.textContent = opt;
-          chip.type = 'button';
-          chip.addEventListener('click', function() {
-            const inp = document.getElementById('input');
-            inp.value = opt;
-            autoResize(inp);
-            sendMessage();
-          });
-          opts.appendChild(chip);
-        });
-        panel.appendChild(opts);
-      }
-
-      return panel;
-    }
-
-    async function sendMessage() {
-      if (sending) return;
-      const inp = document.getElementById('input');
-      const text = inp.value.trim();
-      if (!text) return;
-
-      inp.value = '';
-      autoResize(inp);
-      setSending(true);
-      hideEmpty();
-      addMsg('user', text);
-      conversation.push({ role: 'user', content: text });
-
-      const typingId = addTyping();
-
-      try {
-        const msgs = [];
-        const sys = DOMAINS[activeDomain].system;
-        if (sys) msgs.push({ role: 'system', content: sys });
-        let skipped = 0;
-        conversation.forEach(m => {
-          if (m.role === 'assistant' && m.is_governance_artifact) {
-            skipped += 1;
-            console.log('[aurora-lens demo] skipping governance artifact from history:', m.content);
-            return;
-          }
-          msgs.push({ role: m.role, content: m.content });
-        });
-        console.log('[aurora-lens demo] sending', msgs.length, 'msgs; skipped', skipped, 'governance artifacts');
-
-        const res = await fetch(base + '/v1/chat/completions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'llama-3.1-8b-instant',
-            messages: msgs,
-            aurora_session_id: sessionId,
-            stream: false,
-          }),
-        });
-
-        removeEl(typingId);
-
-        if (!res.ok) {
-          const err = await res.text();
-          console.log('[aurora-lens demo] non-2xx response', res.status, 'body:', err, 'msgs sent:', msgs);
-          addMsg('assistant', 'Error ' + res.status + ' — ' + err.slice(0, 200));
-          setSending(false);
-          return;
-        }
-
-        const data = await res.json();
-        const rawContent = data.choices?.[0]?.message?.content || '(empty)';
-        const aurora = data.aurora || {};
-        const action = (typeof aurora.governance === 'string' ? aurora.governance : aurora.governance?.action || aurora.governance?.outcome || '') || 'PASS';
-
-        const flags = Array.isArray(aurora.flags) ? aurora.flags : [];
-        const noPolicyFlags = flags.length === 0;
-        const shouldSubstituteAck =
-          containmentAction(action) &&
-          noPolicyFlags &&
-          isDevSpeak(rawContent) &&
-          isDeclarative(text);
-
-        const displayContent = shouldSubstituteAck ? ('Got it. ' + text) : rawContent;
-        const isArtifact = shouldSubstituteAck ? true : isGovernanceArtifact(action, rawContent);
-
-        addMsg('assistant', displayContent, action, aurora);
-        conversation.push({
-          role: 'assistant',
-          content: displayContent,
-          is_governance_artifact: isArtifact,
-        });
-        updateGovPanel(aurora, action);
-        loadAuditSlice();
-
-      } catch(err) {
-        removeEl(typingId);
-        addMsg('assistant', 'Could not reach Aurora Lens — check your connection.\n\n' + err.message);
-      }
-
-      setSending(false);
-    }
-
-    // ── Chat DOM ─────────────────────────────────────────────────────────
-    function msgChipClass(action) {
-      if (action === 'PASS' || action === 'ADMIT') return 'chip-pass';
-      if (action === 'HARD_STOP' || action === 'STOP' || action === 'CONTAIN' || action === 'REFUSE') return 'chip-block';
-      if (action === 'FORCE_REVISE') return 'chip-revise';
-      return 'chip-neutral';
-    }
-
-    function msgBubbleClass(action) {
-      if (action === 'HARD_STOP' || action === 'STOP' || action === 'CONTAIN' || action === 'REFUSE') return 'blocked';
-      if (action === 'FORCE_REVISE') return 'revised';
-      return '';
-    }
-
-    function addMsg(role, content, action, aurora) {
-      hideEmpty();
-      const wrap = document.createElement('div');
-      const bClass = role === 'assistant' ? msgBubbleClass(action || '') : '';
-      wrap.className = 'msg ' + role + (bClass ? ' ' + bClass : '');
-
-      const label = document.createElement('div');
-      label.className = 'msg-label';
-
-      if (role === 'user') {
-        const bubble = document.createElement('div');
-        bubble.className = 'msg-bubble';
-        bubble.textContent = content;
-        wrap.appendChild(bubble);
-        label.textContent = 'You';
-      } else {
-        if (isNonPassGoverned(action)) {
-          wrap.appendChild(renderGovernedPanel(content, action));
-        } else {
-          const bubble = document.createElement('div');
-          bubble.className = 'msg-bubble';
-          bubble.textContent = content;
-          wrap.appendChild(bubble);
-        }
-        const lbl = ACTION_LABELS[action] || action || 'Passed';
-        const chipClass = msgChipClass(action || '');
-        label.innerHTML = 'Aurora Lens &nbsp;<span class="msg-outcome-chip ' + chipClass + '">' + esc(lbl) + '</span>';
-      }
-
-      wrap.appendChild(label);
-
-      const c = document.getElementById('messages');
-      c.appendChild(wrap);
-      c.scrollTop = c.scrollHeight;
-    }
-
-    let _tn = 0;
-    function addTyping() {
-      const id = 'typing-' + (++_tn);
-      const wrap = document.createElement('div');
-      wrap.className = 'msg assistant';
-      wrap.id = id;
-      wrap.innerHTML = '<div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
-      const c = document.getElementById('messages');
-      c.appendChild(wrap);
-      c.scrollTop = c.scrollHeight;
-      return id;
-    }
-
-    function removeEl(id) { const el = document.getElementById(id); if (el) el.remove(); }
-    function hideEmpty() { const el = document.getElementById('empty-state'); if (el) el.remove(); }
-    function clearChat() {
-      document.getElementById('messages').innerHTML =
-        '<div class="empty-state" id="empty-state">Choose a scenario below, or type anything.</div>';
-    }
-    function setSending(v) {
-      sending = v;
-      document.getElementById('send-btn').disabled = v;
-      document.getElementById('input').disabled = v;
-    }
-
-    // ── Governance panel ─────────────────────────────────────────────────
-    function updateGovPanel(aurora, action) {
-      const g = action || 'PASS';
-      document.getElementById('gov-idle').style.display = 'none';
-      document.getElementById('gov-content').style.display = 'block';
-
-      // Badge
-      const badge = document.getElementById('outcome-badge');
-      badge.className = 'outcome-badge badge-' + g;
-      badge.innerHTML = '<span class="badge-dot"></span>' + esc(ACTION_LABELS[g] || g);
-
-      // Gloss
-      document.getElementById('outcome-gloss').textContent =
-        OUTCOME_GLOSS[g] || 'Governance outcome ' + g + '.';
-
-      // Flags
-      const flags = aurora.flags || [];
-      const secFlags = document.getElementById('sec-flags');
-      if (flags.length) {
-        secFlags.style.display = 'block';
-        document.getElementById('gov-flags').innerHTML =
-          flags.map(f => '<span class="flag-chip">' + esc(f) + '</span>').join('');
-      } else {
-        secFlags.style.display = 'none';
-      }
-
-      // Domain
-      const fe = aurora.forensic_event;
-      const secDomain = document.getElementById('sec-domain');
-      if (fe?.domain) {
-        secDomain.style.display = 'block';
-        document.getElementById('gov-domain').textContent = fe.domain;
-      } else {
-        secDomain.style.display = 'none';
-      }
-
-      // LLM called
-      let llmCalled;
-      if (g === 'PASS' || g === 'ADMIT' || g === 'SOFT_CORRECT') {
-        llmCalled = true;
-      } else {
-        llmCalled = fe?.attempted_action !== 'call_upstream';
-      }
-      document.getElementById('gov-llm').textContent = llmCalled ? 'Yes' : 'No';
-      document.getElementById('gov-llm-note').textContent = llmCalled
-        ? 'The model was called on this turn.'
-        : 'No model call on this governance path.';
-
-      // Release path
-      const secRelease = document.getElementById('sec-release');
-      const hasRaw = aurora.original_response != null && String(aurora.original_response).length > 0;
-      let relLabel, relNote;
-      if (g === 'PASS' || g === 'ADMIT' || g === 'SOFT_CORRECT') {
-        relLabel = 'Admitted output';
-        relNote  = 'Final text for this turn cleared admissibility.';
-      } else if (!llmCalled && !hasRaw) {
-        relLabel = 'Blocked before generation';
-        relNote  = 'No output was produced on this path.';
-      } else {
-        relLabel = 'Blocked after generation';
-        relNote  = 'Output was generated but not released.';
-      }
-      secRelease.style.display = 'block';
-      document.getElementById('gov-release').textContent = relLabel;
-      document.getElementById('gov-release-note').textContent = relNote;
-
-      // Rationale
-      const secRationale = document.getElementById('sec-rationale');
-      if (aurora.rationale) {
-        secRationale.style.display = 'block';
-        document.getElementById('gov-rationale').textContent = aurora.rationale;
-      } else {
-        secRationale.style.display = 'none';
-      }
-
-      // Original / blocked output
-      const secOriginal = document.getElementById('sec-original');
-      if (hasRaw) {
-        secOriginal.style.display = 'block';
-        const blocked = g === 'HARD_STOP' || g === 'STOP' || g === 'FORCE_REVISE' || g === 'CONTAIN';
-        document.getElementById('gov-original-title').textContent = blocked ? 'Model output — blocked' : 'Model output';
-        document.getElementById('gov-original').className = 'raw-output' + (blocked ? ' struck' : '');
-        document.getElementById('gov-original').textContent = aurora.original_response;
-        const origNote = document.getElementById('gov-original-note');
-        if (blocked) {
-          origNote.textContent = 'Output was generated but not released on this path.';
-          origNote.style.display = 'block';
-        } else {
-          origNote.style.display = 'none';
-        }
-      } else {
-        secOriginal.style.display = 'none';
-      }
-    }
-
-    function resetGovPanel() {
-      document.getElementById('gov-idle').style.display = 'block';
-      document.getElementById('gov-content').style.display = 'none';
-    }
-
-    // ── Operator console: audit + verify + health ────────────────────────
-    function esc(s) {
-      if (s == null) return '';
-      const d = document.createElement('div');
-      d.textContent = String(s);
-      return d.innerHTML;
-    }
-
-    function dashFetch(url) {
-      const sep = url.indexOf('?') >= 0 ? '&' : '?';
-      return fetch(url + sep + '_ts=' + Date.now(), { cache: 'no-store' });
-    }
-
-    const OUTCOME_GLOSS_SHORT = {
-      PASS: 'approved', ADMIT: 'approved',
-      SOFT_CORRECT: 'corrected',
-      FORCE_REVISE: 'revised',
-      HARD_STOP: 'blocked', STOP: 'blocked',
-      CONTAIN: 'withheld', REFUSE: 'refused',
-      CLARIFY: 'clarify',
-    };
-
-    function outcomeClass(oc) {
-      if (oc === 'PASS' || oc === 'ADMIT') return 'outcome-PASS';
-      if (oc === 'SOFT_CORRECT') return 'outcome-SOFT_CORRECT';
-      if (oc === 'FORCE_REVISE') return 'outcome-FORCE_REVISE';
-      if (oc === 'HARD_STOP' || oc === 'STOP') return 'outcome-HARD_STOP';
-      if (oc === 'CONTAIN' || oc === 'REFUSE') return 'outcome-CONTAIN';
-      if (oc === 'CLARIFY') return 'outcome-CLARIFY';
-      return '';
-    }
-
-    async function loadAuditSlice() {
-      await Promise.all([loadHealth(), loadVerify(), loadRecent()]);
-    }
-
-    async function loadRecent() {
-      const statusEl = document.getElementById('recent-status');
-      const table    = document.getElementById('recent-table');
-      const tbody    = document.getElementById('recent-tbody');
-      try {
-        const r = await dashFetch(base + '/v1/audit/recent?n=20');
-        if (r.status === 404) { statusEl.textContent = 'Audit not configured.'; table.style.display = 'none'; return; }
-        const d = await r.json();
-        const rows = d.operator_rows || [];
-        statusEl.textContent = rows.length + ' row(s) · updated ' + new Date().toLocaleTimeString();
-        tbody.innerHTML = '';
-        rows.forEach(function(row) {
-          const tr = document.createElement('tr');
-          const oc  = row.outcome || row.ledger_op || '';
-          const cons = (row.constraints && row.constraints.length) ? row.constraints.join(', ') : '—';
-          const trace = (row.trace_id || '').toString();
-          const reqDom = row.request_domain || '—';
-          const gloss = OUTCOME_GLOSS_SHORT[oc] || '';
-          tr.innerHTML =
-            '<td style="white-space:nowrap">' + esc(row.timestamp || '') + '</td>' +
-            '<td class="' + outcomeClass(oc) + '" style="font-family:var(--mono);font-weight:700">' + esc(oc) +
-              (gloss ? '<span class="outcome-gloss-cell">' + esc(gloss) + '</span>' : '') + '</td>' +
-            '<td style="font-family:var(--mono);font-size:0.75rem">' + esc(reqDom) + '</td>' +
-            '<td class="constraints">' + esc(cons) + '</td>' +
-            '<td style="font-family:var(--mono);font-size:0.72rem">' + esc(trace.slice(0, 12)) + (trace.length > 12 ? '…' : '') + '</td>';
-          tbody.appendChild(tr);
-        });
-        table.style.display = rows.length ? 'table' : 'none';
-      } catch(e) {
-        statusEl.textContent = 'Error: ' + e.message;
-        table.style.display = 'none';
-      }
-    }
-
-    async function loadVerify() {
-      const intEl = document.getElementById('verify-integrity');
-      const extEl = document.getElementById('verify-extended');
-      const evEl = document.getElementById('verify-evidence');
-      function clearVerifyStyles() {
-        [intEl, extEl, evEl].forEach(function(el) {
-          el.style.color = '';
-        });
-      }
-      try {
-        const r = await dashFetch(base + '/v1/audit/verify?n=500');
-        if (r.status === 404) {
-          intEl.textContent = 'Audit log not configured.';
-          intEl.style.color = 'var(--muted-2)';
-          extEl.textContent = '';
-          evEl.textContent = '';
-          return;
-        }
-        if (r.status === 400) {
-          const j = await r.json().catch(function() { return {}; });
-          const em = j.error && (j.error.user_message || j.error.message) ? (j.error.user_message || j.error.message) : r.statusText;
-          intEl.textContent = 'Verify skipped: ' + em;
-          intEl.style.color = 'var(--warn)';
-          extEl.textContent = '';
-          evEl.textContent = '';
-          return;
-        }
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        const d = await r.json();
-        const nested = d.verification && typeof d.verification === 'object' ? d.verification : {};
-        const chainVerified = d.chain_verified != null ? d.chain_verified : nested.chain_valid;
-        const cryptoOk = d.verified === true || nested.verified === true;
-        const fullyVerified = d.fully_verified != null ? d.fully_verified : nested.extended_valid;
-        const unanchored = d.reason === 'unanchored_slice';
-        const backend = d.backend || nested.backend || '';
-        const provSum = d.evidence_audit_status_summary || nested.evidence_audit_status_summary || '';
-        const wv = d.what_was_verified || nested.what_was_verified;
-
-        clearVerifyStyles();
-
-        // Integrity: match /v1/audit/verify payload (chain_verified, verified, HMAC)
-        let chainPill = '';
-        if (chainVerified === true) chainPill = '<span class="pill ok">Chain intact</span>';
-        else if (chainVerified === false) chainPill = '<span class="pill bad">Chain failed</span>';
-        else chainPill = '<span class="pill neutral">Chain —</span>';
-
-        let hmacPill = '';
-        if (backend === 'ledger') {
-          if (d.hmac_checked) hmacPill = d.hmac_verified === true ? '<span class="pill ok">HMAC ok</span>' : '<span class="pill bad">HMAC failed</span>';
-          else hmacPill = '<span class="pill neutral">HMAC n/a</span>';
-        } else {
-          if (d.hmac_verified === true) hmacPill = '<span class="pill ok">HMAC ok</span>';
-          else if (d.hmac_verified === false) hmacPill = '<span class="pill bad">HMAC failed</span>';
-          else hmacPill = '<span class="pill neutral">HMAC —</span>';
-        }
-
-        let headPill = '';
-        if (cryptoOk) headPill = '<span class="pill ok">Crypto ok</span>';
-        else if (unanchored) headPill = '<span class="pill warn">Not fully verified</span>';
-        else headPill = '<span class="pill bad">Crypto failed</span>';
-
-        let intHtml = headPill + ' ' + chainPill + ' ' + hmacPill;
-        intHtml += '<div style="margin-top:8px;font-size:0.78rem;color:var(--muted);line-height:1.45">' + esc(backend) + ' · entries ' + esc(String(d.entries != null ? d.entries : '?')) + '</div>';
-        const intLines = [];
-        if (d.reason) intLines.push('Reason: ' + esc(String(d.reason)));
-        if (d.first_chain_failure_line != null) intLines.push('First chain break at line ' + esc(String(d.first_chain_failure_line)) + (d.first_chain_reason ? ': ' + esc(String(d.first_chain_reason)) : ''));
-        if (d.first_hmac_failure_line != null) intLines.push('First HMAC break at line ' + esc(String(d.first_hmac_failure_line)) + (d.first_hmac_reason ? ': ' + esc(String(d.first_hmac_reason)) : ''));
-        if (intLines.length) intHtml += '<div style="margin-top:8px;font-size:0.76rem;color:var(--muted-2);line-height:1.45">' + intLines.join('<br/>') + '</div>';
-        intEl.innerHTML = intHtml;
-
-        // Extended: fully_verified + what_was_verified (PEF, etc.)
-        const extParts = [];
-        if (typeof fullyVerified === 'boolean') extParts.push(fullyVerified ? '<span class="pill ok">Extended pass</span>' : '<span class="pill warn">Extended pending / fail</span>');
-        if (wv && wv.pef_linkage) {
-          const pl = wv.pef_linkage;
-          const plOk = pl.ok !== false;
-          extParts.push('<span class="pill ' + (plOk ? 'ok' : 'bad') + '">PEF linkage</span> · pairs ' + esc(String(pl.pairs_checked != null ? pl.pairs_checked : '?')) + (plOk ? '' : ' — failed'));
-        }
-        if (wv && wv.pef_state_hash_replay) {
-          const sh = wv.pef_state_hash_replay;
-          const shOk = sh.ok !== false;
-          extParts.push('<span class="pill ' + (shOk ? 'ok' : 'bad') + '">State hash replay</span> · n=' + esc(String(sh.entries_checked != null ? sh.entries_checked : '?')) + (shOk ? '' : ' — failed'));
-        }
-        if (unanchored && d.reason_detail) extParts.push('<span style="font-size:0.78rem;color:var(--muted)">' + esc(String(d.reason_detail)) + '</span>');
-        if (d.verify_note) extParts.push('<span style="font-size:0.78rem;color:var(--muted)">' + esc(String(d.verify_note)) + '</span>');
-        extEl.innerHTML = extParts.length ? extParts.join('<br/>') : '<span style="color:var(--muted)">No extended checks in this response.</span>';
-
-        // Evidence completeness
-        const evParts = [];
-        if (provSum) evParts.push('<span style="color:var(--text)">' + esc(provSum) + '</span>');
-        if (wv && wv.provenance_chain_of_custody && wv.provenance_chain_of_custody.counts) {
-          const c = wv.provenance_chain_of_custody.counts;
-          evParts.push('Rows with block ' + esc(String(c.rows_with_block)) + ' · skipped (no block) ' + esc(String(c.rows_skipped_no_block)));
-        }
-        const evComplete = nested.evidence_complete;
-        if (evComplete === true) evParts.unshift('<span class="pill ok">Complete</span>');
-        else if (evComplete === false) evParts.unshift('<span class="pill warn">Incomplete</span>');
-        evEl.innerHTML = evParts.length ? evParts.join('<br/>') : '<span style="color:var(--muted)">No evidence summary in this response.</span>';
-      } catch(e) {
-        intEl.textContent = 'Error: ' + e.message;
-        intEl.style.color = 'var(--bad)';
-        extEl.textContent = '';
-        evEl.textContent = '';
-      }
-    }
-
-    async function loadHealth() {
-      try {
-        const r = await dashFetch(base + '/health');
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        const d = await r.json();
-
-        // status strip
-        const st   = d.status || 'unknown';
-        const strip = document.getElementById('status-strip');
-        const cls  = st === 'ok' ? 'ok' : (st === 'degraded' ? 'warn' : 'bad');
-        strip.className = cls;
-        const labels = { ok: 'Aurora Lens — operational', warn: 'Aurora Lens — degraded', bad: 'Aurora Lens — error' };
-        document.getElementById('strip-text').textContent = labels[cls] || 'Aurora Lens — ' + st;
-
-        // runtime tiles
-        const pillClass = cls;
-        document.getElementById('rt-status').innerHTML = '<span class="pill ' + pillClass + '">' + esc(st) + '</span>';
-        document.getElementById('rt-policy').textContent = (d.policy || '—') + (d.policy_version ? ' · ' + d.policy_version : '');
-        document.getElementById('rt-sink').textContent   = d.audit_sink || '—';
-        document.getElementById('rt-extraction').textContent = d.extraction_backend || '—';
-
-        // api links
-        ['recent','verify','health','metrics'].forEach(function(k) {
-          const paths = {
-            recent: '/v1/audit/recent?n=20',
-            verify: '/v1/audit/verify?n=500',
-            health: '/health',
-            metrics: '/metrics'
-          };
-          const el = document.getElementById('link-' + k);
-          if (el) el.href = base + paths[k];
-        });
-      } catch(e) {
-        const strip = document.getElementById('status-strip');
-        strip.className = 'bad';
-        document.getElementById('strip-text').textContent = 'Aurora Lens — unreachable';
-      }
-    }
-
-    // ── Init ─────────────────────────────────────────────────────────────
-    selectDomain('general');
-    loadAuditSlice();
-    setInterval(loadAuditSlice, 10000);
+    document.getElementById('send').addEventListener('click', runTurn);
   </script>
-
-  <!-- Cloudflare Web Analytics -->
-  <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b0d0fd61319d4784b8c1ae9f3cd37be4"}'></script>
-
-  <footer>
-    <p style="text-align:center;font-size:0.8rem;opacity:0.65;margin-top:0.75rem">
-      Aurora-Lens implements Margaret Stokes' PEF-based admissibility architecture.
-      First public release: November 2025.
-      <a href="/writing/precedence.html">Precedence record</a>.
-    </p>
-  </footer>
-
 </body>
 </html>
