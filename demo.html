@@ -76,7 +76,7 @@
     .shell {
       position: relative;
       z-index: 1;
-      max-width: 940px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 36px 20px 64px;
     }
@@ -261,7 +261,8 @@
     .chat-body {
       display: flex;
       flex-direction: column;
-      height: 360px;
+      min-height: 560px;
+      height: min(72vh, 760px);
     }
 
     .chat-messages {
@@ -290,6 +291,7 @@
     .msg { display: flex; flex-direction: column; max-width: 88%; gap: 4px; }
     .msg.user { align-self: flex-end; align-items: flex-end; }
     .msg.assistant { align-self: flex-start; align-items: flex-start; }
+    .msg.assistant:has(.governed-panel) { max-width: 100%; width: 100%; }
 
     .msg-bubble {
       padding: 10px 13px;
@@ -401,6 +403,14 @@
       background: rgba(88,180,255,0.08);
       border: 1px solid rgba(88,180,255,0.2);
       color: var(--accent);
+      cursor: pointer;
+      font-family: var(--sans);
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .governed-option:hover {
+      background: rgba(88,180,255,0.18);
+      border-color: rgba(88,180,255,0.45);
     }
 
     .msg-label {
@@ -1414,9 +1424,16 @@
         const opts = document.createElement('div');
         opts.className = 'governed-options';
         options.forEach(function(opt) {
-          const chip = document.createElement('span');
+          const chip = document.createElement('button');
           chip.className = 'governed-option';
           chip.textContent = opt;
+          chip.type = 'button';
+          chip.addEventListener('click', function() {
+            const inp = document.getElementById('input');
+            inp.value = opt;
+            autoResize(inp);
+            sendMessage();
+          });
           opts.appendChild(chip);
         });
         panel.appendChild(opts);
