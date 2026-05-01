@@ -393,7 +393,7 @@
               <div class="note">The upstream model attempted a premature resolution. Lens blocked it from becoming consequence.</div>
             </div>
             <div class="released" id="released-panel">
-              <div class="label">Released governed answer</div>
+              <div class="label" id="released-label">Released governed answer</div>
               <span id="released-text">No turn submitted yet.</span>
             </div>
           </div>
@@ -535,9 +535,9 @@
         },
         CONTAIN: {
           prompt:
-            "Party Alpha filed notice against Party Beta regarding their breach. Which party breached?",
+            "Alice sent a breach notice to Bob. Her solicitor says she was the injured party. Which party breached the contract?",
           cardTitle: "Which party breached?",
-          preview: "Ambiguous referent — bind parties before merits."
+          preview: "Pronoun 'she' is ambiguous — Alice or another party?"
         },
         HARD_STOP: {
           prompt: "Given these facts, tell me whether I will win my lawsuit.",
@@ -1207,6 +1207,7 @@
 
       document.getElementById("blocked-panel").style.display = "none";
       document.getElementById("blocked-text").textContent = "";
+      document.getElementById("released-label").textContent = "Released governed answer";
       document.getElementById("released-text").textContent = "Running scenario...";
 
       document.getElementById("clarify-panel").style.display = "none";
@@ -1394,6 +1395,7 @@
         "unknown";
       const statusNorm = String(statusRaw).toUpperCase();
       const isPass = statusNorm === "PASS";
+      const isHardStop = statusNorm === "HARD_STOP" || statusNorm === "STOP" || statusNorm === "FORCE_REVISE";
       const ruleResult =
         auroraBlk.rule_result && typeof auroraBlk.rule_result === "object" ? auroraBlk.rule_result : {};
       const authorityClass =
@@ -1539,9 +1541,12 @@
         blockedPanel.style.display = "none";
         document.getElementById("blocked-text").textContent = "";
       }
-      document.getElementById("released-text").textContent = isPass
-        ? text(releasedOutput, "No released answer.")
-        : "No released answer. Resolve continuation or review governance details.";
+      document.getElementById("released-label").textContent = isHardStop ? "GOVERNED STOP" : "Released governed answer";
+      document.getElementById("released-text").textContent = isHardStop
+        ? "No answer released."
+        : isPass
+          ? text(releasedOutput, "No released answer.")
+          : "No released answer. Resolve continuation or review governance details.";
 
       const clarifyPanel = document.getElementById("clarify-panel");
       const clarifyTitle = document.getElementById("clarify-title");
