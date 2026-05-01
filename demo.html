@@ -282,6 +282,7 @@
     }
     .ok { font-size: 21px; font-weight: 900; color: #70d78d; }
     .warn { font-size: 21px; font-weight: 900; color: #f0c46a; }
+    .nr { font-size: 21px; font-weight: 900; color: var(--muted); }
 
     code {
       display: block;
@@ -402,16 +403,20 @@
         <section class="panel">
           <div class="panel-head">
             <div class="panel-title">4. Forensic Audit</div>
-            <div class="pill">Visible proof</div>
+            <div class="pill">Turn audit</div>
           </div>
           <div class="panel-body">
             <div class="audit-grid">
-              <div class="audit-card"><div class="label">HMAC verified</div><div id="audit-hmac" class="warn">pending</div></div>
-              <div class="audit-card"><div class="label">Chain verified</div><div id="audit-chain" class="warn">pending</div></div>
-              <div class="audit-card"><div class="label">PEF linkage</div><div id="audit-pef" class="warn">pending</div></div>
-              <div class="audit-card"><div class="label">Fully verified</div><div id="audit-fully" class="warn">pending</div></div>
+              <div class="audit-card"><div class="label">hmac_verified</div><div id="audit-hmac" class="nr">not returned</div></div>
+              <div class="audit-card"><div class="label">chain_verified</div><div id="audit-chain" class="nr">not returned</div></div>
+              <div class="audit-card"><div class="label">fully_verified</div><div id="audit-fully" class="nr">not returned</div></div>
+              <div class="audit-card"><div class="label">pef_linkage</div><div id="audit-pef" class="nr">not returned</div></div>
             </div>
-            <code id="audit-code">trace_id: n/a<br>cid: n/a<br>prev_hash: n/a<br>hash: n/a<br>state_hash: n/a<br>what_was_verified: n/a</code>
+            <div class="kv" style="margin-bottom:12px;">
+              <div class="k">backend</div><div class="v" id="audit-backend">not returned</div>
+              <div class="k">entries checked</div><div class="v" id="audit-entries-checked">not returned</div>
+            </div>
+            <code id="audit-code">trace_id: not returned<br>cid: not returned<br>prev_hash: not returned<br>hash: not returned<br>state_hash: not returned<br>what_was_verified: not returned</code>
           </div>
         </section>
       </section>
@@ -501,25 +506,43 @@
       pendingClarification: null,
       lastRuntimePayload: null,
       lastAuditVerify: null,
+      auditEnrichGeneration: 0,
       heldOriginalQuestion: null,
       lastClarificationSupplied: null,
       lastClarificationResolved: false,
       auroraResponse: null
     };
-    const SERVICE_ORIGIN = (function () {
-      try {
-        return atob("aHR0cHM6Ly9hdXJvcmFsZW5zLXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHA=");
-      } catch (_e) {
-        return "";
-      }
-    })();
-    const metaApiBase = document.querySelector('meta[name="aurora-lens-api-base"]');
-    const API_BASE = (function () {
-      const fromMeta = metaApiBase ? String(metaApiBase.content || "").trim() : "";
+    /**
+     * Internal API origin only — never write this value into the DOM.
+     * Optional operator/debug link surfaces must stay gated (OPERATOR_DEBUG_LINKS).
+     */
+    const OPERATOR_DEBUG_LINKS = false;
+
+    function serviceBase() {
+      const meta = document.querySelector('meta[name="aurora-lens-api-base"]');
+      const fromMeta = meta ? String(meta.content || "").trim() : "";
       if (fromMeta) return fromMeta.replace(/\/+$/, "");
-      if (SERVICE_ORIGIN) return String(SERVICE_ORIGIN).replace(/\/+$/, "");
+      try {
+        const shipped = atob("aHR0cHM6Ly9hdXJvcmFsZW5zLXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHA=");
+        if (shipped) return String(shipped).replace(/\/+$/, "");
+      } catch (_e) {}
       return String(window.location.origin || "").replace(/\/+$/, "");
-    })();
+    }
+
+    function sanitizePublicMessage(msg) {
+      let s = String(msg || "");
+      try {
+        const b = serviceBase();
+        if (b.length > 4) s = s.split(b).join("[backend]");
+      } catch (_e) {}
+      return s;
+    }
+
+    if (OPERATOR_DEBUG_LINKS) {
+      void function operatorDebugPlaceholder() {
+        /* Future private/debug: expose Railway or audit URLs only behind this flag — not for public demo. */
+      };
+    }
 
     function scenarioId(domain, outcomeKey) {
       return domain + "-" + outcomeKey;
@@ -535,13 +558,198 @@
       return String(v);
     }
 
-    function boolBadge(v) {
+    function auditTruthBadge(v) {
       if (v === true) return { label: "true", cls: "ok" };
       if (v === false) return { label: "false", cls: "warn" };
-      return { label: "pending", cls: "warn" };
+      return { label: "not returned", cls: "nr" };
+    }
+
+    function auditScalar(v) {
+      if (v === null || v === undefined) return "not returned";
+      const s = String(v).trim();
+      return s === "" ? "not returned" : s;
+    }
+
+    function auditBackendDisplay(raw) {
+      if (raw === null || raw === undefined) return "not returned";
+      const s = String(raw).trim();
+      if (s === "") return "not returned";
+      if (/^https?:\/\//i.test(s)) return "not returned";
+      if (/\.railway\.app\b/i.test(s)) return "not returned";
+      return s;
+    }
+
+    function pefLinkageDisplay(raw) {
+      if (typeof raw === "boolean") return auditTruthBadge(raw);
+      const safe = auditBackendDisplay(raw);
+      if (safe === "not returned") return auditTruthBadge(null);
+      return { label: safe, cls: "ok" };
+    }
+
+    function setAuditHashBlock(audit) {
+      document.getElementById("audit-code").innerHTML =
+        "trace_id: " + auditScalar(audit.trace_id) + "<br>" +
+        "cid: " + auditScalar(audit.cid) + "<br>" +
+        "prev_hash: " + auditScalar(audit.prev_hash) + "<br>" +
+        "hash: " + auditScalar(audit.hash) + "<br>" +
+        "state_hash: " + auditScalar(audit.state_hash) + "<br>" +
+        "what_was_verified: " + auditScalar(audit.what_was_verified);
+    }
+
+    function resetAuditVisualDefaults() {
+      ["audit-hmac", "audit-chain", "audit-fully", "audit-pef"].forEach(function (id) {
+        const el = document.getElementById(id);
+        el.className = "nr";
+        el.textContent = "not returned";
+      });
+      document.getElementById("audit-backend").textContent = "not returned";
+      document.getElementById("audit-entries-checked").textContent = "not returned";
+      document.getElementById("audit-code").innerHTML =
+        "trace_id: not returned<br>cid: not returned<br>prev_hash: not returned<br>" +
+        "hash: not returned<br>state_hash: not returned<br>what_was_verified: not returned";
+    }
+
+    function applyAuditFromTurnPayload(audit) {
+      const hmac = auditTruthBadge(audit.hmac_verified);
+      const chain = auditTruthBadge(audit.chain_verified);
+      const fully = auditTruthBadge(audit.fully_verified);
+      const pefRaw = audit.pef_linkage_verified ?? audit.pef_linkage ?? null;
+      const pef = pefLinkageDisplay(pefRaw);
+      document.getElementById("audit-hmac").className = hmac.cls;
+      document.getElementById("audit-hmac").textContent = hmac.label;
+      document.getElementById("audit-chain").className = chain.cls;
+      document.getElementById("audit-chain").textContent = chain.label;
+      document.getElementById("audit-fully").className = fully.cls;
+      document.getElementById("audit-fully").textContent = fully.label;
+      document.getElementById("audit-pef").className = pef.cls;
+      document.getElementById("audit-pef").textContent = pef.label;
+      setAuditHashBlock(audit);
+      state.lastAuditVerify = {
+        hmac_verified: audit.hmac_verified,
+        chain_verified: audit.chain_verified,
+        pef_linkage_verified: audit.pef_linkage_verified ?? audit.pef_linkage ?? null,
+        fully_verified: audit.fully_verified
+      };
+    }
+
+    async function enrichAuditFromInternalEndpoints(currentSessionId, generation) {
+      const base = serviceBase();
+      async function fetchJson(relPath) {
+        try {
+          const res = await fetch(base + relPath);
+          if (!res.ok) return null;
+          return await res.json();
+        } catch (_e) {
+          return null;
+        }
+      }
+
+      const sid = currentSessionId != null && String(currentSessionId).trim() !== ""
+        ? String(currentSessionId)
+        : null;
+
+      const [verifyBody, recentBody, healthBody, pefBody] = await Promise.all([
+        fetchJson("/v1/audit/verify?n=500"),
+        fetchJson("/v1/audit/recent?n=30"),
+        fetchJson("/health"),
+        sid ? fetchJson("/v1/session/operator-pef?session_id=" + encodeURIComponent(sid)) : Promise.resolve(null)
+      ]);
+
+      if (generation !== state.auditEnrichGeneration) return;
+
+      let backendLabel = null;
+      if (verifyBody && typeof verifyBody === "object") {
+        backendLabel =
+          verifyBody.backend ??
+          verifyBody.backend_name ??
+          verifyBody.deployment ??
+          verifyBody.environment ??
+          verifyBody.service ??
+          null;
+      }
+      if ((backendLabel === null || String(backendLabel).trim() === "") && healthBody && typeof healthBody === "object") {
+        backendLabel =
+          healthBody.backend ??
+          healthBody.service ??
+          healthBody.status ??
+          (healthBody.ok === true ? "ok" : healthBody.ok === false ? "false" : null);
+      }
+
+      let entriesChecked = null;
+      if (verifyBody && typeof verifyBody === "object") {
+        entriesChecked =
+          verifyBody.entries_checked ??
+          verifyBody.entriesChecked ??
+          verifyBody.checked ??
+          verifyBody.verified_count ??
+          verifyBody.n ??
+          (Array.isArray(verifyBody.entries) ? verifyBody.entries.length : null);
+      }
+      if (entriesChecked == null && Array.isArray(recentBody)) {
+        entriesChecked = recentBody.length;
+      } else if (entriesChecked == null && recentBody && typeof recentBody === "object") {
+        const arr = recentBody.entries ?? recentBody.items ?? recentBody.results ?? recentBody.audit;
+        if (Array.isArray(arr)) entriesChecked = arr.length;
+      }
+
+      document.getElementById("audit-backend").textContent = auditBackendDisplay(backendLabel);
+      document.getElementById("audit-entries-checked").textContent =
+        entriesChecked != null && String(entriesChecked).trim() !== ""
+          ? String(entriesChecked)
+          : "not returned";
+
+      function gapFillBool(elId, candidates) {
+        const el = document.getElementById(elId);
+        if (!el || el.textContent !== "not returned") return;
+        let v = null;
+        for (let i = 0; i < candidates.length; i++) {
+          if (typeof candidates[i] === "boolean") {
+            v = candidates[i];
+            break;
+          }
+        }
+        if (typeof v !== "boolean") return;
+        const b = auditTruthBadge(v);
+        el.className = b.cls;
+        el.textContent = b.label;
+      }
+
+      gapFillBool("audit-hmac", [
+        verifyBody && verifyBody.hmac_verified,
+        pefBody && pefBody.audit && pefBody.audit.hmac_verified,
+        pefBody && pefBody.forensic_audit && pefBody.forensic_audit.hmac_verified
+      ]);
+      gapFillBool("audit-chain", [
+        verifyBody && verifyBody.chain_verified,
+        pefBody && pefBody.audit && pefBody.audit.chain_verified,
+        pefBody && pefBody.forensic_audit && pefBody.forensic_audit.chain_verified
+      ]);
+      gapFillBool("audit-fully", [
+        verifyBody && verifyBody.fully_verified,
+        pefBody && pefBody.audit && pefBody.audit.fully_verified,
+        pefBody && pefBody.forensic_audit && pefBody.forensic_audit.fully_verified
+      ]);
+
+      const pefEl = document.getElementById("audit-pef");
+      if (pefEl && pefEl.textContent === "not returned") {
+        const nestedAudit =
+          (pefBody && typeof pefBody === "object" && (pefBody.audit || pefBody.forensic_audit || {})) || {};
+        const pCand =
+          nestedAudit.pef_linkage_verified ??
+          nestedAudit.pef_linkage ??
+          (verifyBody && verifyBody.pef_linkage_verified) ??
+          (verifyBody && verifyBody.pef_linkage) ??
+          (pefBody && pefBody.pef_linkage_verified) ??
+          (pefBody && pefBody.pef_linkage) ??
+          null;
+        const pd = pefLinkageDisplay(pCand);
+        pefEl.className = pd.cls;
+        pefEl.textContent = pd.label;
+      }
     }
 
     function resetRuntimePanels() {
+      state.auditEnrichGeneration += 1;
       state.auroraResponse = null;
       state.lastRuntimePayload = null;
       state.lastAuditVerify = null;
@@ -574,21 +782,7 @@
       document.getElementById("clarification-supplied").style.display = "none";
       document.getElementById("clarification-result").style.display = "none";
 
-      document.getElementById("audit-hmac").className = "warn";
-      document.getElementById("audit-hmac").textContent = "pending";
-      document.getElementById("audit-chain").className = "warn";
-      document.getElementById("audit-chain").textContent = "pending";
-      document.getElementById("audit-pef").className = "warn";
-      document.getElementById("audit-pef").textContent = "pending";
-      document.getElementById("audit-fully").className = "warn";
-      document.getElementById("audit-fully").textContent = "pending";
-      document.getElementById("audit-code").innerHTML =
-        "trace_id: n/a<br>" +
-        "cid: n/a<br>" +
-        "prev_hash: n/a<br>" +
-        "hash: n/a<br>" +
-        "state_hash: n/a<br>" +
-        "what_was_verified: n/a";
+      resetAuditVisualDefaults();
 
       applySelectorPaused(false);
     }
@@ -671,7 +865,7 @@
     }
 
     async function startNewScenarioSession() {
-      const endpoint = API_BASE + "/v1/session/new-scenario";
+      const endpoint = serviceBase() + "/v1/session/new-scenario";
       const res = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" } });
       if (!res.ok) throw new Error("Failed to start new scenario session: HTTP " + res.status);
       const data = await res.json();
@@ -693,7 +887,7 @@
       if (sessionId) headers["x-aurora-session-id"] = sessionId;
       if (domainHint) headers["x-aurora-domain-hint"] = domainHint;
 
-      const res = await fetch(API_BASE + "/v1/chat/completions", {
+      const res = await fetch(serviceBase() + "/v1/chat/completions", {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -704,7 +898,7 @@
       });
       if (!res.ok) {
         const body = await res.text();
-        throw new Error("HTTP " + res.status + " " + body);
+        throw new Error("HTTP " + res.status + " " + sanitizePublicMessage(body));
       }
       const data = await res.json();
       const payload = data.aurora || data || {};
@@ -823,7 +1017,8 @@
             try {
               await runTurn(candidate, { source: "clarification" });
             } catch (err) {
-              document.getElementById("released-text").textContent = "Request failed: " + text(err && err.message, "unknown error");
+              document.getElementById("released-text").textContent =
+                "Request failed: " + sanitizePublicMessage(text(err && err.message, "unknown error"));
             }
           });
           clarifyChoices.appendChild(btn);
@@ -851,31 +1046,8 @@
         "Regression: clarification value rendered as preloaded/original scenario question."
       );
 
-      const hmac = boolBadge(audit.hmac_verified);
-      const chain = boolBadge(audit.chain_verified);
-      const pef = boolBadge(audit.pef_linkage_verified ?? audit.pef_linkage ?? null);
-      const fully = boolBadge(audit.fully_verified);
-      const hmacEl = document.getElementById("audit-hmac");
-      const chainEl = document.getElementById("audit-chain");
-      const pefEl = document.getElementById("audit-pef");
-      const fullyEl = document.getElementById("audit-fully");
-      hmacEl.className = hmac.cls; hmacEl.textContent = hmac.label;
-      chainEl.className = chain.cls; chainEl.textContent = chain.label;
-      pefEl.className = pef.cls; pefEl.textContent = pef.label;
-      fullyEl.className = fully.cls; fullyEl.textContent = fully.label;
-      state.lastAuditVerify = {
-        hmac_verified: audit.hmac_verified,
-        chain_verified: audit.chain_verified,
-        pef_linkage_verified: audit.pef_linkage_verified ?? audit.pef_linkage ?? null,
-        fully_verified: audit.fully_verified
-      };
-      document.getElementById("audit-code").innerHTML =
-        "trace_id: " + text(audit.trace_id) + "<br>" +
-        "cid: " + text(audit.cid) + "<br>" +
-        "prev_hash: " + text(audit.prev_hash) + "<br>" +
-        "hash: " + text(audit.hash) + "<br>" +
-        "state_hash: " + text(audit.state_hash) + "<br>" +
-        "what_was_verified: " + text(audit.what_was_verified);
+      applyAuditFromTurnPayload(audit);
+      void enrichAuditFromInternalEndpoints(sessionId, state.auditEnrichGeneration);
 
       applySelectorPaused(Boolean(pending.active));
     }
@@ -899,9 +1071,13 @@
         }
         await runTurn(def.prompt, { source: "scenario", domainHint: state.selectedDomain });
       } catch (err) {
-        document.getElementById("released-text").textContent = "Request failed: " + text(err && err.message, "unknown error");
+        document.getElementById("released-text").textContent =
+          "Request failed: " + sanitizePublicMessage(text(err && err.message, "unknown error"));
       }
     });
+
+    state.auditEnrichGeneration += 1;
+    void enrichAuditFromInternalEndpoints(sessionId, state.auditEnrichGeneration);
   </script>
 </body>
 </html>
