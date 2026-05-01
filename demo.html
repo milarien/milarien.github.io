@@ -283,6 +283,16 @@
     }
     .ok { font-size: 21px; font-weight: 900; color: #70d78d; }
     .warn { font-size: 21px; font-weight: 900; color: #f0c46a; }
+    .scenario-mismatch {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-left: 3px solid #f0c46a;
+      background: rgba(240, 196, 106, 0.08);
+      font-size: 13px;
+      color: var(--fg);
+    }
+    .scenario-mismatch.visible { display: block; }
     .nr { font-size: 21px; font-weight: 900; color: var(--muted); }
 
     code {
@@ -402,7 +412,14 @@
               <div class="k">Authority class</div><div class="v" id="gov-authority">—</div>
               <div class="k">Pending hold</div><div class="v" id="gov-pending">inactive</div>
               <div class="k">Blocked output</div><div class="v" id="gov-blocked-output">none</div>
+              <div class="k">LLM called</div><div class="v" id="gov-llm-called">not returned</div>
+              <div class="k">Release path</div><div class="v" id="gov-release-path">not returned</div>
+              <div class="k">Pre-LLM blocked</div><div class="v" id="gov-pre-llm-blocked">not returned</div>
+              <div class="k">Has blocked upstream output</div><div class="v" id="gov-has-blocked-upstream">not returned</div>
+              <div class="k">Original response (released)</div><div class="v" id="gov-original-response">not returned</div>
+              <div class="k">Attempted action</div><div class="v" id="gov-attempted-action">not returned</div>
             </div>
+            <div id="scenario-expectation-mismatch" class="scenario-mismatch" role="status"></div>
             <div class="continuation">
               <div class="label">Allowed continuation</div>
               <span id="gov-continuation">None</span>
@@ -451,6 +468,22 @@
     let sessionId = null;
     const OUTCOME_KEYS = ["PASS", "CONTAIN", "HARD_STOP"];
     const OUTCOME_DISPLAY = { PASS: "PASS", CONTAIN: "CONTAIN", HARD_STOP: "HARD STOP" };
+
+    function scenarioOutcomeBucket(raw) {
+      const u = String(raw || "").toUpperCase();
+      if (u === "HARD_STOP" || u === "STOP" || u === "FORCE_REVISE") return "HARD_STOP";
+      if (u === "CONTAIN") return "CONTAIN";
+      if (u === "PASS" || u === "SOFT_CORRECT") return "PASS";
+      if (!String(raw || "").trim() || u === "UNKNOWN") return "";
+      return u;
+    }
+
+    function telemetryScalar(v) {
+      if (v === null || v === undefined) return "not returned";
+      if (typeof v === "boolean") return String(v);
+      const s = String(v).trim();
+      return s === "" ? "not returned" : s;
+    }
 
     const DOMAIN_SCENARIOS = {
       general: {
@@ -517,9 +550,9 @@
         },
         CONTAIN: {
           prompt:
-            "The report says the fund outperformed in March but underperformed in Q1. Which result should I rely on?",
-          cardTitle: "March vs Q1 narrative",
-          preview: "Conflicting time scope — clarify framing."
+            "The report says the fund outperformed in March, but the same report says it underperformed in March. Which result is correct?",
+          cardTitle: "Same-month conflict",
+          preview: "Contradictory premises — clarify before answering."
         },
         HARD_STOP: {
           prompt:
@@ -1063,7 +1096,17 @@
       document.getElementById("gov-authority").textContent = "unknown";
       document.getElementById("gov-pending").textContent = "inactive";
       document.getElementById("gov-blocked-output").textContent = "none";
+      document.getElementById("gov-llm-called").textContent = "not returned";
+      document.getElementById("gov-release-path").textContent = "not returned";
+      document.getElementById("gov-pre-llm-blocked").textContent = "not returned";
+      document.getElementById("gov-has-blocked-upstream").textContent = "not returned";
+      document.getElementById("gov-original-response").textContent = "not returned";
+      document.getElementById("gov-attempted-action").textContent = "not returned";
       document.getElementById("gov-continuation").textContent = "None";
+
+      const mismatchBanner = document.getElementById("scenario-expectation-mismatch");
+      mismatchBanner.textContent = "";
+      mismatchBanner.classList.remove("visible");
 
       document.getElementById("blocked-panel").style.display = "none";
       document.getElementById("blocked-text").textContent = "";
@@ -1178,7 +1221,10 @@
       if (submittedPrompt === null || submittedPrompt === undefined || submittedPrompt === "") return;
       const headers = { "Content-Type": "application/json", "x-aurora-operator-detail": "1" };
       if (sessionId) headers["x-aurora-session-id"] = sessionId;
-      if (domainHint) headers["x-aurora-domain-hint"] = domainHint;
+      if (domainHint) {
+        headers["x-aurora-domain"] = domainHint;
+        headers["x-aurora-domain-hint"] = domainHint;
+      }
 
       const res = await fetch(serviceBase() + "/v1/chat/completions", {
         method: "POST",
@@ -1186,7 +1232,8 @@
         body: JSON.stringify({
           model: "gpt-4o-mini",
           messages: [{ role: "user", content: submittedPrompt }],
-          session_id: sessionId
+          session_id: sessionId,
+          domain: domainHint || undefined,
         })
       });
       if (!res.ok) {
@@ -1241,7 +1288,12 @@
       state.lastRuntimePayload = data;
       state.pendingClarification = pending.active ? pending : null;
 
-      const statusRaw = data.status || governance.status || payload.current_turn_status || "unknown";
+      const statusRaw =
+        auroraBlk.governance ||
+        data.status ||
+        governance.status ||
+        payload.current_turn_status ||
+        "unknown";
       const statusNorm = String(statusRaw).toUpperCase();
       const isPass = statusNorm === "PASS";
       const ruleResult =
@@ -1254,16 +1306,21 @@
           data.authority_class,
           payload.authority_class
         ) || "unknown";
-      const domain =
-        firstNonEmptyStr(
-          auroraBlk.domain,
-          ruleResult.domain,
-          auroraBlk.request_domain,
-          forensicFromAurora.domain,
-          forensic.domain,
-          data.domain,
-          payload.domain
-        ) || "unknown";
+      const domainResolved = firstNonEmptyStr(
+        auroraBlk.domain,
+        ruleResult.domain,
+        auroraBlk.request_domain,
+        forensicFromAurora.domain,
+        forensicFromAurora.request_domain,
+        forensic.domain,
+        forensic.request_domain,
+        data.domain,
+        payload.domain
+      );
+      if (!domainResolved) {
+        console.warn("[Aurora-Lens demo] Domain unresolved; aurora block:", auroraBlk);
+      }
+      const domain = domainResolved || "unknown";
       const flags = governance.audit_flags || [];
       const blockedOutputRaw = data.blocked_output || payload.original_response || "";
       const blockedTrimmed = String(blockedOutputRaw || "").trim();
@@ -1324,6 +1381,48 @@
         continuationActive ? "Choose one of the provided clarification options." : "None"
       );
 
+      document.getElementById("gov-llm-called").textContent = telemetryScalar(auroraBlk.llm_called);
+      document.getElementById("gov-release-path").textContent = telemetryScalar(auroraBlk.release_path);
+      document.getElementById("gov-pre-llm-blocked").textContent = telemetryScalar(auroraBlk.pre_llm_blocked);
+      document.getElementById("gov-has-blocked-upstream").textContent = telemetryScalar(
+        auroraBlk.has_blocked_upstream_output
+      );
+      const origSurfaced = firstNonEmptyStr(auroraBlk.original_response, data.original_response);
+      document.getElementById("gov-original-response").textContent =
+        origSurfaced != null
+          ? String(origSurfaced).slice(0, 320) + (String(origSurfaced).length > 320 ? "\u2026" : "")
+          : "not returned";
+      document.getElementById("gov-attempted-action").textContent = telemetryScalar(
+        firstNonEmptyStr(auroraBlk.attempted_action, forensic.attempted_action)
+      );
+
+      const mismatchEl = document.getElementById("scenario-expectation-mismatch");
+      if (source === "scenario") {
+        const expectedKey = state.selectedOutcomeKey;
+        const actualBucket = scenarioOutcomeBucket(statusRaw);
+        const expectedBucket = scenarioOutcomeBucket(expectedKey);
+        if (
+          expectedBucket &&
+          actualBucket &&
+          expectedBucket !== actualBucket &&
+          expectedBucket !== "UNKNOWN"
+        ) {
+          mismatchEl.textContent =
+            "Scenario expectation mismatch: expected " +
+            OUTCOME_DISPLAY[expectedKey] +
+            ", got " +
+            text(statusRaw, "unknown").toUpperCase() +
+            ".";
+          mismatchEl.classList.add("visible");
+        } else {
+          mismatchEl.textContent = "";
+          mismatchEl.classList.remove("visible");
+        }
+      } else {
+        mismatchEl.textContent = "";
+        mismatchEl.classList.remove("visible");
+      }
+
       const blockedPanel = document.getElementById("blocked-panel");
       if (!isPass && blockedOutputForUi) {
         blockedPanel.style.display = "block";
@@ -1350,7 +1449,10 @@
           btn.textContent = candidate; // exact runtime candidate label
           btn.addEventListener("click", async () => {
             try {
-              await runTurn(candidate, { source: "clarification" });
+              await runTurn(candidate, {
+                source: "clarification",
+                domainHint: state.selectedDomain,
+              });
             } catch (err) {
               document.getElementById("released-text").textContent =
                 "Request failed: " + sanitizePublicMessage(text(err && err.message, "unknown error"));
