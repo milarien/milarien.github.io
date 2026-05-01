@@ -494,9 +494,9 @@
         },
         CONTAIN: {
           prompt:
-            "Alex said the meeting was moved from Tuesday to Wednesday, then later said it stayed Tuesday. Which date is final?",
+            "Meeting date record A says the meeting is on Tuesday. Meeting date record B says the same meeting is on Wednesday. Which date is final?",
           cardTitle: "Conflicting meeting date",
-          preview: "Conflicting statements — clarify before resolving."
+          preview: "Two records disagree about the same meeting date."
         },
         HARD_STOP: {
           prompt:
@@ -639,6 +639,51 @@
         if (s !== "") return s;
       }
       return null;
+    }
+
+    /**
+     * Infer expected answer shape from clarification + original question (generic).
+     */
+    function inferClarificationAnswerShape(promptBlob) {
+      const p = String(promptBlob || "").toLowerCase();
+      if (/\b(which|what)\s+(date|day)\b/.test(p)) return "TEMPORAL";
+      if (/\bwhen\b\s+.+\b(final|correct|authoritative)\b/.test(p)) return "TEMPORAL";
+      if (/\b(final|correct|authoritative)\b\s+.+\b(date|day)\b/.test(p)) return "TEMPORAL";
+      if (/\bwhich\s+date\b/.test(p) || /\bwhich\s+day\b/.test(p)) return "TEMPORAL";
+      return "";
+    }
+
+    function candidateLooksLikeTemporalAnswer(cand) {
+      const s = String(cand || "").toLowerCase();
+      if (
+        /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/.test(s)
+      ) {
+        return true;
+      }
+      if (
+        /\b(january|february|march|april|may|june|july|august|september|october|november|december)\b/.test(
+          s
+        )
+      ) {
+        return true;
+      }
+      if (/\d/.test(s)) return true;
+      return false;
+    }
+
+    const CLARIFY_FALLBACK_NO_VALID_OPTIONS =
+      "Clarification required, but no valid candidate options were returned.";
+
+    function singleCandidateFailsPromptShape(pending, candidates) {
+      if (!pending || !Array.isArray(candidates) || candidates.length !== 1) return false;
+      const blob = [
+        pending.clarification_prompt,
+        pending.original_question,
+        pending.original_question_preview,
+      ].join(" ");
+      const shape = inferClarificationAnswerShape(blob);
+      if (shape !== "TEMPORAL") return false;
+      return !candidateLooksLikeTemporalAnswer(candidates[0]);
     }
 
     /**
@@ -1114,6 +1159,8 @@
 
       document.getElementById("clarify-panel").style.display = "none";
       document.getElementById("clarify-choices").innerHTML = "";
+      const _cp = document.getElementById("clarify-panel");
+      if (_cp) delete _cp.dataset.clarificationLocksChoiceUi;
       document.getElementById("clarification-supplied").style.display = "none";
       document.getElementById("clarification-result").style.display = "none";
 
@@ -1440,29 +1487,39 @@
         clarifyPanel.style.display = "block";
         clarifyTitle.textContent = text(pending.clarification_prompt, "Clarification required");
         clarifyChoices.innerHTML = "";
+        delete clarifyPanel.dataset.clarificationLocksChoiceUi;
         const candidates = cleanupCandidateEntities(
           Array.isArray(pending.candidate_entities) ? pending.candidate_entities : []
         );
-        candidates.forEach((candidate) => {
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.textContent = candidate; // exact runtime candidate label
-          btn.addEventListener("click", async () => {
-            try {
-              await runTurn(candidate, {
-                source: "clarification",
-                domainHint: state.selectedDomain,
-              });
-            } catch (err) {
-              document.getElementById("released-text").textContent =
-                "Request failed: " + sanitizePublicMessage(text(err && err.message, "unknown error"));
-            }
+        if (singleCandidateFailsPromptShape(pending, candidates)) {
+          const fb = document.createElement("p");
+          fb.className = "clarify-fallback";
+          fb.textContent = CLARIFY_FALLBACK_NO_VALID_OPTIONS;
+          clarifyChoices.appendChild(fb);
+          clarifyPanel.dataset.clarificationLocksChoiceUi = "1";
+        } else {
+          candidates.forEach((candidate) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = candidate; // exact runtime candidate label
+            btn.addEventListener("click", async () => {
+              try {
+                await runTurn(candidate, {
+                  source: "clarification",
+                  domainHint: state.selectedDomain,
+                });
+              } catch (err) {
+                document.getElementById("released-text").textContent =
+                  "Request failed: " + sanitizePublicMessage(text(err && err.message, "unknown error"));
+              }
+            });
+            clarifyChoices.appendChild(btn);
           });
-          clarifyChoices.appendChild(btn);
-        });
+        }
       } else {
         clarifyPanel.style.display = "none";
         clarifyChoices.innerHTML = "";
+        delete clarifyPanel.dataset.clarificationLocksChoiceUi;
       }
 
       if (state.lastClarificationSupplied) {
