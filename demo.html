@@ -710,6 +710,8 @@
       const payload = data.aurora || data || {};
       const responseSessionId = data.session_id || payload.session_id || null;
       if (sessionId && responseSessionId && String(responseSessionId) !== String(sessionId)) {
+        document.getElementById("blocked-panel").style.display = "none";
+        document.getElementById("blocked-text").textContent = "";
         document.getElementById("released-text").textContent =
           "Stale response ignored: session mismatch (" + responseSessionId + " != " + sessionId + ")";
         return;
@@ -737,11 +739,20 @@
       state.lastRuntimePayload = data;
       state.pendingClarification = pending.active ? pending : null;
 
-      const status = data.status || governance.status || payload.current_turn_status || "unknown";
+      const statusRaw = data.status || governance.status || payload.current_turn_status || "unknown";
+      const statusNorm = String(statusRaw).toUpperCase();
+      const isPass = statusNorm === "PASS";
       const authorityClass = data.authority_class || payload.authority_class || "unknown";
       const domain = data.domain || payload.domain || "unknown";
       const flags = governance.audit_flags || [];
-      const blockedOutput = data.blocked_output || payload.original_response || "";
+      const blockedOutputRaw = data.blocked_output || payload.original_response || "";
+      const blockedTrimmed = String(blockedOutputRaw || "").trim();
+      let blockedOutputForUi = "";
+      if (!isPass && blockedTrimmed) {
+        blockedOutputForUi = blockedTrimmed;
+      } else if (isPass && blockedTrimmed) {
+        console.warn("[Aurora-Lens demo] Ignoring blocked_output while governance.status is PASS");
+      }
       const releasedOutput =
         data.output ||
         ((((data.choices || [])[0] || {}).message || {}).content) ||
@@ -769,26 +780,27 @@
 
       document.getElementById("question-text").textContent = state.heldOriginalQuestion || originalQuestion;
       document.getElementById("pill-authority").textContent = authorityClass;
-      document.getElementById("pill-decision").textContent = text(status, "unknown").toUpperCase();
+      document.getElementById("pill-decision").textContent = text(statusRaw, "unknown").toUpperCase();
       document.getElementById("conversation-state-pill").textContent =
         pending.active ? "Paused for continuation" : "Turn completed";
-      document.getElementById("released-pill").textContent = blockedOutput ? "no" : "yes";
+      document.getElementById("released-pill").textContent = isPass ? "yes" : blockedOutputForUi ? "no" : "yes";
 
       const govStatus = document.getElementById("gov-status");
-      govStatus.textContent = text(status, "unknown").toUpperCase();
-      govStatus.className = String(status).toUpperCase() === "CONTAIN" ? "v contain" : "v";
+      govStatus.textContent = text(statusRaw, "unknown").toUpperCase();
+      govStatus.className = statusNorm === "CONTAIN" ? "v contain" : "v";
       document.getElementById("gov-failed").textContent =
         Array.isArray(flags) ? (flags.length ? flags.join(", ") : "none") : text(flags, "none");
       document.getElementById("gov-domain").textContent = text(domain, "unknown");
       document.getElementById("gov-authority").textContent = text(authorityClass, "unknown");
       document.getElementById("gov-pending").textContent = pending.active ? "active" : "inactive";
-      document.getElementById("gov-blocked-output").textContent = blockedOutput ? "quarantined" : "none";
+      document.getElementById("gov-blocked-output").textContent =
+        isPass ? "none" : blockedOutputForUi ? "quarantined" : "none";
       document.getElementById("gov-continuation").innerHTML = text(continuation, "None");
 
       const blockedPanel = document.getElementById("blocked-panel");
-      if (blockedOutput) {
+      if (!isPass && blockedOutputForUi) {
         blockedPanel.style.display = "block";
-        document.getElementById("blocked-text").textContent = blockedOutput;
+        document.getElementById("blocked-text").textContent = blockedOutputForUi;
       } else {
         blockedPanel.style.display = "none";
         document.getElementById("blocked-text").textContent = "";
