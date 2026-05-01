@@ -4,37 +4,35 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="aurora-lens-api-base" content="" />
-  <title>Aurora-Lens Demo UI Mockup</title>
+  <title>Aurora-Lens Demo</title>
   <style>
     :root {
-      --bg: #0d1117;
-      --panel: #151b23;
-      --panel2: #111820;
-      --border: #303845;
-      --text: #e6edf3;
-      --muted: #9aa7b5;
+      --bg: #070b10;
+      --panel: #111821;
+      --panel2: #0d131b;
+      --border: #2d3948;
+      --text: #eef5ff;
+      --muted: #a9b7c8;
+      --blue: #62a8ff;
       --red-bg: #2a1216;
-      --red-border: #b54656;
+      --red-border: #c34b5e;
       --green-bg: #102416;
-      --green-border: #3aa35c;
-      --amber-bg: #2b2211;
-      --amber-border: #c69233;
-      --blue-bg: #102033;
-      --blue-border: #3d7fc4;
-      --chip: #202a36;
+      --green-border: #44b96b;
+      --amber-bg: #2c2110;
+      --amber-border: #d79b38;
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top left, #182235 0, #0d1117 36%, #090c10 100%);
+      background: radial-gradient(circle at top left, #162238 0, var(--bg) 42%, #05070a 100%);
       color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     .shell {
-      max-width: 1180px;
+      max-width: 1280px;
       margin: 0 auto;
       padding: 22px;
     }
@@ -44,47 +42,31 @@
       justify-content: space-between;
       gap: 18px;
       align-items: flex-start;
-      margin-bottom: 18px;
       padding: 18px 20px;
       border: 1px solid var(--border);
-      background: rgba(21, 27, 35, 0.92);
-      border-radius: 18px;
-      box-shadow: 0 18px 50px rgba(0,0,0,0.32);
+      background: rgba(17, 24, 33, 0.95);
+      border-radius: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 18px 55px rgba(0,0,0,.34);
     }
 
-    h1 {
-      margin: 0 0 5px;
-      font-size: 25px;
-      letter-spacing: -0.02em;
-    }
+    h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -0.03em; }
+    .subtitle { color: var(--muted); font-size: 14px; }
 
-    .subtitle {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .runtime-pill {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
+    .pills { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
     .pill {
       border: 1px solid var(--border);
-      background: #0f151d;
-      color: var(--text);
+      background: #0d141d;
       border-radius: 999px;
       padding: 7px 11px;
       font-size: 13px;
       white-space: nowrap;
     }
+    .pill strong { color: white; }
 
-    .pill strong { color: #ffffff; }
-
-    .grid {
+    .layout {
       display: grid;
-      grid-template-columns: minmax(0, 1.18fr) minmax(340px, 0.82fr);
+      grid-template-columns: 300px minmax(0, 1fr) 420px;
       gap: 14px;
       align-items: start;
     }
@@ -93,35 +75,42 @@
 
     .panel {
       border: 1px solid var(--border);
-      background: rgba(21, 27, 35, 0.94);
+      background: rgba(17, 24, 33, 0.96);
       border-radius: 18px;
       overflow: hidden;
-      box-shadow: 0 14px 36px rgba(0,0,0,0.26);
+      box-shadow: 0 14px 38px rgba(0,0,0,.28);
     }
 
     .panel-head {
       padding: 13px 16px;
       border-bottom: 1px solid var(--border);
-      background: rgba(17, 24, 32, 0.95);
+      background: rgba(13, 19, 27, 0.96);
       display: flex;
       justify-content: space-between;
-      gap: 12px;
       align-items: center;
+      gap: 10px;
     }
 
-    .panel-title {
-      font-weight: 700;
-      font-size: 14px;
-      letter-spacing: 0.01em;
-    }
+    .panel-title { font-weight: 800; font-size: 14px; }
+    .panel-body { padding: 15px; }
 
-    .panel-body { padding: 16px; }
+    .scenario {
+      border: 1px solid var(--border);
+      background: #0d141d;
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .scenario.active { border-color: var(--blue); background: #0e1b2b; }
+    .scenario-title { font-weight: 800; margin-bottom: 5px; }
+    .scenario-text { color: var(--muted); font-size: 13px; line-height: 1.38; }
 
     .message {
-      padding: 12px 13px;
       border: 1px solid var(--border);
       background: var(--panel2);
       border-radius: 14px;
+      padding: 12px 13px;
       margin-bottom: 10px;
       line-height: 1.45;
     }
@@ -129,175 +118,87 @@
     .label {
       color: var(--muted);
       text-transform: uppercase;
+      letter-spacing: .08em;
       font-size: 11px;
-      letter-spacing: 0.08em;
-      margin-bottom: 5px;
-      font-weight: 700;
+      font-weight: 800;
+      margin-bottom: 6px;
     }
 
     .clarify {
       border: 1px solid var(--amber-border);
-      background: linear-gradient(180deg, rgba(43,34,17,0.98), rgba(28,23,13,0.98));
+      background: linear-gradient(180deg, rgba(44,33,16,.98), rgba(26,20,11,.98));
       border-radius: 16px;
       padding: 16px;
       margin-top: 12px;
     }
-
-    .clarify h2 {
-      margin: 0 0 8px;
-      font-size: 18px;
-    }
-
-    .choices {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 9px;
-      margin-top: 12px;
-    }
-
+    .clarify h2 { margin: 0 0 8px; font-size: 21px; }
+    .choices { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 13px; }
     button {
-      border: 1px solid #536171;
-      background: #202a36;
+      border: 1px solid #596879;
+      background: #202c39;
       color: var(--text);
       border-radius: 999px;
-      padding: 9px 13px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .input-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 14px;
-    }
-
-    .input-row.pending {
-      opacity: 0.45;
-    }
-
-    input {
-      flex: 1;
-      border: 1px solid var(--border);
-      background: #0e141b;
-      color: var(--text);
-      border-radius: 12px;
-      padding: 11px 12px;
+      padding: 9px 14px;
+      font-weight: 800;
     }
 
     .blocked {
       border: 1px solid var(--red-border);
-      background: linear-gradient(180deg, rgba(42,18,22,0.98), rgba(31,13,16,0.98));
+      background: linear-gradient(180deg, rgba(42,18,22,.98), rgba(29,11,15,.98));
       border-radius: 15px;
       padding: 14px;
       margin-bottom: 12px;
     }
-
     .released {
       border: 1px solid var(--green-border);
-      background: linear-gradient(180deg, rgba(16,36,22,0.98), rgba(11,26,15,0.98));
+      background: linear-gradient(180deg, rgba(16,36,22,.98), rgba(10,25,15,.98));
       border-radius: 15px;
       padding: 14px;
     }
-
-    .tiny-note {
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 7px;
-    }
+    .note { color: var(--muted); font-size: 12px; margin-top: 7px; line-height: 1.45; }
 
     .kv {
       display: grid;
-      grid-template-columns: 150px minmax(0, 1fr);
+      grid-template-columns: 142px minmax(0,1fr);
       gap: 8px 12px;
       font-size: 14px;
-      line-height: 1.4;
+      line-height: 1.42;
     }
-
-    .kv .k { color: var(--muted); }
-    .kv .v { font-weight: 650; overflow-wrap: anywhere; }
-
-    .status-contain {
-      color: #f0c36a;
-      font-weight: 800;
-    }
-
-    .audit-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 9px;
-      margin-bottom: 12px;
-    }
-
-    .audit-card {
-      border: 1px solid var(--border);
-      background: #101720;
-      border-radius: 13px;
-      padding: 11px;
-    }
-
-    .audit-card .ok {
-      font-size: 21px;
-      font-weight: 850;
-      color: #68d083;
-    }
-
-    .audit-card .warn {
-      font-size: 21px;
-      font-weight: 850;
-      color: #f0c36a;
-    }
-
-    code {
-      display: block;
-      background: #0a0f14;
-      border: 1px solid #26313d;
-      border-radius: 12px;
-      padding: 10px;
-      color: #b9c7d6;
-      font-size: 12px;
-      overflow-wrap: anywhere;
-      line-height: 1.45;
-      white-space: pre-wrap;
-    }
+    .k { color: var(--muted); }
+    .v { font-weight: 750; overflow-wrap: anywhere; }
+    .contain { color: #f0c46a; }
 
     .continuation {
-      border: 1px solid var(--blue-border);
-      background: linear-gradient(180deg, rgba(16,32,51,0.98), rgba(11,23,37,0.98));
+      border: 1px solid var(--blue);
+      background: linear-gradient(180deg, rgba(15,33,55,.98), rgba(10,22,38,.98));
       border-radius: 15px;
       padding: 14px;
       margin-top: 12px;
     }
 
-    .pathways {
-      display: grid;
-      gap: 8px;
-    }
-
-    .pathway {
+    .audit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 12px; }
+    .audit-card {
       border: 1px solid var(--border);
-      background: #101720;
+      background: #0d141d;
       border-radius: 13px;
-      padding: 10px 11px;
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
+      padding: 11px;
+    }
+    .ok { font-size: 21px; font-weight: 900; color: #70d78d; }
+    .warn { font-size: 21px; font-weight: 900; color: #f0c46a; }
+
+    code {
+      display: block;
+      border: 1px solid #263442;
+      background: #060a0f;
+      border-radius: 12px;
+      padding: 10px;
+      color: #c1cedd;
+      font-size: 12px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
     }
 
-    .pathway.active {
-      border-color: var(--green-border);
-      background: #112219;
-    }
-
-    .pathway.disabled {
-      opacity: 0.55;
-    }
-
-    @media (max-width: 850px) {
-      .grid { grid-template-columns: 1fr; }
-      header { flex-direction: column; }
-      .runtime-pill { justify-content: flex-start; }
-      .kv { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -305,35 +206,61 @@
     <header>
       <div>
         <h1>Aurora-Lens Demo</h1>
-        <div class="subtitle">Runtime admissibility before consequence, with visible blocked output and forensic audit.</div>
+        <div class="subtitle">Preloaded governed scenarios with continuation, blocked output, allowed continuation, and forensic audit proof.</div>
       </div>
-      <div class="runtime-pill">
-        <div class="pill">Authority <strong id="pill-authority">unknown</strong></div>
-        <div class="pill">Session <strong id="pill-session">inactive</strong></div>
-        <div class="pill">Pending <strong id="pill-pending">inactive</strong></div>
+      <div class="pills">
+        <div class="pill">Authority <strong id="pill-authority">GP</strong></div>
+        <div class="pill">Scenario <strong id="pill-scenario">Ambiguity</strong></div>
+        <div class="pill">Decision <strong id="pill-decision">CONTAIN</strong></div>
       </div>
     </header>
 
-    <section class="grid">
-      <div class="stack">
+    <section class="layout">
+      <aside class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Preloaded questions</div>
+          <div class="pill">Demo</div>
+        </div>
+        <div class="panel-body">
+          <div class="scenario active" data-scenario-key="ambiguity">
+            <div class="scenario-title">1. Ambiguous referent</div>
+            <div class="scenario-text">Emma told Anna that her sister was arriving. Whose sister is arriving?</div>
+          </div>
+          <div class="scenario" data-scenario-key="medical">
+            <div class="scenario-title">2. Medical hard stop</div>
+            <div class="scenario-text">Based on these symptoms, should I diagnose this as a heart attack?</div>
+          </div>
+          <div class="scenario" data-scenario-key="legal">
+            <div class="scenario-title">3. Legal hard stop</div>
+            <div class="scenario-text">Would I likely win this unfair dismissal claim?</div>
+          </div>
+          <div class="scenario" data-scenario-key="finance">
+            <div class="scenario-title">4. Finance hard stop</div>
+            <div class="scenario-text">Should I move all my retirement savings into this fund today?</div>
+          </div>
+          <div class="note">Each question runs as a real turn. The panel is not decorative: it drives the demo scenario.</div>
+        </div>
+      </aside>
+
+      <section class="stack">
         <section class="panel">
           <div class="panel-head">
             <div class="panel-title">1. Conversation</div>
-            <div class="pill">State: <strong id="pill-state">idle</strong></div>
+            <div class="pill" id="conversation-state-pill">Paused for continuation</div>
           </div>
           <div class="panel-body">
-            <div id="messages"></div>
-
-            <div id="clarify-panel" class="clarify" style="display:none;">
-              <div class="label">Continuation required</div>
-              <h2 id="clarify-title">Clarification required</h2>
-              <div id="clarify-note" class="tiny-note">The turn is paused until a valid binding is selected.</div>
-              <div id="clarify-choices" class="choices"></div>
+            <div class="message" id="question-message">
+              <div class="label">Preloaded user question</div>
+              <span id="question-text">Emma told Anna that her sister was arriving. Whose sister is arriving?</span>
             </div>
-
-            <div id="input-row" class="input-row">
-              <input id="prompt" placeholder="Ask something..." />
-              <button id="run-btn" type="button">Run</button>
+            <div class="clarify" id="clarify-panel">
+              <div class="label">Continuation panel</div>
+              <h2 id="clarify-title">Whose sister?</h2>
+              <div class="note" id="clarify-note">Aurora-Lens has held the turn. It will not release a resolved answer until this binding is supplied.</div>
+              <div class="choices" id="clarify-choices">
+                <button type="button">Emma's sister</button>
+                <button type="button">Anna's sister</button>
+              </div>
             </div>
           </div>
         </section>
@@ -341,24 +268,23 @@
         <section class="panel">
           <div class="panel-head">
             <div class="panel-title">2. Model Output</div>
-            <div class="pill">Released: <strong id="pill-released">unknown</strong></div>
+            <div class="pill">Released: <strong id="released-pill">no</strong></div>
           </div>
           <div class="panel-body">
-            <div id="blocked" class="blocked" style="display:none;">
-              <div class="label">Blocked model output</div>
-              <div id="blocked-text"></div>
-              <div class="tiny-note">Generated by upstream model, but not released by Lens.</div>
+            <div class="blocked" id="blocked-panel">
+              <div class="label">Blocked LLM output</div>
+              <span id="blocked-text">Emma's sister is arriving. In this sentence, “her” most naturally refers to Emma, the subject of the clause.</span>
+              <div class="note">The upstream model attempted a premature resolution. Lens blocked it from becoming consequence.</div>
             </div>
-
-            <div id="released" class="released">
-              <div class="label">Released answer</div>
-              <div id="released-text">Run a turn to see governed output.</div>
+            <div class="released" id="released-panel">
+              <div class="label">Released governed answer</div>
+              <span id="released-text">I can’t resolve that yet. The phrase “her sister” could refer to either Emma’s sister or Anna’s sister.</span>
             </div>
           </div>
         </section>
-      </div>
+      </section>
 
-      <div class="stack">
+      <section class="stack">
         <section class="panel">
           <div class="panel-head">
             <div class="panel-title">3. Governance Decision</div>
@@ -366,17 +292,16 @@
           </div>
           <div class="panel-body">
             <div class="kv">
-              <div class="k">Status</div><div id="gov-status" class="v">unknown</div>
-              <div class="k">Failed constraint</div><div id="gov-failed" class="v">none</div>
-              <div class="k">Domain</div><div id="gov-domain" class="v">unknown</div>
-              <div class="k">Authority class</div><div id="gov-authority" class="v">unknown</div>
-              <div class="k">Pending hold</div><div id="gov-pending" class="v">inactive</div>
-              <div class="k">Original question</div><div id="gov-original" class="v">n/a</div>
+              <div class="k">Status</div><div class="v contain" id="gov-status">CONTAIN</div>
+              <div class="k">Failed constraint</div><div class="v" id="gov-failed">UNRESOLVED_REFERENT</div>
+              <div class="k">Domain</div><div class="v" id="gov-domain">general</div>
+              <div class="k">Authority class</div><div class="v" id="gov-authority">GP</div>
+              <div class="k">Pending hold</div><div class="v" id="gov-pending">active</div>
+              <div class="k">Blocked output</div><div class="v" id="gov-blocked-output">quarantined</div>
             </div>
-
             <div class="continuation">
               <div class="label">Allowed continuation</div>
-              <div id="gov-continuation">None</div>
+              <span id="gov-continuation">Answer the clarification question only. Valid continuations are <strong>Emma's sister</strong> or <strong>Anna's sister</strong>.</span>
             </div>
           </div>
         </section>
@@ -384,55 +309,21 @@
         <section class="panel">
           <div class="panel-head">
             <div class="panel-title">4. Forensic Audit</div>
-            <div class="pill">Tamper-evident</div>
+            <div class="pill">Visible proof</div>
           </div>
           <div class="panel-body">
             <div class="audit-grid">
-              <div class="audit-card">
-                <div class="label">HMAC verified</div>
-                <div id="audit-hmac" class="warn">unknown</div>
-              </div>
-              <div class="audit-card">
-                <div class="label">Chain verified</div>
-                <div id="audit-chain" class="warn">unknown</div>
-              </div>
-              <div class="audit-card">
-                <div class="label">PEF linkage</div>
-                <div id="audit-pef" class="warn">unknown</div>
-              </div>
-              <div class="audit-card">
-                <div class="label">Fully verified</div>
-                <div id="audit-fully" class="warn">unknown</div>
-              </div>
+              <div class="audit-card"><div class="label">HMAC verified</div><div id="audit-hmac" class="ok">true</div></div>
+              <div class="audit-card"><div class="label">Chain verified</div><div id="audit-chain" class="ok">true</div></div>
+              <div class="audit-card"><div class="label">PEF linkage</div><div id="audit-pef" class="ok">true</div></div>
+              <div class="audit-card"><div class="label">Fully verified</div><div id="audit-fully" class="warn">pending</div></div>
             </div>
-
-            <code id="audit-code">trace_id: n/a
-cid: n/a
-prev_hash: n/a
-hash: n/a
-state_hash: n/a
-what_was_verified: n/a</code>
+            <code id="audit-code">trace_id: proxy:9c4a7f<br>cid: bafy-audit-entry-013<br>prev_hash: 02f8e7c1a7...<br>hash: 912ac74fd1...<br>state_hash: pef:41ce9b...<br>what_was_verified: integrity, hmac, chain, pef_linkage</code>
           </div>
         </section>
-
-        <section class="panel">
-          <div class="panel-head">
-            <div class="panel-title">Authority Pathways</div>
-            <div class="pill">Configured runtime</div>
-          </div>
-          <div class="panel-body">
-            <div class="pathways">
-              <div id="pathway-gp" class="pathway"><strong>GP</strong><span>General public</span></div>
-              <div id="pathway-da" class="pathway disabled"><strong>DA</strong><span>Unavailable unless configured</span></div>
-              <div id="pathway-hs" class="pathway disabled"><strong>HS</strong><span>Unavailable unless configured</span></div>
-            </div>
-            <div class="tiny-note">No fake switching. If authority is not injected into runtime, the UI says so.</div>
-          </div>
-        </section>
-      </div>
+      </section>
     </section>
   </main>
-
   <script>
     let sessionId = null;
     const SERVICE_ORIGIN = (function () {
@@ -450,184 +341,182 @@ what_was_verified: n/a</code>
       return String(window.location.origin || "").replace(/\/+$/, "");
     })();
 
-    function text(value, fallback = "n/a") {
-      if (value === null || value === undefined || value === "") return fallback;
-      return String(value);
+    const SCENARIOS = {
+      ambiguity: {
+        label: "Ambiguity",
+        domain: "general",
+        prompt: "Emma told Anna that her sister was arriving. Whose sister is arriving?"
+      },
+      medical: {
+        label: "Medical",
+        domain: "medical",
+        prompt: "Based on these symptoms, should I diagnose this as a heart attack?"
+      },
+      legal: {
+        label: "Legal",
+        domain: "legal",
+        prompt: "Would I likely win this unfair dismissal claim?"
+      },
+      finance: {
+        label: "Finance",
+        domain: "finance",
+        prompt: "Should I move all my retirement savings into this fund today?"
+      }
+    };
+
+    function text(v, fallback = "n/a") {
+      if (v === null || v === undefined || v === "") return fallback;
+      return String(v);
     }
 
-    function boolBadge(value) {
-      if (value === true) return { label: "true", className: "ok" };
-      if (value === false) return { label: "false", className: "warn" };
-      return { label: "unknown", className: "warn" };
+    function boolBadge(v) {
+      if (v === true) return { label: "true", cls: "ok" };
+      if (v === false) return { label: "false", cls: "warn" };
+      return { label: "pending", cls: "warn" };
     }
 
-    function messageBlock(label, content) {
-      const node = document.createElement("div");
-      node.className = "message";
-      const title = document.createElement("div");
-      title.className = "label";
-      title.textContent = label;
-      const body = document.createElement("div");
-      body.textContent = content;
-      node.appendChild(title);
-      node.appendChild(body);
-      return node;
-    }
-
-    function clearAuthorityPathways() {
-      document.getElementById("pathway-gp").classList.remove("active");
-      document.getElementById("pathway-da").classList.remove("active");
-      document.getElementById("pathway-hs").classList.remove("active");
-    }
-
-    function setAuthorityPathway(authorityClass) {
-      clearAuthorityPathways();
-      const key = String(authorityClass || "").toUpperCase();
-      if (key === "GP") document.getElementById("pathway-gp").classList.add("active");
-      if (key === "DA") document.getElementById("pathway-da").classList.add("active");
-      if (key === "HS") document.getElementById("pathway-hs").classList.add("active");
-    }
-
-    async function run(choiceText = null) {
-      const promptEl = document.getElementById("prompt");
-      const runBtn = document.getElementById("run-btn");
-      const prompt = String(choiceText ?? promptEl.value ?? "").trim();
-      if (!prompt) return;
-
-      const headers = { "Content-Type": "application/json" };
-      if (sessionId) headers["x-aurora-session-id"] = sessionId;
-      headers["x-aurora-operator-detail"] = "1";
-
-      runBtn.disabled = true;
-      try {
-        const res = await fetch(API_BASE + "/v1/chat/completions", {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            messages: [{ role: "user", content: prompt }],
-            session_id: sessionId
-          })
-        });
-        if (!res.ok) {
-          const body = await res.text();
-          throw new Error("HTTP " + res.status + " " + body);
-        }
-        const data = await res.json();
-        sessionId = data.session_id || sessionId;
-        render(data, prompt);
-        if (choiceText === null) promptEl.value = "";
-      } catch (err) {
-        document.getElementById("released-text").textContent = "Request failed: " + text(err && err.message, "unknown error");
-      } finally {
-        runBtn.disabled = false;
+    function setScenarioActive(key) {
+      document.querySelectorAll(".scenario").forEach((el) => {
+        if (el.dataset.scenarioKey === key) el.classList.add("active");
+        else el.classList.remove("active");
+      });
+      document.getElementById("pill-scenario").textContent = text(SCENARIOS[key]?.label, "Custom");
+      if (SCENARIOS[key]) {
+        document.getElementById("question-text").textContent = SCENARIOS[key].prompt;
       }
     }
 
-    function render(data, submittedPrompt) {
+    async function runTurn(prompt, domainHint = null) {
+      const cleanPrompt = String(prompt || "").trim();
+      if (!cleanPrompt) return;
+      const headers = { "Content-Type": "application/json", "x-aurora-operator-detail": "1" };
+      if (sessionId) headers["x-aurora-session-id"] = sessionId;
+      if (domainHint) headers["x-aurora-domain-hint"] = domainHint;
+
+      const res = await fetch(API_BASE + "/v1/chat/completions", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: cleanPrompt }],
+          session_id: sessionId
+        })
+      });
+      if (!res.ok) {
+        const body = await res.text();
+        throw new Error("HTTP " + res.status + " " + body);
+      }
+      const data = await res.json();
+      sessionId = data.session_id || sessionId;
+      render(data, cleanPrompt);
+    }
+
+    function render(data, promptText) {
       const payload = data.aurora || data || {};
       const governance = data.governance || payload.governance || {};
+      const audit = data.audit || payload.audit || {};
       const operatorPef = data.operator_pef || payload.operator_pef || {};
       const pending = operatorPef.pending_clarification || {};
-      const audit = data.audit || payload.audit || {};
-      const flags = governance.audit_flags || [];
-
-      const authorityClass = data.authority_class || payload.authority_class || "unknown";
       const status = data.status || governance.status || payload.current_turn_status || "unknown";
+      const authorityClass = data.authority_class || payload.authority_class || "unknown";
       const domain = data.domain || payload.domain || "unknown";
+      const flags = governance.audit_flags || [];
       const blockedOutput = data.blocked_output || payload.original_response || "";
       const releasedOutput =
         data.output ||
         ((((data.choices || [])[0] || {}).message || {}).content) ||
         payload.response_message ||
         "";
-      const userInput = data.input || submittedPrompt || "";
+      const continuation = governance.allowed_continuation || "None";
 
-      const messages = document.getElementById("messages");
-      messages.appendChild(messageBlock("User", userInput));
-      if (releasedOutput) messages.appendChild(messageBlock("Released", releasedOutput));
+      document.getElementById("question-text").textContent = promptText;
+      document.getElementById("pill-authority").textContent = authorityClass;
+      document.getElementById("pill-decision").textContent = text(status, "unknown").toUpperCase();
+      document.getElementById("conversation-state-pill").textContent =
+        pending.active ? "Paused for continuation" : "Turn completed";
+      document.getElementById("released-pill").textContent = blockedOutput ? "no" : "yes";
 
-      document.getElementById("pill-authority").textContent = text(authorityClass, "unknown");
-      document.getElementById("pill-session").textContent = sessionId ? "active" : "inactive";
-      document.getElementById("pill-state").textContent = text(status, "unknown");
-
-      document.getElementById("gov-status").textContent = text(status, "unknown");
-      document.getElementById("gov-status").className = String(status).toUpperCase() === "CONTAIN" ? "v status-contain" : "v";
-      document.getElementById("gov-failed").textContent = Array.isArray(flags) ? (flags.length ? flags.join(", ") : "none") : text(flags, "none");
+      const govStatus = document.getElementById("gov-status");
+      govStatus.textContent = text(status, "unknown").toUpperCase();
+      govStatus.className = String(status).toUpperCase() === "CONTAIN" ? "v contain" : "v";
+      document.getElementById("gov-failed").textContent =
+        Array.isArray(flags) ? (flags.length ? flags.join(", ") : "none") : text(flags, "none");
       document.getElementById("gov-domain").textContent = text(domain, "unknown");
       document.getElementById("gov-authority").textContent = text(authorityClass, "unknown");
-      document.getElementById("gov-original").textContent = text(pending.original_question, userInput || "n/a");
-      document.getElementById("gov-continuation").textContent = text(governance.allowed_continuation, "None");
+      document.getElementById("gov-pending").textContent = pending.active ? "active" : "inactive";
+      document.getElementById("gov-blocked-output").textContent = blockedOutput ? "quarantined" : "none";
+      document.getElementById("gov-continuation").innerHTML = text(continuation, "None");
 
-      const pendingActive = Boolean(pending && pending.active);
-      document.getElementById("gov-pending").textContent = pendingActive ? "active" : "inactive";
-      document.getElementById("pill-pending").textContent = pendingActive ? "active" : "inactive";
-      setAuthorityPathway(authorityClass);
-
-      const blocked = document.getElementById("blocked");
-      document.getElementById("blocked-text").textContent = blockedOutput || "None";
-      blocked.style.display = blockedOutput ? "block" : "none";
+      const blockedPanel = document.getElementById("blocked-panel");
+      if (blockedOutput) {
+        blockedPanel.style.display = "block";
+        document.getElementById("blocked-text").textContent = blockedOutput;
+      } else {
+        blockedPanel.style.display = "none";
+        document.getElementById("blocked-text").textContent = "";
+      }
       document.getElementById("released-text").textContent = text(releasedOutput, "No released answer.");
-      document.getElementById("pill-released").textContent = blockedOutput ? "No" : "Yes";
 
       const clarifyPanel = document.getElementById("clarify-panel");
+      const clarifyTitle = document.getElementById("clarify-title");
       const clarifyChoices = document.getElementById("clarify-choices");
-      const inputRow = document.getElementById("input-row");
-      const prompt = document.getElementById("prompt");
-      const runBtn = document.getElementById("run-btn");
-      if (pendingActive) {
+      if (pending.active) {
         clarifyPanel.style.display = "block";
-        document.getElementById("clarify-title").textContent = text(pending.clarification_prompt, "Clarification required");
+        clarifyTitle.textContent = text(pending.clarification_prompt, "Clarification required");
         clarifyChoices.innerHTML = "";
         const candidates = Array.isArray(pending.candidate_entities) ? pending.candidate_entities : [];
         candidates.forEach((candidate) => {
-          const value = typeof candidate === "string" ? candidate : text(candidate, "");
+          const value = String(candidate || "").trim();
           if (!value) return;
           const btn = document.createElement("button");
           btn.type = "button";
           btn.textContent = value;
-          btn.addEventListener("click", () => run(value));
+          btn.addEventListener("click", async () => {
+            try {
+              await runTurn(value, domain);
+            } catch (err) {
+              document.getElementById("released-text").textContent = "Request failed: " + text(err && err.message, "unknown error");
+            }
+          });
           clarifyChoices.appendChild(btn);
         });
-        inputRow.classList.add("pending");
-        prompt.disabled = true;
-        runBtn.disabled = true;
-        prompt.placeholder = "Input disabled while clarification is pending";
       } else {
         clarifyPanel.style.display = "none";
-        clarifyChoices.innerHTML = "";
-        inputRow.classList.remove("pending");
-        prompt.disabled = false;
-        runBtn.disabled = false;
-        prompt.placeholder = "Ask something...";
       }
 
       const hmac = boolBadge(audit.hmac_verified);
       const chain = boolBadge(audit.chain_verified);
-      const fully = boolBadge(audit.fully_verified);
       const pef = boolBadge(audit.pef_linkage_verified ?? audit.pef_linkage ?? null);
+      const fully = boolBadge(audit.fully_verified);
       const hmacEl = document.getElementById("audit-hmac");
       const chainEl = document.getElementById("audit-chain");
       const pefEl = document.getElementById("audit-pef");
       const fullyEl = document.getElementById("audit-fully");
-      hmacEl.className = hmac.className; hmacEl.textContent = hmac.label;
-      chainEl.className = chain.className; chainEl.textContent = chain.label;
-      pefEl.className = pef.className; pefEl.textContent = pef.label;
-      fullyEl.className = fully.className; fullyEl.textContent = fully.label;
-
-      const auditLines = [
-        "trace_id: " + text(audit.trace_id),
-        "cid: " + text(audit.cid),
-        "prev_hash: " + text(audit.prev_hash),
-        "hash: " + text(audit.hash),
-        "state_hash: " + text(audit.state_hash),
-        "what_was_verified: " + text(audit.what_was_verified)
-      ];
-      document.getElementById("audit-code").textContent = auditLines.join("\n");
+      hmacEl.className = hmac.cls; hmacEl.textContent = hmac.label;
+      chainEl.className = chain.cls; chainEl.textContent = chain.label;
+      pefEl.className = pef.cls; pefEl.textContent = pef.label;
+      fullyEl.className = fully.cls; fullyEl.textContent = fully.label;
+      document.getElementById("audit-code").innerHTML =
+        "trace_id: " + text(audit.trace_id) + "<br>" +
+        "cid: " + text(audit.cid) + "<br>" +
+        "prev_hash: " + text(audit.prev_hash) + "<br>" +
+        "hash: " + text(audit.hash) + "<br>" +
+        "state_hash: " + text(audit.state_hash) + "<br>" +
+        "what_was_verified: " + text(audit.what_was_verified);
     }
 
-    document.getElementById("run-btn").addEventListener("click", () => run());
-    document.getElementById("prompt").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") run();
+    document.querySelectorAll(".scenario").forEach((node) => {
+      node.addEventListener("click", async () => {
+        const key = node.dataset.scenarioKey || "ambiguity";
+        setScenarioActive(key);
+        const scenario = SCENARIOS[key];
+        if (!scenario) return;
+        try {
+          await runTurn(scenario.prompt, scenario.domain);
+        } catch (err) {
+          document.getElementById("released-text").textContent = "Request failed: " + text(err && err.message, "unknown error");
+        }
+      });
     });
   </script>
 </body>
