@@ -1,2 +1,5 @@
 # Local Cursor/VS Code workspace files (not site content)
 *.code-workspace
+
+# Claude Code local metadata
+.claude/
