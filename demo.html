@@ -1395,7 +1395,6 @@
         "unknown";
       const statusNorm = String(statusRaw).toUpperCase();
       const isPass = statusNorm === "PASS";
-      const isHardStop = statusNorm === "HARD_STOP" || statusNorm === "STOP" || statusNorm === "FORCE_REVISE";
       const ruleResult =
         auroraBlk.rule_result && typeof auroraBlk.rule_result === "object" ? auroraBlk.rule_result : {};
       const authorityClass =
@@ -1441,6 +1440,7 @@
       );
       const continuationMode = clarificationUiMode(pending, cleanedCandidates, statusNorm);
       const continuationActive = continuationMode !== "none";
+      const isHardStop = !isPass && continuationMode === "none";
       const continuationDisplay = continuationMode === "options"
         ? "Action: Choose one option to continue."
         : continuationMode === "freetext"
