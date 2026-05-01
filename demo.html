@@ -374,6 +374,9 @@
               <div class="note" id="clarify-note">Aurora-Lens has held the turn. It will not release a resolved answer until this binding is supplied.</div>
               <div class="choices" id="clarify-choices">
               </div>
+              <div id="clarify-freetext-wrap" style="display:none; margin-top:10px;">
+                <input id="clarify-freetext-input" type="text" placeholder="Type your answer and press Enter…" autocomplete="off" style="width:100%;box-sizing:border-box;background:#0d141d;border:1px solid var(--border);color:#e8edf3;border-radius:9px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;">
+              </div>
             </div>
           </div>
         </section>
@@ -494,9 +497,9 @@
         },
         CONTAIN: {
           prompt:
-            "Meeting date record A says the meeting is on Tuesday. Meeting date record B says the same meeting is on Wednesday. Which date is final?",
-          cardTitle: "Conflicting meeting date",
-          preview: "Two records disagree about the same meeting date."
+            "Emma told Anna her sister was overseas. Where is she now?",
+          cardTitle: "Ambiguous referent",
+          preview: "Pronoun 'she' could refer to Emma or Anna."
         },
         HARD_STOP: {
           prompt:
@@ -715,6 +718,51 @@
         if (!subsumed) out.push(c);
       });
       return out;
+    }
+
+    function clarificationUiMode(pending, candidates, statusNorm) {
+      const activeContain = Boolean(
+        pending
+        && pending.active
+        && String(statusNorm || "").toUpperCase() === "CONTAIN"
+      );
+      const supportedConstraint = Boolean(
+        pending
+        && (
+          pending.failed_constraint === "UNRESOLVED_REFERENT"
+          || pending.failed_constraint === "DISJUNCTIVE_BRANCH_COLLAPSE"
+        )
+      );
+      if (!activeContain || !supportedConstraint) return "none";
+      if (Array.isArray(candidates) && candidates.length > 0) return "options";
+      return "freetext";
+    }
+
+    function runClarificationUiModeChecks() {
+      console.assert(
+        clarificationUiMode(
+          { active: true, failed_constraint: "UNRESOLVED_REFERENT" },
+          ["Emma", "Anna"],
+          "CONTAIN",
+        ) === "options",
+        "UI contract: CONTAIN with options must render buttons.",
+      );
+      console.assert(
+        clarificationUiMode(
+          { active: true, failed_constraint: "UNRESOLVED_REFERENT" },
+          [],
+          "CONTAIN",
+        ) === "freetext",
+        "UI contract: CONTAIN without options must render free-text clarification.",
+      );
+      console.assert(
+        clarificationUiMode(
+          { active: true, failed_constraint: "UNRESOLVED_REFERENT" },
+          ["Emma", "Anna"],
+          "HARD_STOP",
+        ) === "none",
+        "UI contract: HARD_STOP must not render clarification UI.",
+      );
     }
 
     function auditTruthBadge(v) {
@@ -1159,8 +1207,10 @@
 
       document.getElementById("clarify-panel").style.display = "none";
       document.getElementById("clarify-choices").innerHTML = "";
+      document.getElementById("clarify-freetext-wrap").style.display = "none";
+      document.getElementById("clarify-freetext-input").value = "";
       const _cp = document.getElementById("clarify-panel");
-      if (_cp) delete _cp.dataset.clarificationLocksChoiceUi;
+      if (_cp) delete _cp.dataset.clarificationMode;
       document.getElementById("clarification-supplied").style.display = "none";
       document.getElementById("clarification-result").style.display = "none";
 
@@ -1383,10 +1433,16 @@
         payload.response_message ||
         "";
       const continuationRaw = governance.allowed_continuation || "None";
-      const continuationActive = Boolean(pending.active);
-      const continuationDisplay = continuationActive
+      const cleanedCandidates = cleanupCandidateEntities(
+        Array.isArray(pending.candidate_entities) ? pending.candidate_entities : []
+      );
+      const continuationMode = clarificationUiMode(pending, cleanedCandidates, statusNorm);
+      const continuationActive = continuationMode !== "none";
+      const continuationDisplay = continuationMode === "options"
         ? "Action: Choose one option to continue."
-        : continuationRaw;
+        : continuationMode === "freetext"
+          ? "Action: Provide clarification text to continue."
+          : continuationRaw;
       const clarificationSuppliedEl = document.getElementById("clarification-supplied");
       const clarificationResultEl = document.getElementById("clarification-result");
       const originalQuestion = text(
@@ -1425,7 +1481,11 @@
         isPass ? "none" : blockedOutputForUi ? "quarantined" : "none";
       document.getElementById("gov-continuation").textContent = text(
         continuationDisplay,
-        continuationActive ? "Choose one of the provided clarification options." : "None"
+        continuationMode === "freetext"
+          ? "Type a clarification response to continue."
+          : continuationActive
+            ? "Choose one of the provided clarification options."
+            : "None"
       );
 
       document.getElementById("gov-llm-called").textContent = telemetryScalar(auroraBlk.llm_called);
@@ -1478,27 +1538,26 @@
         blockedPanel.style.display = "none";
         document.getElementById("blocked-text").textContent = "";
       }
-      document.getElementById("released-text").textContent = text(releasedOutput, "No released answer.");
+      document.getElementById("released-text").textContent = isPass
+        ? text(releasedOutput, "No released answer.")
+        : "No released answer. Resolve continuation or review governance details.";
 
       const clarifyPanel = document.getElementById("clarify-panel");
       const clarifyTitle = document.getElementById("clarify-title");
       const clarifyChoices = document.getElementById("clarify-choices");
-      if (pending.active) {
+      if (continuationMode !== "none") {
         clarifyPanel.style.display = "block";
         clarifyTitle.textContent = text(pending.clarification_prompt, "Clarification required");
         clarifyChoices.innerHTML = "";
-        delete clarifyPanel.dataset.clarificationLocksChoiceUi;
-        const candidates = cleanupCandidateEntities(
-          Array.isArray(pending.candidate_entities) ? pending.candidate_entities : []
-        );
-        if (singleCandidateFailsPromptShape(pending, candidates)) {
+        delete clarifyPanel.dataset.clarificationMode;
+        if (singleCandidateFailsPromptShape(pending, cleanedCandidates)) {
           const fb = document.createElement("p");
           fb.className = "clarify-fallback";
           fb.textContent = CLARIFY_FALLBACK_NO_VALID_OPTIONS;
           clarifyChoices.appendChild(fb);
-          clarifyPanel.dataset.clarificationLocksChoiceUi = "1";
-        } else {
-          candidates.forEach((candidate) => {
+          clarifyPanel.dataset.clarificationMode = "freetext";
+        } else if (continuationMode === "options") {
+          cleanedCandidates.forEach((candidate) => {
             const btn = document.createElement("button");
             btn.type = "button";
             btn.textContent = candidate; // exact runtime candidate label
@@ -1515,12 +1574,24 @@
             });
             clarifyChoices.appendChild(btn);
           });
+          clarifyPanel.dataset.clarificationMode = "options";
+        } else {
+          const fb = document.createElement("p");
+          fb.className = "clarify-fallback";
+          fb.textContent = "No discrete options are available. Type your clarification below and press Enter.";
+          clarifyChoices.appendChild(fb);
+          clarifyPanel.dataset.clarificationMode = "freetext";
         }
       } else {
         clarifyPanel.style.display = "none";
         clarifyChoices.innerHTML = "";
-        delete clarifyPanel.dataset.clarificationLocksChoiceUi;
+        delete clarifyPanel.dataset.clarificationMode;
       }
+
+      const freetextWrap = document.getElementById("clarify-freetext-wrap");
+      freetextWrap.style.display =
+        continuationMode === "freetext"
+          ? "block" : "none";
 
       if (state.lastClarificationSupplied) {
         clarificationSuppliedEl.style.display = "block";
@@ -1559,7 +1630,7 @@
         turnStartedAt: state.lastTurnStartedAt
       });
 
-      applySelectorPaused(Boolean(pending.active));
+      applySelectorPaused(continuationActive);
     }
 
     buildDomainTabs();
@@ -1586,6 +1657,25 @@
       }
     });
 
+    document.getElementById("clarify-freetext-input").addEventListener("keydown", async (event) => {
+      if (event.key !== "Enter") return;
+      const value = String(event.target.value || "").trim();
+      if (!value) return;
+      if (!state.pendingClarification || !state.pendingClarification.active) return;
+      event.preventDefault();
+      event.target.value = "";
+      try {
+        await runTurn(value, {
+          source: "clarification",
+          domainHint: state.selectedDomain,
+        });
+      } catch (err) {
+        document.getElementById("released-text").textContent =
+          "Request failed: " + sanitizePublicMessage(text(err && err.message, "unknown error"));
+      }
+    });
+
+    runClarificationUiModeChecks();
     state.auditEnrichGeneration += 1;
     void bootstrapLedgerVerificationOnly(state.auditEnrichGeneration);
   </script>
