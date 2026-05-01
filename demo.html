@@ -274,6 +274,7 @@
     }
 
     .audit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 12px; }
+    .ledger-audit-grid { grid-template-columns: 1fr 1fr 1fr; }
     .audit-card {
       border: 1px solid var(--border);
       background: #0d141d;
@@ -297,6 +298,15 @@
     }
 
     @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } }
+    .audit-section-title {
+      font-weight: 800;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 10px;
+    }
+    .audit-section-title:not(:first-child) { margin-top: 18px; }
   </style>
 </head>
 <body>
@@ -406,17 +416,28 @@
             <div class="pill">Turn audit</div>
           </div>
           <div class="panel-body">
-            <div class="audit-grid">
-              <div class="audit-card"><div class="label">hmac_verified</div><div id="audit-hmac" class="nr">not returned</div></div>
-              <div class="audit-card"><div class="label">chain_verified</div><div id="audit-chain" class="nr">not returned</div></div>
-              <div class="audit-card"><div class="label">fully_verified</div><div id="audit-fully" class="nr">not returned</div></div>
-              <div class="audit-card"><div class="label">pef_linkage</div><div id="audit-pef" class="nr">not returned</div></div>
+            <div class="audit-section-title">Ledger verification</div>
+            <div class="audit-grid ledger-audit-grid">
+              <div class="audit-card"><div class="label">hmac_verified</div><div id="ledger-hmac" class="nr">not returned</div></div>
+              <div class="audit-card"><div class="label">chain_verified</div><div id="ledger-chain" class="nr">not returned</div></div>
+              <div class="audit-card"><div class="label">fully_verified</div><div id="ledger-fully" class="nr">not returned</div></div>
             </div>
             <div class="kv" style="margin-bottom:12px;">
-              <div class="k">backend</div><div class="v" id="audit-backend">not returned</div>
-              <div class="k">entries checked</div><div class="v" id="audit-entries-checked">not returned</div>
+              <div class="k">backend</div><div class="v" id="ledger-backend">not returned</div>
+              <div class="k">entries checked</div><div class="v" id="ledger-entries-checked">not returned</div>
+              <div class="k">reason / operator_message</div><div class="v" id="ledger-reason">not returned</div>
             </div>
-            <code id="audit-code">trace_id: not returned<br>cid: not returned<br>prev_hash: not returned<br>hash: not returned<br>state_hash: not returned<br>what_was_verified: not returned</code>
+
+            <div class="audit-section-title">Current turn audit</div>
+            <div class="kv" style="margin-bottom:12px;">
+              <div class="k">session_id</div><div class="v" id="turn-session-id">not returned</div>
+              <div class="k">trace_id</div><div class="v" id="turn-trace-id">not returned</div>
+              <div class="k">cid</div><div class="v" id="turn-cid">not returned</div>
+              <div class="k">prev_hash</div><div class="v" id="turn-prev-hash">not returned</div>
+              <div class="k">hash</div><div class="v" id="turn-hash">not returned</div>
+              <div class="k">state_hash</div><div class="v" id="turn-state-hash">not returned</div>
+              <div class="k">what_was_verified</div><div class="v" id="turn-what-verified">not returned</div>
+            </div>
           </div>
         </section>
       </section>
@@ -507,6 +528,8 @@
       lastRuntimePayload: null,
       lastAuditVerify: null,
       auditEnrichGeneration: 0,
+      lastTurnStartedAt: null,
+      lastResponseTraceId: null,
       heldOriginalQuestion: null,
       lastClarificationSupplied: null,
       lastClarificationResolved: false,
@@ -579,173 +602,289 @@
       return s;
     }
 
-    function pefLinkageDisplay(raw) {
-      if (typeof raw === "boolean") return auditTruthBadge(raw);
-      const safe = auditBackendDisplay(raw);
-      if (safe === "not returned") return auditTruthBadge(null);
-      return { label: safe, cls: "ok" };
+    function isAuditValueMissing(v) {
+      return v === null || v === undefined || String(v).trim() === "";
     }
 
-    function setAuditHashBlock(audit) {
-      document.getElementById("audit-code").innerHTML =
-        "trace_id: " + auditScalar(audit.trace_id) + "<br>" +
-        "cid: " + auditScalar(audit.cid) + "<br>" +
-        "prev_hash: " + auditScalar(audit.prev_hash) + "<br>" +
-        "hash: " + auditScalar(audit.hash) + "<br>" +
-        "state_hash: " + auditScalar(audit.state_hash) + "<br>" +
-        "what_was_verified: " + auditScalar(audit.what_was_verified);
+    function normalizeAuditRecentRows(body) {
+      if (!body) return [];
+      if (Array.isArray(body)) return body;
+      if (typeof body !== "object") return [];
+      const keys = ["entries", "items", "results", "audit", "rows", "recent"];
+      for (let i = 0; i < keys.length; i++) {
+        const arr = body[keys[i]];
+        if (Array.isArray(arr)) return arr;
+      }
+      return [];
     }
 
-    function resetAuditVisualDefaults() {
-      ["audit-hmac", "audit-chain", "audit-fully", "audit-pef"].forEach(function (id) {
-        const el = document.getElementById(id);
-        el.className = "nr";
-        el.textContent = "not returned";
+    function rowSessionId(row) {
+      if (!row || typeof row !== "object") return null;
+      return row.session_id ?? row.sessionId ?? row.sid ?? (row.audit && row.audit.session_id) ?? null;
+    }
+
+    function rowTraceId(row) {
+      if (!row || typeof row !== "object") return null;
+      return row.trace_id ?? row.traceId ?? (row.audit && row.audit.trace_id) ?? null;
+    }
+
+    function rowTimestamp(row) {
+      if (!row || typeof row !== "object") return null;
+      const t = row.ts ?? row.timestamp ?? row.created_at ?? row.time ?? row.updated_at ?? row.createdAt ?? null;
+      if (t == null) return null;
+      if (typeof t === "number" && Number.isFinite(t)) return t;
+      const ms = Date.parse(String(t));
+      return Number.isFinite(ms) ? ms : null;
+    }
+
+    function pickNewestAmong(rows, turnStartedMs) {
+      if (!rows.length) return null;
+      const scored = rows.map(function (r) {
+        return { r: r, ts: rowTimestamp(r) };
       });
-      document.getElementById("audit-backend").textContent = "not returned";
-      document.getElementById("audit-entries-checked").textContent = "not returned";
-      document.getElementById("audit-code").innerHTML =
-        "trace_id: not returned<br>cid: not returned<br>prev_hash: not returned<br>" +
-        "hash: not returned<br>state_hash: not returned<br>what_was_verified: not returned";
+      scored.sort(function (a, b) {
+        const ta = a.ts != null ? a.ts : -Infinity;
+        const tb = b.ts != null ? b.ts : -Infinity;
+        return tb - ta;
+      });
+      if (turnStartedMs != null) {
+        const cutoff = turnStartedMs - 15000;
+        const fresh = scored.filter(function (x) {
+          return x.ts != null && x.ts >= cutoff;
+        });
+        if (fresh.length) return fresh[0].r;
+        return null;
+      }
+      return scored[0].r;
     }
 
-    function applyAuditFromTurnPayload(audit) {
-      const hmac = auditTruthBadge(audit.hmac_verified);
-      const chain = auditTruthBadge(audit.chain_verified);
-      const fully = auditTruthBadge(audit.fully_verified);
-      const pefRaw = audit.pef_linkage_verified ?? audit.pef_linkage ?? null;
-      const pef = pefLinkageDisplay(pefRaw);
-      document.getElementById("audit-hmac").className = hmac.cls;
-      document.getElementById("audit-hmac").textContent = hmac.label;
-      document.getElementById("audit-chain").className = chain.cls;
-      document.getElementById("audit-chain").textContent = chain.label;
-      document.getElementById("audit-fully").className = fully.cls;
-      document.getElementById("audit-fully").textContent = fully.label;
-      document.getElementById("audit-pef").className = pef.cls;
-      document.getElementById("audit-pef").textContent = pef.label;
-      setAuditHashBlock(audit);
-      state.lastAuditVerify = {
-        hmac_verified: audit.hmac_verified,
-        chain_verified: audit.chain_verified,
-        pef_linkage_verified: audit.pef_linkage_verified ?? audit.pef_linkage ?? null,
-        fully_verified: audit.fully_verified
+    function pickMatchingRecentRow(rows, sessionId, traceId, turnStartedMs) {
+      if (!rows.length) return null;
+      const sid = sessionId ? String(sessionId) : "";
+      const tid = traceId ? String(traceId) : "";
+      if (sid) {
+        const m = rows.filter(function (r) {
+          return String(rowSessionId(r) || "") === sid;
+        });
+        if (m.length) {
+          const picked = pickNewestAmong(m, turnStartedMs);
+          if (picked) return picked;
+        }
+      }
+      if (tid) {
+        const m = rows.filter(function (r) {
+          return String(rowTraceId(r) || "") === tid;
+        });
+        if (m.length) {
+          const picked = pickNewestAmong(m, turnStartedMs);
+          if (picked) return picked;
+        }
+      }
+      if (turnStartedMs != null) {
+        const cutoff = turnStartedMs - 15000;
+        const freshGlobal = rows.filter(function (r) {
+          const ts = rowTimestamp(r);
+          return ts != null && ts >= cutoff;
+        });
+        if (freshGlobal.length) return pickNewestAmong(freshGlobal, turnStartedMs);
+      }
+      return null;
+    }
+
+    function auditFieldsFromRow(row) {
+      const inner = row && typeof row.audit === "object" ? row.audit : row;
+      if (!inner || typeof inner !== "object") return {};
+      return {
+        trace_id: inner.trace_id,
+        cid: inner.cid,
+        prev_hash: inner.prev_hash,
+        hash: inner.hash,
+        state_hash: inner.state_hash,
+        what_was_verified: inner.what_was_verified
       };
     }
 
-    async function enrichAuditFromInternalEndpoints(currentSessionId, generation) {
-      const base = serviceBase();
-      async function fetchJson(relPath) {
-        try {
-          const res = await fetch(base + relPath);
-          if (!res.ok) return null;
-          return await res.json();
-        } catch (_e) {
-          return null;
-        }
+    function mergeTurnAudit(payloadAudit, recentAudit) {
+      const keys = ["trace_id", "cid", "prev_hash", "hash", "state_hash", "what_was_verified"];
+      const out = {};
+      keys.forEach(function (k) {
+        const p = payloadAudit[k];
+        const r = recentAudit[k];
+        out[k] = !isAuditValueMissing(p) ? p : (!isAuditValueMissing(r) ? r : null);
+      });
+      return out;
+    }
+
+    function extractTurnAuditFromPayload(auditObj) {
+      if (!auditObj || typeof auditObj !== "object") return {};
+      return {
+        trace_id: auditObj.trace_id,
+        cid: auditObj.cid,
+        prev_hash: auditObj.prev_hash,
+        hash: auditObj.hash,
+        state_hash: auditObj.state_hash,
+        what_was_verified: auditObj.what_was_verified
+      };
+    }
+
+    function syncApplyCurrentTurnFromPayloadOnly(payloadAudit, sid) {
+      document.getElementById("turn-session-id").textContent =
+        sid ? auditScalar(sid) : "not returned by current payload";
+      const pairs = [
+        ["trace_id", "turn-trace-id"],
+        ["cid", "turn-cid"],
+        ["prev_hash", "turn-prev-hash"],
+        ["hash", "turn-hash"],
+        ["state_hash", "turn-state-hash"],
+        ["what_was_verified", "turn-what-verified"]
+      ];
+      pairs.forEach(function (pair) {
+        const key = pair[0];
+        const elId = pair[1];
+        const v = payloadAudit[key];
+        document.getElementById(elId).textContent =
+          !isAuditValueMissing(v) ? auditScalar(v) : "not returned by current payload";
+      });
+    }
+
+    function finalizeCurrentTurnAuditPanel(merged, sid, ledgerVerifyReturned) {
+      document.getElementById("turn-session-id").textContent =
+        sid ? auditScalar(sid) : "not returned by current payload";
+      const pairs = [
+        ["trace_id", "turn-trace-id"],
+        ["cid", "turn-cid"],
+        ["prev_hash", "turn-prev-hash"],
+        ["hash", "turn-hash"],
+        ["state_hash", "turn-state-hash"],
+        ["what_was_verified", "turn-what-verified"]
+      ];
+      pairs.forEach(function (pair) {
+        const key = pair[0];
+        const elId = pair[1];
+        const v = merged[key];
+        let msg;
+        if (!isAuditValueMissing(v)) msg = auditScalar(v);
+        else msg = ledgerVerifyReturned ? "not returned by ledger summary" : "not returned by current payload";
+        document.getElementById(elId).textContent = msg;
+      });
+    }
+
+    function applyLedgerVerificationPanel(verifyBody) {
+      function setLedgerBool(elId, val) {
+        const b = auditTruthBadge(val);
+        const el = document.getElementById(elId);
+        el.className = b.cls;
+        el.textContent = b.label;
+      }
+      if (!verifyBody || typeof verifyBody !== "object") {
+        ["ledger-hmac", "ledger-chain", "ledger-fully"].forEach(function (id) {
+          document.getElementById(id).className = "nr";
+          document.getElementById(id).textContent = "not returned";
+        });
+        document.getElementById("ledger-backend").textContent = "not returned";
+        document.getElementById("ledger-entries-checked").textContent = "not returned";
+        document.getElementById("ledger-reason").textContent = "not returned";
+        state.lastAuditVerify = null;
+        return false;
       }
 
-      const sid = currentSessionId != null && String(currentSessionId).trim() !== ""
-        ? String(currentSessionId)
-        : null;
+      setLedgerBool("ledger-hmac", verifyBody.hmac_verified);
+      setLedgerBool("ledger-chain", verifyBody.chain_verified);
+      setLedgerBool("ledger-fully", verifyBody.fully_verified);
 
-      const [verifyBody, recentBody, healthBody, pefBody] = await Promise.all([
-        fetchJson("/v1/audit/verify?n=500"),
-        fetchJson("/v1/audit/recent?n=30"),
-        fetchJson("/health"),
-        sid ? fetchJson("/v1/session/operator-pef?session_id=" + encodeURIComponent(sid)) : Promise.resolve(null)
-      ]);
+      const backendLabel =
+        verifyBody.backend ??
+        verifyBody.backend_name ??
+        verifyBody.deployment ??
+        verifyBody.environment ??
+        verifyBody.service ??
+        null;
+      document.getElementById("ledger-backend").textContent = auditBackendDisplay(backendLabel);
 
-      if (generation !== state.auditEnrichGeneration) return;
+      const entriesChecked =
+        verifyBody.entries_checked ??
+        verifyBody.entriesChecked ??
+        verifyBody.checked ??
+        verifyBody.verified_count ??
+        verifyBody.n ??
+        (Array.isArray(verifyBody.entries) ? verifyBody.entries.length : null);
 
-      let backendLabel = null;
-      if (verifyBody && typeof verifyBody === "object") {
-        backendLabel =
-          verifyBody.backend ??
-          verifyBody.backend_name ??
-          verifyBody.deployment ??
-          verifyBody.environment ??
-          verifyBody.service ??
-          null;
-      }
-      if ((backendLabel === null || String(backendLabel).trim() === "") && healthBody && typeof healthBody === "object") {
-        backendLabel =
-          healthBody.backend ??
-          healthBody.service ??
-          healthBody.status ??
-          (healthBody.ok === true ? "ok" : healthBody.ok === false ? "false" : null);
-      }
-
-      let entriesChecked = null;
-      if (verifyBody && typeof verifyBody === "object") {
-        entriesChecked =
-          verifyBody.entries_checked ??
-          verifyBody.entriesChecked ??
-          verifyBody.checked ??
-          verifyBody.verified_count ??
-          verifyBody.n ??
-          (Array.isArray(verifyBody.entries) ? verifyBody.entries.length : null);
-      }
-      if (entriesChecked == null && Array.isArray(recentBody)) {
-        entriesChecked = recentBody.length;
-      } else if (entriesChecked == null && recentBody && typeof recentBody === "object") {
-        const arr = recentBody.entries ?? recentBody.items ?? recentBody.results ?? recentBody.audit;
-        if (Array.isArray(arr)) entriesChecked = arr.length;
-      }
-
-      document.getElementById("audit-backend").textContent = auditBackendDisplay(backendLabel);
-      document.getElementById("audit-entries-checked").textContent =
+      document.getElementById("ledger-entries-checked").textContent =
         entriesChecked != null && String(entriesChecked).trim() !== ""
           ? String(entriesChecked)
           : "not returned";
 
-      function gapFillBool(elId, candidates) {
-        const el = document.getElementById(elId);
-        if (!el || el.textContent !== "not returned") return;
-        let v = null;
-        for (let i = 0; i < candidates.length; i++) {
-          if (typeof candidates[i] === "boolean") {
-            v = candidates[i];
-            break;
-          }
-        }
-        if (typeof v !== "boolean") return;
-        const b = auditTruthBadge(v);
-        el.className = b.cls;
-        el.textContent = b.label;
-      }
+      const reason =
+        verifyBody.reason ??
+        verifyBody.operator_message ??
+        verifyBody.operatorMessage ??
+        verifyBody.detail ??
+        null;
+      document.getElementById("ledger-reason").textContent =
+        !isAuditValueMissing(reason) ? auditScalar(reason) : "not returned";
 
-      gapFillBool("audit-hmac", [
-        verifyBody && verifyBody.hmac_verified,
-        pefBody && pefBody.audit && pefBody.audit.hmac_verified,
-        pefBody && pefBody.forensic_audit && pefBody.forensic_audit.hmac_verified
-      ]);
-      gapFillBool("audit-chain", [
-        verifyBody && verifyBody.chain_verified,
-        pefBody && pefBody.audit && pefBody.audit.chain_verified,
-        pefBody && pefBody.forensic_audit && pefBody.forensic_audit.chain_verified
-      ]);
-      gapFillBool("audit-fully", [
-        verifyBody && verifyBody.fully_verified,
-        pefBody && pefBody.audit && pefBody.audit.fully_verified,
-        pefBody && pefBody.forensic_audit && pefBody.forensic_audit.fully_verified
+      state.lastAuditVerify = {
+        hmac_verified: verifyBody.hmac_verified,
+        chain_verified: verifyBody.chain_verified,
+        fully_verified: verifyBody.fully_verified
+      };
+      return true;
+    }
+
+    async function fetchServiceJson(relPath) {
+      try {
+        const res = await fetch(serviceBase() + relPath);
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (_e) {
+        return null;
+      }
+    }
+
+    async function bootstrapLedgerVerificationOnly(generation) {
+      const verifyBody = await fetchServiceJson("/v1/audit/verify?n=30");
+      if (generation !== state.auditEnrichGeneration) return;
+      applyLedgerVerificationPanel(verifyBody && typeof verifyBody === "object" ? verifyBody : null);
+    }
+
+    async function enrichAuditAfterTurn(opts) {
+      const generation = opts.generation;
+      const sessionIdLocal = opts.sessionId;
+      const traceId = opts.traceId;
+      const payloadAudit = opts.payloadAudit || {};
+      const turnStartedAt = opts.turnStartedAt;
+
+      const [verifyBody, recentRaw] = await Promise.all([
+        fetchServiceJson("/v1/audit/verify?n=30"),
+        fetchServiceJson("/v1/audit/recent?n=30")
       ]);
 
-      const pefEl = document.getElementById("audit-pef");
-      if (pefEl && pefEl.textContent === "not returned") {
-        const nestedAudit =
-          (pefBody && typeof pefBody === "object" && (pefBody.audit || pefBody.forensic_audit || {})) || {};
-        const pCand =
-          nestedAudit.pef_linkage_verified ??
-          nestedAudit.pef_linkage ??
-          (verifyBody && verifyBody.pef_linkage_verified) ??
-          (verifyBody && verifyBody.pef_linkage) ??
-          (pefBody && pefBody.pef_linkage_verified) ??
-          (pefBody && pefBody.pef_linkage) ??
-          null;
-        const pd = pefLinkageDisplay(pCand);
-        pefEl.className = pd.cls;
-        pefEl.textContent = pd.label;
-      }
+      if (generation !== state.auditEnrichGeneration) return;
+
+      const ledgerReturned = verifyBody != null && typeof verifyBody === "object";
+      applyLedgerVerificationPanel(ledgerReturned ? verifyBody : null);
+
+      const rows = normalizeAuditRecentRows(recentRaw);
+      const picked = pickMatchingRecentRow(rows, sessionIdLocal, traceId, turnStartedAt);
+      const recentAudit = auditFieldsFromRow(picked);
+      const merged = mergeTurnAudit(payloadAudit, recentAudit);
+
+      finalizeCurrentTurnAuditPanel(merged, sessionIdLocal, ledgerReturned);
+    }
+
+    function resetAuditVisualDefaults() {
+      ["ledger-hmac", "ledger-chain", "ledger-fully"].forEach(function (id) {
+        const el = document.getElementById(id);
+        el.className = "nr";
+        el.textContent = "not returned";
+      });
+      document.getElementById("ledger-backend").textContent = "not returned";
+      document.getElementById("ledger-entries-checked").textContent = "not returned";
+      document.getElementById("ledger-reason").textContent = "not returned";
+
+      ["turn-session-id", "turn-trace-id", "turn-cid", "turn-prev-hash", "turn-hash", "turn-state-hash", "turn-what-verified"].forEach(function (id) {
+        document.getElementById(id).textContent = "not returned by current payload";
+      });
     }
 
     function resetRuntimePanels() {
@@ -875,6 +1014,7 @@
     }
 
     async function runTurn(prompt, options = {}) {
+      state.lastTurnStartedAt = Date.now();
       const opts = typeof options === "string" ? { domainHint: options } : options || {};
       const domainHint = opts.domainHint != null ? opts.domainHint : opts.domain != null ? opts.domain : null;
       const source = opts.source != null ? opts.source : "scenario";
@@ -1046,8 +1186,24 @@
         "Regression: clarification value rendered as preloaded/original scenario question."
       );
 
-      applyAuditFromTurnPayload(audit);
-      void enrichAuditFromInternalEndpoints(sessionId, state.auditEnrichGeneration);
+      const payloadTurnAudit = extractTurnAuditFromPayload(audit);
+      const traceForMatch =
+        payloadTurnAudit.trace_id ??
+        data.trace_id ??
+        payload.trace_id ??
+        (forensic && forensic.trace_id) ??
+        null;
+      state.lastResponseTraceId = traceForMatch;
+
+      syncApplyCurrentTurnFromPayloadOnly(payloadTurnAudit, sessionId);
+
+      void enrichAuditAfterTurn({
+        generation: state.auditEnrichGeneration,
+        sessionId: sessionId,
+        traceId: traceForMatch,
+        payloadAudit: payloadTurnAudit,
+        turnStartedAt: state.lastTurnStartedAt
+      });
 
       applySelectorPaused(Boolean(pending.active));
     }
@@ -1077,7 +1233,7 @@
     });
 
     state.auditEnrichGeneration += 1;
-    void enrichAuditFromInternalEndpoints(sessionId, state.auditEnrichGeneration);
+    void bootstrapLedgerVerificationOnly(state.auditEnrichGeneration);
   </script>
 </body>
 </html>
