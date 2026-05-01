@@ -1032,8 +1032,12 @@
       if (ei != null && String(ei).trim() !== "") eiMsg = String(ei);
       else eiMsg = ledgerVerifyReturned ? "not returned by ledger summary" : "not returned by current payload";
       document.getElementById("turn-receipt-entry-index").textContent = eiMsg;
-      applyReceiptBoolSpan("turn-receipt-hmac-verified", merged.hmac_verified, ledgerVerifyReturned, false);
-      applyReceiptBoolSpan("turn-receipt-chain-verified", merged.chain_verified_to_entry, ledgerVerifyReturned, false);
+      const hmacVal = typeof merged.hmac_verified === "boolean" ? merged.hmac_verified
+        : (state.lastAuditVerify ? state.lastAuditVerify.hmac_verified : null);
+      const chainVal = typeof merged.chain_verified_to_entry === "boolean" ? merged.chain_verified_to_entry
+        : (state.lastAuditVerify ? state.lastAuditVerify.chain_verified : null);
+      applyReceiptBoolSpan("turn-receipt-hmac-verified", hmacVal, ledgerVerifyReturned, false);
+      applyReceiptBoolSpan("turn-receipt-chain-verified", chainVal, ledgerVerifyReturned, false);
     }
 
     function applyLedgerVerificationPanel(verifyBody) {
