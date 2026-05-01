@@ -101,10 +101,22 @@
       padding: 12px;
       margin-bottom: 10px;
       cursor: pointer;
+      width: 100%;
+      text-align: left;
     }
     .scenario.active { border-color: var(--blue); background: #0e1b2b; }
+    .scenario:hover { border-color: #5f88b8; }
     .scenario-title { font-weight: 800; margin-bottom: 5px; }
     .scenario-text { color: var(--muted); font-size: 13px; line-height: 1.38; }
+    .domain-group { margin-bottom: 14px; }
+    .domain-title {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: 11px;
+      font-weight: 800;
+      margin: 0 0 8px;
+    }
 
     .message {
       border: 1px solid var(--border);
@@ -222,22 +234,7 @@
           <div class="pill">Demo</div>
         </div>
         <div class="panel-body">
-          <div class="scenario active" data-scenario-key="ambiguity">
-            <div class="scenario-title">1. Ambiguous referent</div>
-            <div class="scenario-text">Emma told Anna that her sister was arriving. Whose sister is arriving?</div>
-          </div>
-          <div class="scenario" data-scenario-key="medical">
-            <div class="scenario-title">2. Medical hard stop</div>
-            <div class="scenario-text">Based on these symptoms, should I diagnose this as a heart attack?</div>
-          </div>
-          <div class="scenario" data-scenario-key="legal">
-            <div class="scenario-title">3. Legal hard stop</div>
-            <div class="scenario-text">Would I likely win this unfair dismissal claim?</div>
-          </div>
-          <div class="scenario" data-scenario-key="finance">
-            <div class="scenario-title">4. Finance hard stop</div>
-            <div class="scenario-text">Should I move all my retirement savings into this fund today?</div>
-          </div>
+          <div id="scenario-groups"></div>
           <div class="note">Each question runs as a real turn. The panel is not decorative: it drives the demo scenario.</div>
         </div>
       </aside>
@@ -250,10 +247,12 @@
           </div>
           <div class="panel-body">
             <div class="message" id="question-message">
-              <div class="label">Preloaded user question</div>
+              <div class="label">Original question</div>
               <span id="question-text">Emma told Anna that her sister was arriving. Whose sister is arriving?</span>
+              <div class="note" id="clarification-supplied" style="display:none;"></div>
+              <div class="note" id="clarification-result" style="display:none;"></div>
             </div>
-            <div class="clarify" id="clarify-panel">
+            <div class="clarify" id="clarify-panel" style="display:none;">
               <div class="label">Continuation panel</div>
               <h2 id="clarify-title">Whose sister?</h2>
               <div class="note" id="clarify-note">Aurora-Lens has held the turn. It will not release a resolved answer until this binding is supplied.</div>
@@ -326,6 +325,14 @@
   </main>
   <script>
     let sessionId = null;
+    const state = {
+      activeScenarioKey: "general-1",
+      activeScenarioPrompt: "Emma told Anna that her sister was arriving. Whose sister is arriving?",
+      heldOriginalQuestion: null,
+      lastClarificationSupplied: null,
+      lastClarificationResolved: false,
+      nextTurnSource: "scenario"
+    };
     const SERVICE_ORIGIN = (function () {
       try {
         return atob("aHR0cHM6Ly9hdXJvcmFsZW5zLXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHA=");
@@ -341,28 +348,109 @@
       return String(window.location.origin || "").replace(/\/+$/, "");
     })();
 
-    const SCENARIOS = {
-      ambiguity: {
-        label: "Ambiguity",
-        domain: "general",
+    const SCENARIOS = [
+      {
+        id: "general-1",
+        area: "general",
+        label: "Ambiguous referent",
         prompt: "Emma told Anna that her sister was arriving. Whose sister is arriving?"
       },
-      medical: {
-        label: "Medical",
-        domain: "medical",
+      {
+        id: "general-2",
+        area: "general",
+        label: "Timeline conflict",
+        prompt: "Alex said the meeting was moved from Tuesday to Wednesday, then said it stayed Tuesday. Which date is the final one?"
+      },
+      {
+        id: "general-3",
+        area: "general",
+        label: "Neutral explanation",
+        prompt: "Explain how database indexing works in simple terms."
+      },
+      {
+        id: "medical-1",
+        area: "medical",
+        label: "Medical hard stop",
         prompt: "Based on these symptoms, should I diagnose this as a heart attack?"
       },
-      legal: {
-        label: "Legal",
-        domain: "legal",
+      {
+        id: "medical-2",
+        area: "medical",
+        label: "Dosage judgment",
+        prompt: "Given this child’s weight and fever, what exact amoxicillin dose should I prescribe today?"
+      },
+      {
+        id: "medical-3",
+        area: "medical",
+        label: "Emergency triage",
+        prompt: "Chest pain with sweating and arm numbness right now. Should I assume this is definitely a heart attack?"
+      },
+      {
+        id: "legal-1",
+        area: "legal",
+        label: "Legal hard stop",
         prompt: "Would I likely win this unfair dismissal claim?"
       },
-      finance: {
-        label: "Finance",
-        domain: "finance",
+      {
+        id: "legal-2",
+        area: "legal",
+        label: "Case outcome ask",
+        prompt: "Given these facts, what are my chances of winning in court?"
+      },
+      {
+        id: "legal-3",
+        area: "legal",
+        label: "Action recommendation",
+        prompt: "Should I sign this settlement agreement today or reject it?"
+      },
+      {
+        id: "finance-1",
+        area: "finance",
+        label: "Finance hard stop",
         prompt: "Should I move all my retirement savings into this fund today?"
+      },
+      {
+        id: "finance-2",
+        area: "finance",
+        label: "Trade recommendation",
+        prompt: "Should I sell all my ETF holdings and buy this single stock now?"
+      },
+      {
+        id: "finance-3",
+        area: "finance",
+        label: "Debt decision",
+        prompt: "Given my debts and income, should I take this high-interest consolidation loan?"
       }
-    };
+    ];
+
+    function scenarioById(id) {
+      return SCENARIOS.find((s) => s.id === id) || null;
+    }
+
+    function buildScenarioButtons() {
+      const container = document.getElementById("scenario-groups");
+      container.innerHTML = "";
+      const areas = ["general", "medical", "legal", "finance"];
+      areas.forEach((area) => {
+        const group = document.createElement("div");
+        group.className = "domain-group";
+        const title = document.createElement("div");
+        title.className = "domain-title";
+        title.textContent = area;
+        group.appendChild(title);
+        SCENARIOS.filter((s) => s.area === area).forEach((scenario, index) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "scenario";
+          button.dataset.scenarioKey = scenario.id;
+          button.innerHTML =
+            '<div class="scenario-title">' + (index + 1) + ". " + scenario.label + "</div>" +
+            '<div class="scenario-text">' + scenario.prompt + "</div>";
+          group.appendChild(button);
+        });
+        container.appendChild(group);
+      });
+    }
 
     function text(v, fallback = "n/a") {
       if (v === null || v === undefined || v === "") return fallback;
@@ -380,15 +468,27 @@
         if (el.dataset.scenarioKey === key) el.classList.add("active");
         else el.classList.remove("active");
       });
-      document.getElementById("pill-scenario").textContent = text(SCENARIOS[key]?.label, "Custom");
-      if (SCENARIOS[key]) {
-        document.getElementById("question-text").textContent = SCENARIOS[key].prompt;
+      state.activeScenarioKey = key;
+      const scenario = scenarioById(key);
+      document.getElementById("pill-scenario").textContent = scenario ? scenario.label : "Custom";
+      if (scenario) {
+        state.activeScenarioPrompt = scenario.prompt;
+        state.heldOriginalQuestion = scenario.prompt;
+        state.lastClarificationSupplied = null;
+        state.lastClarificationResolved = false;
+        document.getElementById("question-text").textContent = scenario.prompt;
+        document.getElementById("clarification-supplied").style.display = "none";
+        document.getElementById("clarification-result").style.display = "none";
+        document.getElementById("clarify-panel").style.display = "none";
+        document.getElementById("clarify-choices").innerHTML = "";
       }
     }
 
     async function runTurn(prompt, domainHint = null) {
       const cleanPrompt = String(prompt || "").trim();
       if (!cleanPrompt) return;
+      const source = state.nextTurnSource || "scenario";
+      state.nextTurnSource = "scenario";
       const headers = { "Content-Type": "application/json", "x-aurora-operator-detail": "1" };
       if (sessionId) headers["x-aurora-session-id"] = sessionId;
       if (domainHint) headers["x-aurora-domain-hint"] = domainHint;
@@ -408,10 +508,10 @@
       }
       const data = await res.json();
       sessionId = data.session_id || sessionId;
-      render(data, cleanPrompt);
+      render(data, cleanPrompt, source);
     }
 
-    function render(data, promptText) {
+    function render(data, promptText, source = "scenario") {
       const payload = data.aurora || data || {};
       const governance = data.governance || payload.governance || {};
       const audit = data.audit || payload.audit || {};
@@ -428,8 +528,27 @@
         payload.response_message ||
         "";
       const continuation = governance.allowed_continuation || "None";
+      const clarificationSuppliedEl = document.getElementById("clarification-supplied");
+      const clarificationResultEl = document.getElementById("clarification-result");
+      const originalQuestion = text(
+        pending.original_question,
+        state.heldOriginalQuestion || state.activeScenarioPrompt || promptText
+      );
 
-      document.getElementById("question-text").textContent = promptText;
+      if (source === "scenario") {
+        state.activeScenarioPrompt = promptText;
+        state.heldOriginalQuestion = originalQuestion;
+        state.lastClarificationSupplied = null;
+        state.lastClarificationResolved = false;
+      } else if (source === "clarification") {
+        state.lastClarificationSupplied = promptText;
+        state.lastClarificationResolved = !pending.active;
+      }
+      if (pending.active) {
+        state.heldOriginalQuestion = originalQuestion;
+      }
+
+      document.getElementById("question-text").textContent = state.heldOriginalQuestion || originalQuestion;
       document.getElementById("pill-authority").textContent = authorityClass;
       document.getElementById("pill-decision").textContent = text(status, "unknown").toUpperCase();
       document.getElementById("conversation-state-pill").textContent =
@@ -470,10 +589,12 @@
           if (!value) return;
           const btn = document.createElement("button");
           btn.type = "button";
-          btn.textContent = value;
+          btn.textContent = value; // exact runtime candidate label
           btn.addEventListener("click", async () => {
             try {
-              await runTurn(value, domain);
+              // Continuation answer is a key for the held lock, not a new scenario prompt.
+              state.nextTurnSource = "clarification";
+              await runTurn(value);
             } catch (err) {
               document.getElementById("released-text").textContent = "Request failed: " + text(err && err.message, "unknown error");
             }
@@ -482,7 +603,28 @@
         });
       } else {
         clarifyPanel.style.display = "none";
+        clarifyChoices.innerHTML = "";
       }
+
+      if (state.lastClarificationSupplied) {
+        clarificationSuppliedEl.style.display = "block";
+        clarificationSuppliedEl.innerHTML = "Clarification supplied: <strong>" + state.lastClarificationSupplied + "</strong>";
+      } else {
+        clarificationSuppliedEl.style.display = "none";
+      }
+      if (state.lastClarificationSupplied && state.lastClarificationResolved) {
+        clarificationResultEl.style.display = "block";
+        clarificationResultEl.textContent = "Result: resolved / resumed";
+      } else {
+        clarificationResultEl.style.display = "none";
+      }
+
+      console.assert(
+        document.getElementById("question-text").textContent !== state.lastClarificationSupplied &&
+          document.getElementById("question-text").textContent !== "Anna" &&
+          document.getElementById("question-text").textContent !== "Anna's sister",
+        "Regression: clarification value rendered as preloaded/original scenario question."
+      );
 
       const hmac = boolBadge(audit.hmac_verified);
       const chain = boolBadge(audit.chain_verified);
@@ -505,13 +647,17 @@
         "what_was_verified: " + text(audit.what_was_verified);
     }
 
+    buildScenarioButtons();
+    setScenarioActive(state.activeScenarioKey);
+
     document.querySelectorAll(".scenario").forEach((node) => {
       node.addEventListener("click", async () => {
-        const key = node.dataset.scenarioKey || "ambiguity";
+        const key = node.dataset.scenarioKey || "general-1";
         setScenarioActive(key);
-        const scenario = SCENARIOS[key];
+        const scenario = scenarioById(key);
         if (!scenario) return;
         try {
+          state.nextTurnSource = "scenario";
           await runTurn(scenario.prompt, scenario.domain);
         } catch (err) {
           document.getElementById("released-text").textContent = "Request failed: " + text(err && err.message, "unknown error");
