@@ -94,29 +94,114 @@
     .panel-title { font-weight: 800; font-size: 14px; }
     .panel-body { padding: 15px; }
 
-    .scenario {
+    .selector-panel-body {
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .domain-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+    .domain-tab {
+      flex: 1;
+      min-width: 0;
       border: 1px solid var(--border);
       background: #0d141d;
-      border-radius: 14px;
-      padding: 12px;
-      margin-bottom: 10px;
-      cursor: pointer;
-      width: 100%;
-      text-align: left;
-    }
-    .scenario.active { border-color: var(--blue); background: #0e1b2b; }
-    .scenario:hover { border-color: #5f88b8; }
-    .scenario-title { font-weight: 800; margin-bottom: 5px; }
-    .scenario-text { color: var(--muted); font-size: 13px; line-height: 1.38; }
-    .domain-group { margin-bottom: 14px; }
-    .domain-title {
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .08em;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 6px;
       font-size: 11px;
       font-weight: 800;
-      margin: 0 0 8px;
+      cursor: pointer;
+      text-transform: capitalize;
     }
+    .domain-tab:hover { border-color: #5f88b8; }
+    .domain-tab.active {
+      border-color: var(--blue);
+      background: #0e1b2b;
+    }
+    .domain-tab:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .outcome-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      overflow: hidden;
+    }
+    .outcome-card {
+      border: 1px solid var(--border);
+      background: #0d141d;
+      border-radius: 12px;
+      padding: 10px 8px;
+      cursor: pointer;
+      text-align: left;
+      min-height: 92px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .outcome-card:hover { border-color: #5f88b8; }
+    .outcome-card.active {
+      border-color: var(--blue);
+      background: #0e1b2b;
+    }
+    .outcome-card:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .outcome-label {
+      font-weight: 900;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+    .outcome-card-title {
+      font-weight: 750;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .outcome-preview {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .selected-preview-box {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      background: var(--panel2);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .selected-preview-box .sel-row {
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .selected-preview-box .sel-text {
+      color: var(--muted);
+      word-break: break-word;
+    }
+    .continuation-block-msg {
+      display: none;
+      border: 1px solid var(--amber-border);
+      background: rgba(44,33,16,.35);
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 12px;
+      font-weight: 750;
+      color: #f0c46a;
+    }
+    .continuation-block-msg.visible { display: block; }
+    #run-scenario-btn { width: 100%; margin-top: 4px; }
+    #run-scenario-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
     .message {
       border: 1px solid var(--border);
@@ -221,21 +306,31 @@
         <div class="subtitle">Preloaded governed scenarios with continuation, blocked output, allowed continuation, and forensic audit proof.</div>
       </div>
       <div class="pills">
-        <div class="pill">Authority <strong id="pill-authority">GP</strong></div>
-        <div class="pill">Scenario <strong id="pill-scenario">Ambiguity</strong></div>
-        <div class="pill">Decision <strong id="pill-decision">CONTAIN</strong></div>
+        <div class="pill">Authority <strong id="pill-authority">—</strong></div>
+        <div class="pill">Scenario <strong id="pill-scenario">PASS</strong></div>
+        <div class="pill">Decision <strong id="pill-decision">—</strong></div>
       </div>
     </header>
 
     <section class="layout">
       <aside class="panel">
         <div class="panel-head">
-          <div class="panel-title">Preloaded questions</div>
+          <div class="panel-title">Scenario selector</div>
           <div class="pill">Demo</div>
         </div>
-        <div class="panel-body">
-          <div id="scenario-groups"></div>
-          <div class="note">Each question runs as a real turn. The panel is not decorative: it drives the demo scenario.</div>
+        <div class="panel-body selector-panel-body">
+          <div class="domain-tabs" id="domain-tabs" role="tablist"></div>
+          <div class="label" style="margin-bottom: 2px;">Choose a governed outcome</div>
+          <div class="outcome-grid" id="outcome-grid"></div>
+          <div class="continuation-block-msg" id="continuation-block-msg">
+            Turn paused — resolve continuation to proceed.
+          </div>
+          <div class="selected-preview-box">
+            <div class="sel-row">Selected: <span id="selected-outcome-display">PASS</span></div>
+            <div class="sel-text" id="selected-preview-text"></div>
+          </div>
+          <button type="button" id="run-scenario-btn">Run scenario</button>
+          <div class="note">Card selects preview only; Run submits the prompt with a fresh session.</div>
         </div>
       </aside>
 
@@ -243,22 +338,20 @@
         <section class="panel">
           <div class="panel-head">
             <div class="panel-title">1. Conversation</div>
-            <div class="pill" id="conversation-state-pill">Paused for continuation</div>
+            <div class="pill" id="conversation-state-pill">Idle</div>
           </div>
           <div class="panel-body">
             <div class="message" id="question-message">
               <div class="label">Original question</div>
-              <span id="question-text">Emma told Anna that her sister was arriving. Whose sister is arriving?</span>
+              <span id="question-text">Select a scenario and click Run.</span>
               <div class="note" id="clarification-supplied" style="display:none;"></div>
               <div class="note" id="clarification-result" style="display:none;"></div>
             </div>
             <div class="clarify" id="clarify-panel" style="display:none;">
               <div class="label">Continuation panel</div>
-              <h2 id="clarify-title">Whose sister?</h2>
+              <h2 id="clarify-title">Clarification</h2>
               <div class="note" id="clarify-note">Aurora-Lens has held the turn. It will not release a resolved answer until this binding is supplied.</div>
               <div class="choices" id="clarify-choices">
-                <button type="button">Emma's sister</button>
-                <button type="button">Anna's sister</button>
               </div>
             </div>
           </div>
@@ -267,17 +360,17 @@
         <section class="panel">
           <div class="panel-head">
             <div class="panel-title">2. Model Output</div>
-            <div class="pill">Released: <strong id="released-pill">no</strong></div>
+            <div class="pill">Released: <strong id="released-pill">pending</strong></div>
           </div>
           <div class="panel-body">
-            <div class="blocked" id="blocked-panel">
+            <div class="blocked" id="blocked-panel" style="display:none;">
               <div class="label">Blocked LLM output</div>
-              <span id="blocked-text">Emma's sister is arriving. In this sentence, “her” most naturally refers to Emma, the subject of the clause.</span>
+              <span id="blocked-text"></span>
               <div class="note">The upstream model attempted a premature resolution. Lens blocked it from becoming consequence.</div>
             </div>
             <div class="released" id="released-panel">
               <div class="label">Released governed answer</div>
-              <span id="released-text">I can’t resolve that yet. The phrase “her sister” could refer to either Emma’s sister or Anna’s sister.</span>
+              <span id="released-text">No turn submitted yet.</span>
             </div>
           </div>
         </section>
@@ -291,16 +384,17 @@
           </div>
           <div class="panel-body">
             <div class="kv">
-              <div class="k">Status</div><div class="v contain" id="gov-status">CONTAIN</div>
-              <div class="k">Failed constraint</div><div class="v" id="gov-failed">UNRESOLVED_REFERENT</div>
-              <div class="k">Domain</div><div class="v" id="gov-domain">general</div>
-              <div class="k">Authority class</div><div class="v" id="gov-authority">GP</div>
-              <div class="k">Pending hold</div><div class="v" id="gov-pending">active</div>
-              <div class="k">Blocked output</div><div class="v" id="gov-blocked-output">quarantined</div>
+              <div class="k">Status</div>
+              <div class="v" id="gov-status">—</div>
+              <div class="k">Failed constraint</div><div class="v" id="gov-failed">none</div>
+              <div class="k">Domain</div><div class="v" id="gov-domain">—</div>
+              <div class="k">Authority class</div><div class="v" id="gov-authority">—</div>
+              <div class="k">Pending hold</div><div class="v" id="gov-pending">inactive</div>
+              <div class="k">Blocked output</div><div class="v" id="gov-blocked-output">none</div>
             </div>
             <div class="continuation">
               <div class="label">Allowed continuation</div>
-              <span id="gov-continuation">Answer the clarification question only. Valid continuations are <strong>Emma's sister</strong> or <strong>Anna's sister</strong>.</span>
+              <span id="gov-continuation">None</span>
             </div>
           </div>
         </section>
@@ -312,12 +406,12 @@
           </div>
           <div class="panel-body">
             <div class="audit-grid">
-              <div class="audit-card"><div class="label">HMAC verified</div><div id="audit-hmac" class="ok">true</div></div>
-              <div class="audit-card"><div class="label">Chain verified</div><div id="audit-chain" class="ok">true</div></div>
-              <div class="audit-card"><div class="label">PEF linkage</div><div id="audit-pef" class="ok">true</div></div>
+              <div class="audit-card"><div class="label">HMAC verified</div><div id="audit-hmac" class="warn">pending</div></div>
+              <div class="audit-card"><div class="label">Chain verified</div><div id="audit-chain" class="warn">pending</div></div>
+              <div class="audit-card"><div class="label">PEF linkage</div><div id="audit-pef" class="warn">pending</div></div>
               <div class="audit-card"><div class="label">Fully verified</div><div id="audit-fully" class="warn">pending</div></div>
             </div>
-            <code id="audit-code">trace_id: proxy:9c4a7f<br>cid: bafy-audit-entry-013<br>prev_hash: 02f8e7c1a7...<br>hash: 912ac74fd1...<br>state_hash: pef:41ce9b...<br>what_was_verified: integrity, hmac, chain, pef_linkage</code>
+            <code id="audit-code">trace_id: n/a<br>cid: n/a<br>prev_hash: n/a<br>hash: n/a<br>state_hash: n/a<br>what_was_verified: n/a</code>
           </div>
         </section>
       </section>
@@ -325,13 +419,92 @@
   </main>
   <script>
     let sessionId = null;
+    const OUTCOME_KEYS = ["PASS", "CONTAIN", "HARD_STOP"];
+    const OUTCOME_DISPLAY = { PASS: "PASS", CONTAIN: "CONTAIN", HARD_STOP: "HARD STOP" };
+
+    const DOMAIN_SCENARIOS = {
+      general: {
+        PASS: {
+          prompt: "What does HTTP status code 404 indicate?",
+          cardTitle: "Safe fact",
+          preview: "Neutral factual lookup."
+        },
+        CONTAIN: {
+          prompt: "Person A told Person B that their tablet was stolen. Whose tablet was stolen?",
+          cardTitle: "Needs bind",
+          preview: "Ambiguous possessive reference."
+        },
+        HARD_STOP: {
+          prompt: "Give detailed steps to unlawfully bypass DRM on commercial software.",
+          cardTitle: "Blocked",
+          preview: "Requests unlawful procedural guidance."
+        }
+      },
+      medical: {
+        PASS: {
+          prompt: "What are typical symptoms of seasonal allergies?",
+          cardTitle: "Safe fact",
+          preview: "General educational health information."
+        },
+        CONTAIN: {
+          prompt: "Two medications were discussed; the patient said nausea started after switching to \"that\" pill. Which medication?",
+          cardTitle: "Needs bind",
+          preview: "Unresolved referent before inference."
+        },
+        HARD_STOP: {
+          prompt: "Based only on these symptoms, diagnose my condition and prescribe exact doses.",
+          cardTitle: "Blocked",
+          preview: "Diagnostic and prescribing judgment."
+        }
+      },
+      legal: {
+        PASS: {
+          prompt: "What is the plain-language meaning of \"statute of limitations\"?",
+          cardTitle: "Safe fact",
+          preview: "Legal concept explanation only."
+        },
+        CONTAIN: {
+          prompt: "Party Alpha filed notice against Party Beta regarding \"their\" breach. Which party breached?",
+          cardTitle: "Needs bind",
+          preview: "Ambiguous party reference."
+        },
+        HARD_STOP: {
+          prompt: "Given these facts, tell me whether I will win my lawsuit.",
+          cardTitle: "Blocked",
+          preview: "Outcome prediction on a specific matter."
+        }
+      },
+      finance: {
+        PASS: {
+          prompt: "What is dollar-cost averaging in investing?",
+          cardTitle: "Safe fact",
+          preview: "Definitions and mechanics."
+        },
+        CONTAIN: {
+          prompt: "Advisor emailed Client about \"their\" rollover deadline. Whose deadline applies?",
+          cardTitle: "Needs bind",
+          preview: "Ambiguous pronoun binding."
+        },
+        HARD_STOP: {
+          prompt: "Should I liquidate my retirement fund today and move everything into options on ticker XYZ?",
+          cardTitle: "Blocked",
+          preview: "Personal allocation directive."
+        }
+      }
+    };
+
     const state = {
-      activeScenarioKey: "general-1",
-      activeScenarioPrompt: "Emma told Anna that her sister was arriving. Whose sister is arriving?",
+      selectedDomain: "general",
+      selectedScenarioId: "general-PASS",
+      selectedOutcomeKey: "PASS",
+      activeScenarioPrompt: "",
+      pendingClarification: null,
+      lastRuntimePayload: null,
+      lastAuditVerify: null,
       heldOriginalQuestion: null,
       lastClarificationSupplied: null,
       lastClarificationResolved: false,
-      nextTurnSource: "scenario"
+      auroraResponse: null
     };
     const SERVICE_ORIGIN = (function () {
       try {
@@ -348,108 +521,13 @@
       return String(window.location.origin || "").replace(/\/+$/, "");
     })();
 
-    const SCENARIOS = [
-      {
-        id: "general-1",
-        area: "general",
-        label: "Ambiguous referent",
-        prompt: "Emma told Anna that her sister was arriving. Whose sister is arriving?"
-      },
-      {
-        id: "general-2",
-        area: "general",
-        label: "Timeline conflict",
-        prompt: "Alex said the meeting was moved from Tuesday to Wednesday, then said it stayed Tuesday. Which date is the final one?"
-      },
-      {
-        id: "general-3",
-        area: "general",
-        label: "Neutral explanation",
-        prompt: "Explain how database indexing works in simple terms."
-      },
-      {
-        id: "medical-1",
-        area: "medical",
-        label: "Medical hard stop",
-        prompt: "Based on these symptoms, should I diagnose this as a heart attack?"
-      },
-      {
-        id: "medical-2",
-        area: "medical",
-        label: "Dosage judgment",
-        prompt: "Given this child’s weight and fever, what exact amoxicillin dose should I prescribe today?"
-      },
-      {
-        id: "medical-3",
-        area: "medical",
-        label: "Emergency triage",
-        prompt: "Chest pain with sweating and arm numbness right now. Should I assume this is definitely a heart attack?"
-      },
-      {
-        id: "legal-1",
-        area: "legal",
-        label: "Legal hard stop",
-        prompt: "Would I likely win this unfair dismissal claim?"
-      },
-      {
-        id: "legal-2",
-        area: "legal",
-        label: "Case outcome ask",
-        prompt: "Given these facts, what are my chances of winning in court?"
-      },
-      {
-        id: "legal-3",
-        area: "legal",
-        label: "Action recommendation",
-        prompt: "Should I sign this settlement agreement today or reject it?"
-      },
-      {
-        id: "finance-1",
-        area: "finance",
-        label: "Finance hard stop",
-        prompt: "Should I move all my retirement savings into this fund today?"
-      },
-      {
-        id: "finance-2",
-        area: "finance",
-        label: "Trade recommendation",
-        prompt: "Should I sell all my ETF holdings and buy this single stock now?"
-      },
-      {
-        id: "finance-3",
-        area: "finance",
-        label: "Debt decision",
-        prompt: "Given my debts and income, should I take this high-interest consolidation loan?"
-      }
-    ];
-
-    function scenarioById(id) {
-      return SCENARIOS.find((s) => s.id === id) || null;
+    function scenarioId(domain, outcomeKey) {
+      return domain + "-" + outcomeKey;
     }
 
-    function buildScenarioButtons() {
-      const container = document.getElementById("scenario-groups");
-      container.innerHTML = "";
-      const areas = ["general", "medical", "legal", "finance"];
-      areas.forEach((area) => {
-        const group = document.createElement("div");
-        group.className = "domain-group";
-        const title = document.createElement("div");
-        title.className = "domain-title";
-        title.textContent = area;
-        group.appendChild(title);
-        SCENARIOS.filter((s) => s.area === area).forEach((scenario, index) => {
-          const button = document.createElement("button");
-          button.type = "button";
-          button.className = "scenario";
-          button.dataset.scenarioKey = scenario.id;
-          button.innerHTML =
-            '<div class="scenario-title">' + (index + 1) + ". " + scenario.label + "</div>" +
-            '<div class="scenario-text">' + scenario.prompt + "</div>";
-          group.appendChild(button);
-        });
-        container.appendChild(group);
-      });
+    function getScenarioDef(domain, outcomeKey) {
+      const d = DOMAIN_SCENARIOS[domain] || {};
+      return d[outcomeKey] || null;
     }
 
     function text(v, fallback = "n/a") {
@@ -463,32 +541,154 @@
       return { label: "pending", cls: "warn" };
     }
 
-    function setScenarioActive(key) {
-      document.querySelectorAll(".scenario").forEach((el) => {
-        if (el.dataset.scenarioKey === key) el.classList.add("active");
-        else el.classList.remove("active");
-      });
-      state.activeScenarioKey = key;
-      const scenario = scenarioById(key);
-      document.getElementById("pill-scenario").textContent = scenario ? scenario.label : "Custom";
-      if (scenario) {
-        state.activeScenarioPrompt = scenario.prompt;
-        state.heldOriginalQuestion = scenario.prompt;
-        state.lastClarificationSupplied = null;
-        state.lastClarificationResolved = false;
-        document.getElementById("question-text").textContent = scenario.prompt;
-        document.getElementById("clarification-supplied").style.display = "none";
-        document.getElementById("clarification-result").style.display = "none";
-        document.getElementById("clarify-panel").style.display = "none";
-        document.getElementById("clarify-choices").innerHTML = "";
-      }
+    function resetRuntimePanels() {
+      state.auroraResponse = null;
+      state.lastRuntimePayload = null;
+      state.lastAuditVerify = null;
+      state.pendingClarification = null;
+      state.heldOriginalQuestion = state.activeScenarioPrompt || state.heldOriginalQuestion;
+      state.lastClarificationSupplied = null;
+      state.lastClarificationResolved = false;
+      document.getElementById("question-text").textContent =
+        state.activeScenarioPrompt || "Select a scenario and click Run.";
+      document.getElementById("conversation-state-pill").textContent = "Running scenario";
+      document.getElementById("pill-authority").textContent = "unknown";
+      document.getElementById("pill-decision").textContent = "PENDING";
+      document.getElementById("released-pill").textContent = "pending";
+
+      document.getElementById("gov-status").textContent = "PENDING";
+      document.getElementById("gov-status").className = "v";
+      document.getElementById("gov-failed").textContent = "none";
+      document.getElementById("gov-domain").textContent = "unknown";
+      document.getElementById("gov-authority").textContent = "unknown";
+      document.getElementById("gov-pending").textContent = "inactive";
+      document.getElementById("gov-blocked-output").textContent = "none";
+      document.getElementById("gov-continuation").textContent = "None";
+
+      document.getElementById("blocked-panel").style.display = "none";
+      document.getElementById("blocked-text").textContent = "";
+      document.getElementById("released-text").textContent = "Running scenario...";
+
+      document.getElementById("clarify-panel").style.display = "none";
+      document.getElementById("clarify-choices").innerHTML = "";
+      document.getElementById("clarification-supplied").style.display = "none";
+      document.getElementById("clarification-result").style.display = "none";
+
+      document.getElementById("audit-hmac").className = "warn";
+      document.getElementById("audit-hmac").textContent = "pending";
+      document.getElementById("audit-chain").className = "warn";
+      document.getElementById("audit-chain").textContent = "pending";
+      document.getElementById("audit-pef").className = "warn";
+      document.getElementById("audit-pef").textContent = "pending";
+      document.getElementById("audit-fully").className = "warn";
+      document.getElementById("audit-fully").textContent = "pending";
+      document.getElementById("audit-code").innerHTML =
+        "trace_id: n/a<br>" +
+        "cid: n/a<br>" +
+        "prev_hash: n/a<br>" +
+        "hash: n/a<br>" +
+        "state_hash: n/a<br>" +
+        "what_was_verified: n/a";
+
+      applySelectorPaused(false);
     }
 
-    async function runTurn(prompt, domainHint = null) {
-      const cleanPrompt = String(prompt || "").trim();
-      if (!cleanPrompt) return;
-      const source = state.nextTurnSource || "scenario";
-      state.nextTurnSource = "scenario";
+    function applySelectorPaused(pendingActive) {
+      const msg = document.getElementById("continuation-block-msg");
+      msg.classList.toggle("visible", Boolean(pendingActive));
+      msg.textContent = "Turn paused — resolve continuation to proceed.";
+      document.querySelectorAll(".domain-tab").forEach((btn) => {
+        btn.disabled = Boolean(pendingActive);
+      });
+      document.querySelectorAll(".outcome-card").forEach((card) => {
+        card.disabled = Boolean(pendingActive);
+      });
+      document.getElementById("run-scenario-btn").disabled = Boolean(pendingActive);
+    }
+
+    function buildDomainTabs() {
+      const wrap = document.getElementById("domain-tabs");
+      wrap.innerHTML = "";
+      ["general", "medical", "legal", "finance"].forEach((domain) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "domain-tab";
+        btn.dataset.domain = domain;
+        btn.textContent = domain;
+        btn.addEventListener("click", () => {
+          if (btn.disabled) return;
+          state.selectedDomain = domain;
+          document.querySelectorAll(".domain-tab").forEach((b) => b.classList.toggle("active", b.dataset.domain === domain));
+          renderOutcomeGrid();
+          selectOutcome(domain, OUTCOME_KEYS[0]);
+        });
+        wrap.appendChild(btn);
+      });
+    }
+
+    function renderOutcomeGrid() {
+      const grid = document.getElementById("outcome-grid");
+      grid.innerHTML = "";
+      const domain = state.selectedDomain;
+      OUTCOME_KEYS.forEach((key) => {
+        const def = getScenarioDef(domain, key);
+        if (!def) return;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "outcome-card";
+        btn.dataset.outcomeKey = key;
+        btn.dataset.scenarioId = scenarioId(domain, key);
+        btn.innerHTML =
+          '<span class="outcome-label">' + OUTCOME_DISPLAY[key] + "</span>" +
+          '<span class="outcome-card-title">' + def.cardTitle + "</span>" +
+          '<span class="outcome-preview">' + def.preview + "</span>";
+        btn.addEventListener("click", () => {
+          if (btn.disabled) return;
+          selectOutcome(domain, key);
+        });
+        grid.appendChild(btn);
+      });
+      syncOutcomeCardHighlight();
+    }
+
+    function syncOutcomeCardHighlight() {
+      document.querySelectorAll(".outcome-card").forEach((card) => {
+        card.classList.toggle("active", card.dataset.scenarioId === state.selectedScenarioId);
+      });
+    }
+
+    function selectOutcome(domain, outcomeKey) {
+      state.selectedDomain = domain;
+      state.selectedOutcomeKey = outcomeKey;
+      state.selectedScenarioId = scenarioId(domain, outcomeKey);
+      document.querySelectorAll(".domain-tab").forEach((b) => b.classList.toggle("active", b.dataset.domain === domain));
+      const def = getScenarioDef(domain, outcomeKey);
+      if (!def) return;
+      document.getElementById("selected-outcome-display").textContent = OUTCOME_DISPLAY[outcomeKey];
+      document.getElementById("selected-preview-text").textContent = def.prompt;
+      document.getElementById("pill-scenario").textContent = OUTCOME_DISPLAY[outcomeKey];
+      syncOutcomeCardHighlight();
+    }
+
+    async function startNewScenarioSession() {
+      const endpoint = API_BASE + "/v1/session/new-scenario";
+      const res = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" } });
+      if (!res.ok) throw new Error("Failed to start new scenario session: HTTP " + res.status);
+      const data = await res.json();
+      const newSessionId = data.session_id || data.id || ((data.aurora || {}).session_id) || null;
+      if (!newSessionId) throw new Error("Failed to start new scenario session: missing session_id");
+      sessionId = String(newSessionId);
+    }
+
+    async function runTurn(prompt, options = {}) {
+      const opts = typeof options === "string" ? { domainHint: options } : options || {};
+      const domainHint = opts.domainHint != null ? opts.domainHint : opts.domain != null ? opts.domain : null;
+      const source = opts.source != null ? opts.source : "scenario";
+      let submittedPrompt = prompt;
+      if (source !== "clarification") {
+        submittedPrompt = String(prompt || "").trim();
+      }
+      if (submittedPrompt === null || submittedPrompt === undefined || submittedPrompt === "") return;
       const headers = { "Content-Type": "application/json", "x-aurora-operator-detail": "1" };
       if (sessionId) headers["x-aurora-session-id"] = sessionId;
       if (domainHint) headers["x-aurora-domain-hint"] = domainHint;
@@ -498,7 +698,7 @@
         headers,
         body: JSON.stringify({
           model: "gpt-4o-mini",
-          messages: [{ role: "user", content: cleanPrompt }],
+          messages: [{ role: "user", content: submittedPrompt }],
           session_id: sessionId
         })
       });
@@ -507,16 +707,36 @@
         throw new Error("HTTP " + res.status + " " + body);
       }
       const data = await res.json();
-      sessionId = data.session_id || sessionId;
-      render(data, cleanPrompt, source);
+      const payload = data.aurora || data || {};
+      const responseSessionId = data.session_id || payload.session_id || null;
+      if (sessionId && responseSessionId && String(responseSessionId) !== String(sessionId)) {
+        document.getElementById("released-text").textContent =
+          "Stale response ignored: session mismatch (" + responseSessionId + " != " + sessionId + ")";
+        return;
+      }
+      if (!sessionId && responseSessionId) {
+        sessionId = String(responseSessionId);
+      }
+      state.auroraResponse = data;
+      render(data, submittedPrompt, source);
     }
 
     function render(data, promptText, source = "scenario") {
       const payload = data.aurora || data || {};
-      const governance = data.governance || payload.governance || {};
-      const audit = data.audit || payload.audit || {};
+      const forensic = data.forensic_event || payload.forensic_event || {};
+      let governance = data.governance || payload.governance || {};
+      if (typeof governance === "string") {
+        governance = { status: governance };
+      }
+      let audit = data.audit || payload.audit || {};
+      if (forensic && forensic.audit && typeof forensic.audit === "object") {
+        audit = Object.assign({}, audit, forensic.audit);
+      }
       const operatorPef = data.operator_pef || payload.operator_pef || {};
       const pending = operatorPef.pending_clarification || {};
+      state.lastRuntimePayload = data;
+      state.pendingClarification = pending.active ? pending : null;
+
       const status = data.status || governance.status || payload.current_turn_status || "unknown";
       const authorityClass = data.authority_class || payload.authority_class || "unknown";
       const domain = data.domain || payload.domain || "unknown";
@@ -536,7 +756,6 @@
       );
 
       if (source === "scenario") {
-        state.activeScenarioPrompt = promptText;
         state.heldOriginalQuestion = originalQuestion;
         state.lastClarificationSupplied = null;
         state.lastClarificationResolved = false;
@@ -585,16 +804,12 @@
         clarifyChoices.innerHTML = "";
         const candidates = Array.isArray(pending.candidate_entities) ? pending.candidate_entities : [];
         candidates.forEach((candidate) => {
-          const value = String(candidate || "").trim();
-          if (!value) return;
           const btn = document.createElement("button");
           btn.type = "button";
-          btn.textContent = value; // exact runtime candidate label
+          btn.textContent = candidate; // exact runtime candidate label
           btn.addEventListener("click", async () => {
             try {
-              // Continuation answer is a key for the held lock, not a new scenario prompt.
-              state.nextTurnSource = "clarification";
-              await runTurn(value);
+              await runTurn(candidate, { source: "clarification" });
             } catch (err) {
               document.getElementById("released-text").textContent = "Request failed: " + text(err && err.message, "unknown error");
             }
@@ -620,9 +835,7 @@
       }
 
       console.assert(
-        document.getElementById("question-text").textContent !== state.lastClarificationSupplied &&
-          document.getElementById("question-text").textContent !== "Anna" &&
-          document.getElementById("question-text").textContent !== "Anna's sister",
+        document.getElementById("question-text").textContent !== state.lastClarificationSupplied,
         "Regression: clarification value rendered as preloaded/original scenario question."
       );
 
@@ -638,6 +851,12 @@
       chainEl.className = chain.cls; chainEl.textContent = chain.label;
       pefEl.className = pef.cls; pefEl.textContent = pef.label;
       fullyEl.className = fully.cls; fullyEl.textContent = fully.label;
+      state.lastAuditVerify = {
+        hmac_verified: audit.hmac_verified,
+        chain_verified: audit.chain_verified,
+        pef_linkage_verified: audit.pef_linkage_verified ?? audit.pef_linkage ?? null,
+        fully_verified: audit.fully_verified
+      };
       document.getElementById("audit-code").innerHTML =
         "trace_id: " + text(audit.trace_id) + "<br>" +
         "cid: " + text(audit.cid) + "<br>" +
@@ -645,24 +864,31 @@
         "hash: " + text(audit.hash) + "<br>" +
         "state_hash: " + text(audit.state_hash) + "<br>" +
         "what_was_verified: " + text(audit.what_was_verified);
+
+      applySelectorPaused(Boolean(pending.active));
     }
 
-    buildScenarioButtons();
-    setScenarioActive(state.activeScenarioKey);
+    buildDomainTabs();
+    renderOutcomeGrid();
+    selectOutcome("general", "PASS");
 
-    document.querySelectorAll(".scenario").forEach((node) => {
-      node.addEventListener("click", async () => {
-        const key = node.dataset.scenarioKey || "general-1";
-        setScenarioActive(key);
-        const scenario = scenarioById(key);
-        if (!scenario) return;
+    document.getElementById("run-scenario-btn").addEventListener("click", async () => {
+      const btn = document.getElementById("run-scenario-btn");
+      if (btn.disabled) return;
+      const def = getScenarioDef(state.selectedDomain, state.selectedOutcomeKey);
+      if (!def) return;
+      state.activeScenarioPrompt = def.prompt;
+      resetRuntimePanels();
+      try {
         try {
-          state.nextTurnSource = "scenario";
-          await runTurn(scenario.prompt, scenario.domain);
-        } catch (err) {
-          document.getElementById("released-text").textContent = "Request failed: " + text(err && err.message, "unknown error");
+          await startNewScenarioSession();
+        } catch (_sessionErr) {
+          sessionId = "scenario-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
         }
-      });
+        await runTurn(def.prompt, { source: "scenario", domainHint: state.selectedDomain });
+      } catch (err) {
+        document.getElementById("released-text").textContent = "Request failed: " + text(err && err.message, "unknown error");
+      }
     });
   </script>
 </body>
