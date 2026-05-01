@@ -1345,10 +1345,7 @@
       const payload = data.aurora || data || {};
       const responseSessionId = data.session_id || payload.session_id || null;
       if (sessionId && responseSessionId && String(responseSessionId) !== String(sessionId)) {
-        document.getElementById("blocked-panel").style.display = "none";
-        document.getElementById("blocked-text").textContent = "";
-        document.getElementById("released-text").textContent =
-          "Stale response ignored: session mismatch (" + responseSessionId + " != " + sessionId + ")";
+        console.warn("[Aurora-Lens demo] Stale response ignored: session mismatch (" + responseSessionId + " != " + sessionId + ")");
         return;
       }
       if (!sessionId && responseSessionId) {
