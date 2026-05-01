@@ -1385,7 +1385,7 @@
       const continuationRaw = governance.allowed_continuation || "None";
       const continuationActive = Boolean(pending.active);
       const continuationDisplay = continuationActive
-        ? "Choose one of the provided clarification options."
+        ? "Action: Choose one option to continue."
         : continuationRaw;
       const clarificationSuppliedEl = document.getElementById("clarification-supplied");
       const clarificationResultEl = document.getElementById("clarification-result");
@@ -1411,7 +1411,7 @@
       document.getElementById("pill-decision").textContent = text(statusRaw, "unknown").toUpperCase();
       document.getElementById("conversation-state-pill").textContent =
         pending.active ? "Paused for continuation" : "Turn completed";
-      document.getElementById("released-pill").textContent = isPass ? "yes" : blockedOutputForUi ? "no" : "yes";
+      document.getElementById("released-pill").textContent = isPass ? "yes" : "no";
 
       const govStatus = document.getElementById("gov-status");
       govStatus.textContent = text(statusRaw, "unknown").toUpperCase();
