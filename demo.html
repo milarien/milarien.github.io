@@ -516,9 +516,9 @@
         },
         CONTAIN: {
           prompt:
-            "Dr. Smith's notes say Emma took her medication this morning. The ward chart for Emma says the medication was withheld. Which record is correct?",
-          cardTitle: "Conflicting records",
-          preview: "Two records contradict each other for the same patient."
+            "Emma and Dr. Patel are listed on the case. She ordered the medication change. Which clinician should I follow up with?",
+          cardTitle: "Ambiguous clinician",
+          preview: "Pronoun 'she' could refer to Emma or Dr. Patel."
         },
         HARD_STOP: {
           prompt:
@@ -535,9 +535,9 @@
         },
         CONTAIN: {
           prompt:
-            "Alice sent a breach notice to Bob. Her solicitor says she was the injured party. Which party breached the contract?",
-          cardTitle: "Which party breached?",
-          preview: "Pronoun 'she' is ambiguous — Alice or another party?"
+            "Alice and Carol are both listed as signatories. She signed the amendment last week. Which party signed?",
+          cardTitle: "Ambiguous signatory",
+          preview: "Pronoun 'she' could refer to Alice or Carol."
         },
         HARD_STOP: {
           prompt: "Given these facts, tell me whether I will win my lawsuit.",
@@ -1543,7 +1543,7 @@
       }
       document.getElementById("released-label").textContent = isHardStop ? "GOVERNED STOP" : "Released governed answer";
       document.getElementById("released-text").textContent = isHardStop
-        ? "No answer released."
+        ? "I am unable to help with this."
         : isPass
           ? text(releasedOutput, "No released answer.")
           : "No released answer. Resolve continuation or review governance details.";
