@@ -410,6 +410,7 @@
             <div class="kv">
               <div class="k">Status</div>
               <div class="v" id="gov-status">—</div>
+              <div class="k">Decision path</div><div class="v" id="gov-decision-path">—</div>
               <div class="k">Failed constraint</div><div class="v" id="gov-failed">none</div>
               <div class="k">Domain</div><div class="v" id="gov-domain">—</div>
               <div class="k">Authority class</div><div class="v" id="gov-authority">—</div>
@@ -695,27 +696,27 @@
      */
     function cleanupCandidateEntities(rawList) {
       if (!Array.isArray(rawList)) return [];
-      const trimmed = rawList.map(function (x) {
-        return String(x == null ? "" : x).trim();
-      }).filter(function (s) {
-        return s !== "";
+      // Expand compound "Alice and Carol" entries into individual proper names.
+      // Only splits when every part begins with an uppercase letter.
+      const expanded = [];
+      rawList.forEach(function (x) {
+        const s = String(x == null ? "" : x).trim();
+        if (!s) return;
+        const andParts = s.split(/\s+and\s+/i).map(function (p) { return p.trim(); });
+        if (andParts.length > 1 && andParts.every(function (p) { return p && p[0] === p[0].toUpperCase() && p[0] !== p[0].toLowerCase(); })) {
+          andParts.forEach(function (p) { if (p) expanded.push(p); });
+        } else {
+          expanded.push(s);
+        }
       });
+      // Deduplicate case-insensitively, preserving first-seen order.
       const seen = new Set();
-      const uniq = [];
-      trimmed.forEach(function (s) {
-        if (seen.has(s)) return;
-        seen.add(s);
-        uniq.push(s);
-      });
-      uniq.sort(function (a, b) {
-        return b.length - a.length;
-      });
       const out = [];
-      uniq.forEach(function (c) {
-        const subsumed = out.some(function (longer) {
-          return longer.length > c.length && longer.indexOf(c) !== -1;
-        });
-        if (!subsumed) out.push(c);
+      expanded.forEach(function (s) {
+        const k = s.toLowerCase();
+        if (seen.has(k)) return;
+        seen.add(k);
+        out.push(s);
       });
       return out;
     }
@@ -1441,8 +1442,13 @@
       const continuationMode = clarificationUiMode(pending, cleanedCandidates, statusNorm);
       const continuationActive = continuationMode !== "none";
       const isHardStop = !isPass && continuationMode === "none";
+      const clarifyQ = pending.clarification_prompt
+        ? String(pending.clarification_prompt).trim()
+        : (Array.isArray(pending.ambiguous_referents) && pending.ambiguous_referents.length === 1
+            ? "Who do you mean by ‘" + pending.ambiguous_referents[0] + "’?"
+            : "Which referent did you mean?");
       const continuationDisplay = continuationMode === "options"
-        ? "Action: Choose one option to continue."
+        ? "Clarify referent: " + clarifyQ
         : continuationMode === "freetext"
           ? "Action: Provide clarification text to continue."
           : continuationRaw;
@@ -1476,7 +1482,9 @@
       govStatus.textContent = text(statusRaw, "unknown").toUpperCase();
       govStatus.className = statusNorm === "CONTAIN" ? "v contain" : "v";
       document.getElementById("gov-failed").textContent =
-        Array.isArray(flags) ? (flags.length ? flags.join(", ") : "none") : text(flags, "none");
+        pending.active && pending.failed_constraint
+          ? String(pending.failed_constraint)
+          : Array.isArray(flags) ? (flags.length ? flags.join(", ") : "none") : text(flags, "none");
       document.getElementById("gov-domain").textContent = text(domain, "unknown");
       document.getElementById("gov-authority").textContent = text(authorityClass, "unknown");
       document.getElementById("gov-pending").textContent = pending.active ? "active" : "inactive";
@@ -1491,6 +1499,11 @@
             : "None"
       );
 
+      const llmCalledVal = auroraBlk.llm_called;
+      document.getElementById("gov-decision-path").textContent =
+        llmCalledVal === true ? "Model invoked" :
+        llmCalledVal === false ? "Decision made without model invocation" :
+        "not returned";
       document.getElementById("gov-llm-called").textContent = telemetryScalar(auroraBlk.llm_called);
       document.getElementById("gov-release-path").textContent = telemetryScalar(auroraBlk.release_path);
       document.getElementById("gov-pre-llm-blocked").textContent = telemetryScalar(auroraBlk.pre_llm_blocked);
@@ -1550,10 +1563,21 @@
 
       const clarifyPanel = document.getElementById("clarify-panel");
       const clarifyTitle = document.getElementById("clarify-title");
+      const clarifyNote = document.getElementById("clarify-note");
       const clarifyChoices = document.getElementById("clarify-choices");
       if (continuationMode !== "none") {
         clarifyPanel.style.display = "block";
-        clarifyTitle.textContent = text(pending.clarification_prompt, "Clarification required");
+        clarifyTitle.textContent = clarifyQ;
+        const ambigRefs = Array.isArray(pending.ambiguous_referents) ? pending.ambiguous_referents : [];
+        const ambigCands = cleanedCandidates;
+        if (clarifyNote && pending.failed_constraint === "UNRESOLVED_REFERENT" && ambigRefs.length > 0 && ambigCands.length >= 2) {
+          const pronoun = """ + String(ambigRefs[0]).charAt(0).toUpperCase() + String(ambigRefs[0]).slice(1) + """;
+          const last = ambigCands[ambigCands.length - 1];
+          const rest = ambigCands.slice(0, -1).join(", ");
+          clarifyNote.textContent = pronoun + " could refer to " + rest + " or " + last + ". Select the correct referent to continue.";
+        } else if (clarifyNote) {
+          clarifyNote.textContent = "Aurora-Lens has held the turn. It will not release a resolved answer until this binding is supplied.";
+        }
         clarifyChoices.innerHTML = "";
         delete clarifyPanel.dataset.clarificationMode;
         if (singleCandidateFailsPromptShape(pending, cleanedCandidates)) {
