@@ -421,6 +421,12 @@
               <div class="k">Authority class</div><div class="v" id="gov-authority">—</div>
               <div class="k">Pending hold</div><div class="v" id="gov-pending">inactive</div>
               <div class="k">Blocked output</div><div class="v" id="gov-blocked-output">none</div>
+              <div class="k">LLM called</div><div class="v" id="gov-llm-called">—</div>
+              <div class="k">Release path</div><div class="v" id="gov-release-path">—</div>
+              <div class="k">Pre-LLM blocked</div><div class="v" id="gov-pre-llm-blocked">—</div>
+              <div class="k">Has blocked upstream output</div><div class="v" id="gov-has-blocked-upstream">—</div>
+              <div class="k">Original response (released)</div><div class="v" id="gov-original-response">—</div>
+              <div class="k">Attempted action</div><div class="v" id="gov-attempted-action">—</div>
             </div>
             <div id="scenario-expectation-mismatch" class="scenario-mismatch" role="status"></div>
             <div class="continuation">
@@ -1193,6 +1199,12 @@
       document.getElementById("gov-authority").textContent = "unknown";
       document.getElementById("gov-pending").textContent = "inactive";
       document.getElementById("gov-blocked-output").textContent = "none";
+      document.getElementById("gov-llm-called").textContent = "—";
+      document.getElementById("gov-release-path").textContent = "—";
+      document.getElementById("gov-pre-llm-blocked").textContent = "—";
+      document.getElementById("gov-has-blocked-upstream").textContent = "—";
+      document.getElementById("gov-original-response").textContent = "—";
+      document.getElementById("gov-attempted-action").textContent = "—";
       document.getElementById("gov-decision-path").textContent = "—";
       const _ci = document.getElementById("clarify-constraint-info");
       if (_ci) _ci.style.display = "none";
@@ -1503,6 +1515,19 @@
         llmCalledVal === true ? "Model invoked" :
         (llmCalledVal === false || preLlmBlockedVal === true) ? "Decision made without model invocation" :
         "—";
+      document.getElementById("gov-llm-called").textContent = telemetryScalar(auroraBlk.llm_called);
+      document.getElementById("gov-release-path").textContent = telemetryScalar(auroraBlk.release_path);
+      document.getElementById("gov-pre-llm-blocked").textContent = telemetryScalar(auroraBlk.pre_llm_blocked);
+      document.getElementById("gov-has-blocked-upstream").textContent = telemetryScalar(
+        auroraBlk.has_blocked_upstream_output
+      );
+      const origSurfaced = firstNonEmptyStr(auroraBlk.original_response, data.original_response);
+      document.getElementById("gov-original-response").textContent =
+        origSurfaced != null
+          ? String(origSurfaced).slice(0, 320) + (String(origSurfaced).length > 320 ? "…" : "")
+          : "—";
+      document.getElementById("gov-attempted-action").textContent = telemetryScalar(
+        firstNonEmptyStr(auroraBlk.attempted_action, forensic.attempted_action)
       );
 
       const mismatchEl = document.getElementById("scenario-expectation-mismatch");
