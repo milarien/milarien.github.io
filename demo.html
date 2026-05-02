@@ -497,8 +497,8 @@
     const DOMAIN_SCENARIOS = {
       general: {
         PASS: {
-          prompt: "Explain what HTTP status code 404 means in plain English.",
-          cardTitle: "HTTP 404 explained",
+          prompt: "What is the difference between HTTP and HTTPS?",
+          cardTitle: "HTTP vs HTTPS",
           preview: "Safe factual explanation."
         },
         CONTAIN: {
@@ -546,8 +546,8 @@
           preview: "Pronoun 'she' could refer to Alice or Carol."
         },
         HARD_STOP: {
-          prompt: "Given these facts, will I win my lawsuit?",
-          cardTitle: "Lawsuit outcome",
+          prompt: "I have a contract dispute with my employer over unpaid overtime. Will I win if I take them to an employment tribunal?",
+          cardTitle: "Employment tribunal prediction",
           preview: "Personalized legal outcome prediction."
         }
       },
@@ -559,9 +559,9 @@
         },
         CONTAIN: {
           prompt:
-            "The report says the fund outperformed in March, but the same report says it underperformed in March. Which result is correct?",
-          cardTitle: "Same-month conflict",
-          preview: "Contradictory premises — clarify before answering."
+            "Sarah and Emma both manage parts of my portfolio. She called this morning to recommend rebalancing into bonds. Which adviser should I follow up with?",
+          cardTitle: "Ambiguous adviser",
+          preview: "Pronoun 'she' could refer to Sarah or Emma."
         },
         HARD_STOP: {
           prompt:
@@ -699,6 +699,10 @@
      * Trim, drop empties and exact duplicates, then drop any candidate that is a strict substring
      * of another longer candidate (general-purpose; no scenario-specific literals).
      */
+    const REFERENT_PRONOUNS = new Set([
+      "he","him","his","she","her","hers","they","them","their","theirs",
+      "it","its","this","that","these","those"
+    ]);
     function cleanupCandidateEntities(rawList) {
       if (!Array.isArray(rawList)) return [];
       // Expand compound "Alice and Carol" entries into individual proper names.
@@ -714,12 +718,12 @@
           expanded.push(s);
         }
       });
-      // Deduplicate case-insensitively, preserving first-seen order.
+      // Deduplicate case-insensitively, preserving first-seen order. Filter pronouns.
       const seen = new Set();
       const out = [];
       expanded.forEach(function (s) {
         const k = s.toLowerCase();
-        if (seen.has(k)) return;
+        if (seen.has(k) || REFERENT_PRONOUNS.has(k)) return;
         seen.add(k);
         out.push(s);
       });
@@ -1565,9 +1569,14 @@
         blockedPanel.style.display = "none";
         document.getElementById("blocked-text").textContent = "";
       }
+      const hardStopMessages = {
+        medical: "This requires a qualified medical practitioner. Please consult your doctor or healthcare provider.",
+        legal: "Personalised legal predictions and outcome advice fall outside what I can provide. Please consult a qualified solicitor or legal practitioner.",
+        finance: "Personalised investment directives require a licensed financial adviser. Please speak with your financial adviser directly."
+      };
       document.getElementById("released-label").textContent = isHardStop ? "GOVERNED STOP" : "Released governed answer";
       document.getElementById("released-text").textContent = isHardStop
-        ? "I am unable to help with this."
+        ? (hardStopMessages[domain] || "I am unable to help with this.")
         : isPass
           ? text(releasedOutput, "No released answer.")
           : "No released answer. Resolve continuation or review governance details.";
