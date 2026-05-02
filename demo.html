@@ -372,6 +372,11 @@
               <div class="label">Continuation panel</div>
               <h2 id="clarify-title">Clarification</h2>
               <div class="note" id="clarify-note">Aurora-Lens has held the turn. It will not release a resolved answer until this binding is supplied.</div>
+              <div class="kv" id="clarify-constraint-info" style="margin:8px 0 10px;display:none;">
+                <div class="k">Failed constraint</div><div class="v" id="clarify-failed-constraint">—</div>
+                <div class="k">Reason</div><div class="v" id="clarify-reason">—</div>
+                <div class="k">Details</div><div class="v" id="clarify-details">—</div>
+              </div>
               <div class="choices" id="clarify-choices">
               </div>
               <div id="clarify-freetext-wrap" style="display:none; margin-top:10px;">
@@ -416,12 +421,6 @@
               <div class="k">Authority class</div><div class="v" id="gov-authority">—</div>
               <div class="k">Pending hold</div><div class="v" id="gov-pending">inactive</div>
               <div class="k">Blocked output</div><div class="v" id="gov-blocked-output">none</div>
-              <div class="k">LLM called</div><div class="v" id="gov-llm-called">—</div>
-              <div class="k">Release path</div><div class="v" id="gov-release-path">—</div>
-              <div class="k">Pre-LLM blocked</div><div class="v" id="gov-pre-llm-blocked">—</div>
-              <div class="k">Has blocked upstream output</div><div class="v" id="gov-has-blocked-upstream">—</div>
-              <div class="k">Original response (released)</div><div class="v" id="gov-original-response">—</div>
-              <div class="k">Attempted action</div><div class="v" id="gov-attempted-action">—</div>
             </div>
             <div id="scenario-expectation-mismatch" class="scenario-mismatch" role="status"></div>
             <div class="continuation">
@@ -1194,13 +1193,9 @@
       document.getElementById("gov-authority").textContent = "unknown";
       document.getElementById("gov-pending").textContent = "inactive";
       document.getElementById("gov-blocked-output").textContent = "none";
-      document.getElementById("gov-llm-called").textContent = "—";
-      document.getElementById("gov-release-path").textContent = "—";
-      document.getElementById("gov-pre-llm-blocked").textContent = "—";
-      document.getElementById("gov-has-blocked-upstream").textContent = "—";
-      document.getElementById("gov-original-response").textContent = "—";
-      document.getElementById("gov-attempted-action").textContent = "—";
       document.getElementById("gov-decision-path").textContent = "—";
+      const _ci = document.getElementById("clarify-constraint-info");
+      if (_ci) _ci.style.display = "none";
       document.getElementById("gov-continuation").textContent = "None";
 
       const mismatchBanner = document.getElementById("scenario-expectation-mismatch");
@@ -1218,6 +1213,8 @@
       document.getElementById("clarify-freetext-input").value = "";
       const _cp = document.getElementById("clarify-panel");
       if (_cp) delete _cp.dataset.clarificationMode;
+      const _cci = document.getElementById("clarify-constraint-info");
+      if (_cci) _cci.style.display = "none";
       document.getElementById("clarification-supplied").style.display = "none";
       document.getElementById("clarification-result").style.display = "none";
 
@@ -1506,19 +1503,6 @@
         llmCalledVal === true ? "Model invoked" :
         (llmCalledVal === false || preLlmBlockedVal === true) ? "Decision made without model invocation" :
         "—";
-      document.getElementById("gov-llm-called").textContent = telemetryScalar(auroraBlk.llm_called);
-      document.getElementById("gov-release-path").textContent = telemetryScalar(auroraBlk.release_path);
-      document.getElementById("gov-pre-llm-blocked").textContent = telemetryScalar(auroraBlk.pre_llm_blocked);
-      document.getElementById("gov-has-blocked-upstream").textContent = telemetryScalar(
-        auroraBlk.has_blocked_upstream_output
-      );
-      const origSurfaced = firstNonEmptyStr(auroraBlk.original_response, data.original_response);
-      document.getElementById("gov-original-response").textContent =
-        origSurfaced != null
-          ? String(origSurfaced).slice(0, 320) + (String(origSurfaced).length > 320 ? "\u2026" : "")
-          : "not returned";
-      document.getElementById("gov-attempted-action").textContent = telemetryScalar(
-        firstNonEmptyStr(auroraBlk.attempted_action, forensic.attempted_action)
       );
 
       const mismatchEl = document.getElementById("scenario-expectation-mismatch");
@@ -1567,18 +1551,47 @@
       const clarifyTitle = document.getElementById("clarify-title");
       const clarifyNote = document.getElementById("clarify-note");
       const clarifyChoices = document.getElementById("clarify-choices");
+      const clarifyConstraintInfo = document.getElementById("clarify-constraint-info");
+      const clarifyFailedConstraintEl = document.getElementById("clarify-failed-constraint");
+      const clarifyReasonEl = document.getElementById("clarify-reason");
+      const clarifyDetailsEl = document.getElementById("clarify-details");
       if (continuationMode !== "none") {
         clarifyPanel.style.display = "block";
         clarifyTitle.textContent = clarifyQ;
         const ambigRefs = Array.isArray(pending.ambiguous_referents) ? pending.ambiguous_referents : [];
         const ambigCands = cleanedCandidates;
         if (clarifyNote && pending.failed_constraint === "UNRESOLVED_REFERENT" && ambigRefs.length > 0 && ambigCands.length >= 2) {
-          const pronoun = """ + String(ambigRefs[0]).charAt(0).toUpperCase() + String(ambigRefs[0]).slice(1) + """;
+          const pronoun = "“" + String(ambigRefs[0]).charAt(0).toUpperCase() + String(ambigRefs[0]).slice(1) + "”";
           const last = ambigCands[ambigCands.length - 1];
           const rest = ambigCands.slice(0, -1).join(", ");
           clarifyNote.textContent = pronoun + " could refer to " + rest + " or " + last + ". Select the correct referent to continue.";
         } else if (clarifyNote) {
           clarifyNote.textContent = "Aurora-Lens has held the turn. It will not release a resolved answer until this binding is supplied.";
+        }
+        if (clarifyConstraintInfo && pending.failed_constraint) {
+          clarifyConstraintInfo.style.display = "";
+          if (clarifyFailedConstraintEl) clarifyFailedConstraintEl.textContent = String(pending.failed_constraint);
+          if (clarifyReasonEl) {
+            clarifyReasonEl.textContent = pending.failed_constraint === "UNRESOLVED_REFERENT"
+              ? "ambiguous pronoun"
+              : pending.failed_constraint === "DISJUNCTIVE_BRANCH_COLLAPSE"
+                ? "contradictory premises"
+                : "—";
+          }
+          if (clarifyDetailsEl) {
+            const refs = Array.isArray(pending.ambiguous_referents) ? pending.ambiguous_referents : [];
+            const cands = cleanedCandidates;
+            if (refs.length > 0 && cands.length >= 2) {
+              const pron = "“" + String(refs[0]).charAt(0).toUpperCase() + String(refs[0]).slice(1) + "”";
+              const last = cands[cands.length - 1];
+              const rest = cands.slice(0, -1).join(", ");
+              clarifyDetailsEl.textContent = pron + " could refer to " + rest + " or " + last;
+            } else {
+              clarifyDetailsEl.textContent = "—";
+            }
+          }
+        } else if (clarifyConstraintInfo) {
+          clarifyConstraintInfo.style.display = "none";
         }
         clarifyChoices.innerHTML = "";
         delete clarifyPanel.dataset.clarificationMode;
@@ -1618,6 +1631,7 @@
         clarifyPanel.style.display = "none";
         clarifyChoices.innerHTML = "";
         delete clarifyPanel.dataset.clarificationMode;
+        if (clarifyConstraintInfo) clarifyConstraintInfo.style.display = "none";
       }
 
       const freetextWrap = document.getElementById("clarify-freetext-wrap");
