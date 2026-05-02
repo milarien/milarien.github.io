@@ -356,6 +356,11 @@
             <div class="label" style="margin-bottom:6px;">Or enter your own question</div>
             <textarea id="freetext-input" rows="3" placeholder="Type any question… (Enter to submit, Shift+Enter for newline)" autocomplete="off" style="width:100%;box-sizing:border-box;background:#0d141d;border:1px solid var(--border);color:#e8edf3;border-radius:9px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
             <button type="button" id="freetext-submit-btn" style="margin-top:8px;width:100%;">Run question</button>
+            <div style="margin-top:8px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);">
+              <span>Session:</span>
+              <span id="session-status-display" style="font-family:monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">none</span>
+              <button type="button" id="freetext-new-session-btn" title="Discard current session and start fresh on next submit" style="padding:2px 8px;font-size:11px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:5px;cursor:pointer;white-space:nowrap;">new session</button>
+            </div>
           </div>
         </div>
       </aside>
@@ -1256,6 +1261,7 @@
       });
       document.getElementById("run-scenario-btn").disabled = Boolean(pendingActive);
       document.getElementById("freetext-submit-btn").disabled = Boolean(pendingActive);
+      document.getElementById("freetext-new-session-btn").disabled = Boolean(pendingActive);
     }
 
     function buildDomainTabs() {
@@ -1322,6 +1328,13 @@
       syncOutcomeCardHighlight();
     }
 
+    function updateSessionDisplay() {
+      const el = document.getElementById("session-status-display");
+      if (!el) return;
+      el.textContent = sessionId ? String(sessionId).slice(0, 16) + (String(sessionId).length > 16 ? "…" : "") : "none";
+      el.title = sessionId || "";
+    }
+
     async function startNewScenarioSession() {
       const endpoint = serviceBase() + "/v1/session/new-scenario";
       const res = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" } });
@@ -1330,6 +1343,7 @@
       const newSessionId = data.session_id || data.id || ((data.aurora || {}).session_id) || null;
       if (!newSessionId) throw new Error("Failed to start new scenario session: missing session_id");
       sessionId = String(newSessionId);
+      updateSessionDisplay();
     }
 
     async function runTurn(prompt, options = {}) {
@@ -1372,6 +1386,7 @@
       }
       if (!sessionId && responseSessionId) {
         sessionId = String(responseSessionId);
+        updateSessionDisplay();
       }
       state.auroraResponse = data;
       render(data, submittedPrompt, source);
@@ -1735,6 +1750,7 @@
           await startNewScenarioSession();
         } catch (_sessionErr) {
           sessionId = "scenario-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+          updateSessionDisplay();
         }
         await runTurn(def.prompt, { source: "scenario", domainHint: state.selectedDomain });
       } catch (err) {
@@ -1761,6 +1777,11 @@
       }
     });
 
+    // Regression test — multi-turn freetext must reuse the same Aurora session:
+    //   1. Submit "Alice gives Bob a book."
+    //   2. Submit "What did Bob have?"
+    //   Expected: second answer references the book (PEF carries forward).
+    //   If it returns no prior context, the session is being reset between turns.
     document.getElementById("freetext-submit-btn").addEventListener("click", async () => {
       const btn = document.getElementById("freetext-submit-btn");
       if (btn.disabled) return;
@@ -1769,11 +1790,9 @@
       state.activeScenarioPrompt = value;
       resetRuntimePanels();
       try {
-        try {
-          await startNewScenarioSession();
-        } catch (_sessionErr) {
-          sessionId = "freetext-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
-        }
+        // Do NOT call startNewScenarioSession() here — freetext turns must reuse
+        // the current session so PEF state carries across turns. A new session is
+        // created only when the user clicks "new session" or runs a preset scenario.
         await runTurn(value, { source: "freetext", domainHint: state.selectedDomain });
       } catch (err) {
         document.getElementById("released-text").textContent =
@@ -1785,6 +1804,11 @@
       if (event.key !== "Enter" || event.shiftKey) return;
       event.preventDefault();
       document.getElementById("freetext-submit-btn").click();
+    });
+
+    document.getElementById("freetext-new-session-btn").addEventListener("click", () => {
+      sessionId = null;
+      updateSessionDisplay();
     });
 
     runClarificationUiModeChecks();
