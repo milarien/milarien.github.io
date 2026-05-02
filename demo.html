@@ -352,6 +352,11 @@
           </div>
           <button type="button" id="run-scenario-btn">Run scenario</button>
           <div class="note">Card selects preview only; Run submits the prompt with a fresh session.</div>
+          <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">
+            <div class="label" style="margin-bottom:6px;">Or enter your own question</div>
+            <textarea id="freetext-input" rows="3" placeholder="Type any question… (Enter to submit, Shift+Enter for newline)" autocomplete="off" style="width:100%;box-sizing:border-box;background:#0d141d;border:1px solid var(--border);color:#e8edf3;border-radius:9px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
+            <button type="button" id="freetext-submit-btn" style="margin-top:8px;width:100%;">Run question</button>
+          </div>
         </div>
       </aside>
 
@@ -1250,6 +1255,7 @@
         card.disabled = Boolean(pendingActive);
       });
       document.getElementById("run-scenario-btn").disabled = Boolean(pendingActive);
+      document.getElementById("freetext-submit-btn").disabled = Boolean(pendingActive);
     }
 
     function buildDomainTabs() {
@@ -1753,6 +1759,32 @@
         document.getElementById("released-text").textContent =
           "Request failed: " + sanitizePublicMessage(text(err && err.message, "unknown error"));
       }
+    });
+
+    document.getElementById("freetext-submit-btn").addEventListener("click", async () => {
+      const btn = document.getElementById("freetext-submit-btn");
+      if (btn.disabled) return;
+      const value = String(document.getElementById("freetext-input").value || "").trim();
+      if (!value) return;
+      state.activeScenarioPrompt = value;
+      resetRuntimePanels();
+      try {
+        try {
+          await startNewScenarioSession();
+        } catch (_sessionErr) {
+          sessionId = "freetext-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+        }
+        await runTurn(value, { source: "freetext", domainHint: state.selectedDomain });
+      } catch (err) {
+        document.getElementById("released-text").textContent =
+          "Request failed: " + sanitizePublicMessage(text(err && err.message, "unknown error"));
+      }
+    });
+
+    document.getElementById("freetext-input").addEventListener("keydown", async (event) => {
+      if (event.key !== "Enter" || event.shiftKey) return;
+      event.preventDefault();
+      document.getElementById("freetext-submit-btn").click();
     });
 
     runClarificationUiModeChecks();
