@@ -1794,6 +1794,7 @@
         // the current session so PEF state carries across turns. A new session is
         // created only when the user clicks "new session" or runs a preset scenario.
         await runTurn(value, { source: "freetext", domainHint: state.selectedDomain });
+        document.getElementById("freetext-input").value = "";
       } catch (err) {
         document.getElementById("released-text").textContent =
           "Request failed: " + sanitizePublicMessage(text(err && err.message, "unknown error"));
