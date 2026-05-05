@@ -1593,7 +1593,9 @@
       const hardStopMessages = {
         medical: "This requires a qualified medical practitioner. Please consult your doctor or healthcare provider.",
         legal: "Personalised legal predictions and outcome advice fall outside what I can provide. Please consult a qualified solicitor or legal practitioner.",
-        finance: "Personalised investment directives require a licensed financial adviser. Please speak with your financial adviser directly."
+        finance: "Personalised investment directives require a licensed financial adviser. Please speak with your financial adviser directly.",
+        harmful: "This request asks for a decision the system is not permitted to make. Please reframe as a general educational question.",
+        procedural: "This request cannot be completed in the current workflow state. Please follow data-governance boundaries."
       };
       document.getElementById("released-label").textContent = isHardStop ? "GOVERNED STOP" : "Released governed answer";
       document.getElementById("released-text").textContent = isHardStop
