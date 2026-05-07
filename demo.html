@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="aurora-lens-api-base" content="" />
-  <title>Aurora-Lens Demo</title>
+  <title>Aurora-Lens | Runtime AI Governance</title>
   <style>
     :root {
       --bg: #070b10;
@@ -323,12 +323,12 @@
   <main class="shell">
     <header>
       <div>
-        <h1>Aurora-Lens Demo</h1>
-        <div class="subtitle">Preloaded governed scenarios with continuation, blocked output, allowed continuation, and forensic audit proof.</div>
+        <h1>Aurora-Lens governs AI before consequence.</h1>
+        <div class="subtitle">Ask any question or instruction. Aurora-Lens evaluates domain, authority, ambiguity, contradiction, and persistent discourse state before model output is allowed to become consequence.</div>
       </div>
       <div class="pills">
         <div class="pill">Authority <strong id="pill-authority">—</strong></div>
-        <div class="pill">Scenario <strong id="pill-scenario">PASS</strong></div>
+        <div class="pill">Example <strong id="pill-scenario">PASS</strong></div>
         <div class="pill">Decision <strong id="pill-decision">—</strong></div>
       </div>
     </header>
@@ -336,26 +336,26 @@
     <section class="layout">
       <aside class="panel">
         <div class="panel-head">
-          <div class="panel-title">Scenario selector</div>
-          <div class="pill">Demo</div>
+          <div class="panel-title">Governance entrypoint</div>
+          <div class="pill">Live</div>
         </div>
         <div class="panel-body selector-panel-body">
-          <div class="domain-tabs" id="domain-tabs" role="tablist"></div>
-          <div class="label" style="margin-bottom: 2px;">Choose a governed outcome</div>
-          <div class="outcome-grid" id="outcome-grid"></div>
+          <div class="label" style="margin-bottom:6px;">Ask Aurora-Lens anything</div>
+          <textarea id="freetext-input" rows="3" placeholder="Type any question… (Enter to submit, Shift+Enter for newline)" autocomplete="off" style="width:100%;box-sizing:border-box;background:#0d141d;border:1px solid var(--border);color:#e8edf3;border-radius:9px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
+          <button type="button" id="freetext-submit-btn" style="margin-top:8px;width:100%;">Run governance check</button>
           <div class="continuation-block-msg" id="continuation-block-msg">
             Turn paused — resolve continuation to proceed.
           </div>
-          <div class="selected-preview-box">
-            <div class="sel-row">Selected: <span id="selected-outcome-display">PASS</span></div>
-            <div class="sel-text" id="selected-preview-text"></div>
-          </div>
-          <button type="button" id="run-scenario-btn">Run scenario</button>
-          <div class="note">Card selects preview only; Run submits the prompt with a fresh session.</div>
           <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">
-            <div class="label" style="margin-bottom:6px;">Or enter your own question</div>
-            <textarea id="freetext-input" rows="3" placeholder="Type any question… (Enter to submit, Shift+Enter for newline)" autocomplete="off" style="width:100%;box-sizing:border-box;background:#0d141d;border:1px solid var(--border);color:#e8edf3;border-radius:9px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
-            <button type="button" id="freetext-submit-btn" style="margin-top:8px;width:100%;">Run question</button>
+            <div class="label" style="margin-bottom:4px;">Governance demonstrations</div>
+            <div class="note" style="margin-top:0;margin-bottom:8px;">These examples demonstrate specific governance conditions in action. Aurora-Lens still determines the outcome at runtime.</div>
+            <div class="domain-tabs" id="domain-tabs" role="tablist"></div>
+            <div class="outcome-grid" id="outcome-grid"></div>
+            <div class="selected-preview-box">
+              <div class="sel-row">Example loaded: <span id="selected-outcome-display">PASS</span></div>
+              <div class="sel-text" id="selected-preview-text"></div>
+            </div>
+            <button type="button" id="run-scenario-btn">Run example</button>
             <div style="margin-top:8px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);">
               <span>Session:</span>
               <span id="session-status-display" style="font-family:monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">none</span>
@@ -486,7 +486,11 @@
   <script>
     let sessionId = null;
     const OUTCOME_KEYS = ["PASS", "CONTAIN", "HARD_STOP"];
-    const OUTCOME_DISPLAY = { PASS: "PASS", CONTAIN: "CONTAIN", HARD_STOP: "HARD STOP" };
+    const OUTCOME_DISPLAY = {
+      PASS: "SAFE EXAMPLE",
+      CONTAIN: "CLARIFICATION EXAMPLE",
+      HARD_STOP: "BLOCK EXAMPLE"
+    };
 
     function scenarioOutcomeBucket(raw) {
       const u = String(raw || "").toUpperCase();
