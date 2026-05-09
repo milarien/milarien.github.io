@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="aurora-lens-api-base" content="" />
-  <title>Aurora-Lens | Runtime AI Governance</title>
+  <title>Aurora-Lens | Execution-boundary adjudication</title>
   <style>
     :root {
       --bg: #070b10;
@@ -63,6 +63,32 @@
       white-space: nowrap;
     }
     .pill strong { color: white; }
+
+    .adjudication-llm-pill {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 13px;
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid var(--border);
+      background: #0d141d;
+      color: var(--muted);
+    }
+    .adjudication-llm-pill.llm-pill-yes {
+      border-color: var(--green-border);
+      background: var(--green-bg);
+      color: #c8f0d4;
+    }
+    .adjudication-llm-pill.llm-pill-no {
+      border-color: var(--amber-border);
+      background: var(--amber-bg);
+      color: #f0e0c8;
+    }
 
     .layout {
       display: grid;
@@ -323,8 +349,8 @@
   <main class="shell">
     <header>
       <div>
-        <h1>Aurora-Lens governs AI before consequence.</h1>
-        <div class="subtitle">Ask any question or instruction. Aurora-Lens evaluates domain, authority, ambiguity, contradiction, and persistent discourse state before model output is allowed to become consequence.</div>
+        <h1>Aurora-Lens adjudicates execution before consequence.</h1>
+        <div class="subtitle">Submit any request. Aurora-Lens evaluates admissibility at the execution boundary—domain, authority, ambiguity, contradiction, and discourse state—before output is authorized to leave the boundary.</div>
       </div>
       <div class="pills">
         <div class="pill">Authority <strong id="pill-authority">—</strong></div>
@@ -336,19 +362,19 @@
     <section class="layout">
       <aside class="panel">
         <div class="panel-head">
-          <div class="panel-title">Governance entrypoint</div>
+          <div class="panel-title">Execution Boundary</div>
           <div class="pill">Live</div>
         </div>
         <div class="panel-body selector-panel-body">
-          <div class="label" style="margin-bottom:6px;">Ask Aurora-Lens anything</div>
-          <textarea id="freetext-input" rows="3" placeholder="Enter a question, instruction, or claim… (Enter to submit, Shift+Enter for newline)" autocomplete="off" style="width:100%;box-sizing:border-box;background:#0d141d;border:1px solid var(--border);color:#e8edf3;border-radius:9px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
-          <button type="button" id="freetext-submit-btn" style="margin-top:8px;width:100%;">Run governance check</button>
+          <div class="label" style="margin-bottom:6px;">SUBMIT A REQUEST</div>
+          <textarea id="freetext-input" rows="3" placeholder="Describe the action, question, or claim you want evaluated… (Enter to submit, Shift+Enter for newline)" autocomplete="off" style="width:100%;box-sizing:border-box;background:#0d141d;border:1px solid var(--border);color:#e8edf3;border-radius:9px;padding:9px 12px;font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
+          <button type="button" id="freetext-submit-btn" style="margin-top:8px;width:100%;">Run admissibility check</button>
           <div class="continuation-block-msg" id="continuation-block-msg">
             Turn paused — resolve continuation to proceed.
           </div>
           <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">
-            <div class="label" style="margin-bottom:4px;">Governance demonstrations</div>
-            <div class="note" style="margin-top:0;margin-bottom:8px;">These examples demonstrate specific governance conditions in action. Aurora-Lens still determines the outcome at runtime.</div>
+            <div class="label" style="margin-bottom:4px;">BOUNDARY TESTS</div>
+            <div class="note" style="margin-top:0;margin-bottom:8px;">These scenarios exercise specific boundary conditions. Aurora-Lens still determines the outcome at runtime.</div>
             <div class="domain-tabs" id="domain-tabs" role="tablist"></div>
             <div class="outcome-grid" id="outcome-grid"></div>
             <div class="selected-preview-box">
@@ -368,13 +394,13 @@
       <section class="stack">
         <section class="panel">
           <div class="panel-head">
-            <div class="panel-title">1. Conversation</div>
+            <div class="panel-title">1. Request &amp; context</div>
             <div class="pill" id="conversation-state-pill">Idle</div>
           </div>
           <div class="panel-body">
             <div class="message" id="question-message">
-              <div class="label">Original question</div>
-              <span id="question-text">Type any question above, or select a demonstration below.</span>
+              <div class="label">Submitted request</div>
+              <span id="question-text">Submit a request above, or run a boundary test below.</span>
               <div class="note" id="clarification-supplied" style="display:none;"></div>
               <div class="note" id="clarification-result" style="display:none;"></div>
             </div>
@@ -398,8 +424,8 @@
 
         <section class="panel">
           <div class="panel-head">
-            <div class="panel-title">2. Model Output</div>
-            <div class="pill">Released: <strong id="released-pill">pending</strong></div>
+            <div class="panel-title">2. Released output</div>
+            <div class="pill">Release: <strong id="released-pill">pending</strong></div>
           </div>
           <div class="panel-body">
             <div class="blocked" id="blocked-panel" style="display:none;">
@@ -408,7 +434,7 @@
               <div class="note">The upstream model attempted a premature resolution. Lens blocked it from becoming consequence.</div>
             </div>
             <div class="released" id="released-panel">
-              <div class="label" id="released-label">Released governed answer</div>
+              <div class="label" id="released-label">Released output</div>
               <span id="released-text">No turn submitted yet.</span>
             </div>
           </div>
@@ -418,29 +444,30 @@
       <section class="stack">
         <section class="panel">
           <div class="panel-head">
-            <div class="panel-title">3. Governance Decision</div>
-            <div class="pill">Lens</div>
+            <div class="panel-title">3. Adjudication Record</div>
+            <div class="pill">Record</div>
           </div>
           <div class="panel-body">
+            <div id="adjudication-llm-pill" class="adjudication-llm-pill llm-pill-unk">LLM called: —</div>
             <div class="kv">
               <div class="k">Status</div>
               <div class="v" id="gov-status">—</div>
               <div class="k">Decision path</div><div class="v" id="gov-decision-path">—</div>
+              <div class="k">LLM called</div><div class="v" id="gov-llm-called">—</div>
+              <div class="k">Pre-LLM blocked</div><div class="v" id="gov-pre-llm-blocked">—</div>
+              <div class="k">Release path</div><div class="v" id="gov-release-path">—</div>
               <div class="k">Failed constraint</div><div class="v" id="gov-failed">none</div>
               <div class="k">Domain</div><div class="v" id="gov-domain">—</div>
               <div class="k">Authority class</div><div class="v" id="gov-authority">—</div>
               <div class="k">Pending hold</div><div class="v" id="gov-pending">inactive</div>
               <div class="k">Blocked output</div><div class="v" id="gov-blocked-output">none</div>
-              <div class="k">LLM called</div><div class="v" id="gov-llm-called">—</div>
-              <div class="k">Release path</div><div class="v" id="gov-release-path">—</div>
-              <div class="k">Pre-LLM blocked</div><div class="v" id="gov-pre-llm-blocked">—</div>
               <div class="k">Has blocked upstream output</div><div class="v" id="gov-has-blocked-upstream">—</div>
               <div class="k">Original response (released)</div><div class="v" id="gov-original-response">—</div>
               <div class="k">Attempted action</div><div class="v" id="gov-attempted-action">—</div>
             </div>
             <div id="scenario-expectation-mismatch" class="scenario-mismatch" role="status"></div>
             <div class="continuation">
-              <div class="label">Allowed continuation</div>
+              <div class="label">Authorized continuation</div>
               <span id="gov-continuation">None</span>
             </div>
           </div>
@@ -448,7 +475,7 @@
 
         <section class="panel">
           <div class="panel-head">
-            <div class="panel-title">4. Forensic Audit</div>
+            <div class="panel-title">4. Decision Proof</div>
             <div class="pill">Turn audit</div>
           </div>
           <div class="panel-body">
@@ -506,6 +533,34 @@
       if (typeof v === "boolean") return String(v);
       const s = String(v).trim();
       return s === "" ? "not returned" : s;
+    }
+
+    function pathwayFromForensic(fe) {
+      if (!fe || typeof fe !== "object") return "";
+      const raw =
+        fe.pathway_id ??
+        fe.pathway ??
+        fe.decision_path ??
+        fe.path ??
+        "";
+      const s = String(raw || "").trim();
+      return s;
+    }
+
+    function setAdjudicationLlmPill(llmCalledVal, preLlmBlockedVal) {
+      const el = document.getElementById("adjudication-llm-pill");
+      if (!el) return;
+      el.classList.remove("llm-pill-yes", "llm-pill-no", "llm-pill-unk");
+      if (llmCalledVal === true) {
+        el.classList.add("llm-pill-yes");
+        el.textContent = "LLM called: yes";
+      } else if (llmCalledVal === false || preLlmBlockedVal === true) {
+        el.classList.add("llm-pill-no");
+        el.textContent = "LLM called: no (decided at boundary)";
+      } else {
+        el.classList.add("llm-pill-unk");
+        el.textContent = "LLM called: —";
+      }
     }
 
     const DOMAIN_SCENARIOS = {
@@ -1204,7 +1259,7 @@
       state.lastClarificationSupplied = null;
       state.lastClarificationResolved = false;
       document.getElementById("question-text").textContent =
-        state.activeScenarioPrompt || "Type any question above, or select a demonstration below.";
+        state.activeScenarioPrompt || "Submit a request above, or run a boundary test below.";
       document.getElementById("conversation-state-pill").textContent = "Running scenario";
       document.getElementById("pill-authority").textContent = "unknown";
       document.getElementById("pill-decision").textContent = "PENDING";
@@ -1227,6 +1282,7 @@
       const _ci = document.getElementById("clarify-constraint-info");
       if (_ci) _ci.style.display = "none";
       document.getElementById("gov-continuation").textContent = "None";
+      setAdjudicationLlmPill(undefined, undefined);
 
       const mismatchBanner = document.getElementById("scenario-expectation-mismatch");
       mismatchBanner.textContent = "";
@@ -1234,7 +1290,7 @@
 
       document.getElementById("blocked-panel").style.display = "none";
       document.getElementById("blocked-text").textContent = "";
-      document.getElementById("released-label").textContent = "Released governed answer";
+      document.getElementById("released-label").textContent = "Released output";
       document.getElementById("released-text").textContent = "Running scenario...";
 
       document.getElementById("clarify-panel").style.display = "none";
@@ -1540,11 +1596,11 @@
 
       const llmCalledVal = auroraBlk.llm_called;
       const preLlmBlockedVal = auroraBlk.pre_llm_blocked;
-      document.getElementById("gov-decision-path").textContent =
-        llmCalledVal === true ? "Model invoked" :
-        (llmCalledVal === false || preLlmBlockedVal === true) ? "Decision made without model invocation" :
-        "—";
+      const pathwayDisp =
+        pathwayFromForensic(forensic) || pathwayFromForensic(auroraBlk);
+      document.getElementById("gov-decision-path").textContent = pathwayDisp || "—";
       document.getElementById("gov-llm-called").textContent = telemetryScalar(auroraBlk.llm_called);
+      setAdjudicationLlmPill(llmCalledVal, preLlmBlockedVal);
       document.getElementById("gov-release-path").textContent = telemetryScalar(auroraBlk.release_path);
       document.getElementById("gov-pre-llm-blocked").textContent = telemetryScalar(auroraBlk.pre_llm_blocked);
       document.getElementById("gov-has-blocked-upstream").textContent = telemetryScalar(
@@ -1599,14 +1655,14 @@
         legal: "Personalised legal predictions and outcome advice fall outside what I can provide. Please consult a qualified solicitor or legal practitioner.",
         finance: "Personalised investment directives require a licensed financial adviser. Please speak with your financial adviser directly.",
         harmful: "This request asks for a decision the system is not permitted to make. Please reframe as a general educational question.",
-        procedural: "This request cannot be completed in the current workflow state. Please follow data-governance boundaries."
+        procedural: "This request cannot be completed in the current workflow state. Please follow applicable operational boundaries."
       };
-      document.getElementById("released-label").textContent = isHardStop ? "GOVERNED STOP" : "Released governed answer";
+      document.getElementById("released-label").textContent = isHardStop ? "Adjudicated stop" : "Released output";
       document.getElementById("released-text").textContent = isHardStop
         ? (hardStopMessages[domain] || "I am unable to help with this.")
         : isPass
           ? text(releasedOutput, "No released answer.")
-          : "No released answer. Resolve continuation or review governance details.";
+          : "No released answer. Resolve continuation or review the adjudication record.";
 
       const clarifyPanel = document.getElementById("clarify-panel");
       const clarifyTitle = document.getElementById("clarify-title");
