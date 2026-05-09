@@ -374,7 +374,7 @@
           <div class="panel-body">
             <div class="message" id="question-message">
               <div class="label">Original question</div>
-              <span id="question-text">Select a scenario and click Run.</span>
+              <span id="question-text">Type any question above, or select a demonstration below.</span>
               <div class="note" id="clarification-supplied" style="display:none;"></div>
               <div class="note" id="clarification-result" style="display:none;"></div>
             </div>
@@ -1204,7 +1204,7 @@
       state.lastClarificationSupplied = null;
       state.lastClarificationResolved = false;
       document.getElementById("question-text").textContent =
-        state.activeScenarioPrompt || "Select a scenario and click Run.";
+        state.activeScenarioPrompt || "Type any question above, or select a demonstration below.";
       document.getElementById("conversation-state-pill").textContent = "Running scenario";
       document.getElementById("pill-authority").textContent = "unknown";
       document.getElementById("pill-decision").textContent = "PENDING";
