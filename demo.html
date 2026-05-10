@@ -372,9 +372,6 @@
           <div class="continuation-block-msg" id="continuation-block-msg">
             Turn paused — resolve continuation to proceed.
           </div>
-          <div id="active-continuation-banner" style="display:none; margin-top:8px; border:1px solid var(--amber-border); background:rgba(44,33,16,.35); border-radius:12px; padding:10px; font-size:12px; font-weight:750; color:#f0c46a;" role="status" aria-live="polite">
-            Active constrained continuation: —
-          </div>
           <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px;">
             <div class="label" style="margin-bottom:4px;">BOUNDARY TESTS</div>
             <div class="note" style="margin-top:0;margin-bottom:8px;">These scenarios exercise specific boundary conditions. Aurora-Lens still determines the outcome at runtime.</div>
@@ -658,28 +655,8 @@
       heldOriginalQuestion: null,
       lastClarificationSupplied: null,
       lastClarificationResolved: false,
-      auroraResponse: null,
-      continuationActive: false,
-      continuationLabel: null,
-      lastSubmittedSelectionKey: ""
+      auroraResponse: null
     };
-
-    function currentSelectionKey() {
-      return state.selectedDomain + ":" + state.selectedOutcomeKey;
-    }
-
-    function updateActiveContinuationBanner(label) {
-      const banner = document.getElementById("active-continuation-banner");
-      if (!banner) return;
-      const clean = String(label || "").trim();
-      if (!clean) {
-        banner.style.display = "none";
-        banner.textContent = "Active constrained continuation: —";
-        return;
-      }
-      banner.style.display = "block";
-      banner.textContent = `Active constrained continuation: ${clean}`;
-    }
     /**
      * Internal API origin only — never write this value into the DOM.
      * Optional operator/debug link surfaces must stay gated (OPERATOR_DEBUG_LINKS).
@@ -1281,9 +1258,6 @@
       state.heldOriginalQuestion = state.activeScenarioPrompt || state.heldOriginalQuestion;
       state.lastClarificationSupplied = null;
       state.lastClarificationResolved = false;
-      state.continuationActive = false;
-      state.continuationLabel = null;
-      updateActiveContinuationBanner("");
       document.getElementById("question-text").textContent =
         state.activeScenarioPrompt || "Submit a request above, or run a boundary test below.";
       document.getElementById("conversation-state-pill").textContent = "Running scenario";
@@ -1437,20 +1411,6 @@
       const opts = typeof options === "string" ? { domainHint: options } : options || {};
       const domainHint = opts.domainHint != null ? opts.domainHint : opts.domain != null ? opts.domain : null;
       const source = opts.source != null ? opts.source : "scenario";
-
-      const selectionKey = currentSelectionKey();
-      if (source === "freetext" || source === "scenario") {
-        const selectionChangedSinceSubmit = (
-          state.lastSubmittedSelectionKey
-          && state.lastSubmittedSelectionKey !== selectionKey
-        );
-        if (selectionChangedSinceSubmit) {
-          // New boundary test/category selected: force clean session before submit.
-          sessionId = null;
-          updateSessionDisplay();
-        }
-      }
-
       let submittedPrompt = prompt;
       if (source !== "clarification") {
         submittedPrompt = String(prompt || "").trim();
@@ -1489,7 +1449,6 @@
         updateSessionDisplay();
       }
       state.auroraResponse = data;
-      state.lastSubmittedSelectionKey = selectionKey;
       render(data, submittedPrompt, source);
     }
 
@@ -1531,52 +1490,9 @@
         payload.current_turn_status ||
         "unknown";
       const statusNorm = String(statusRaw).toUpperCase();
-      const isContinuing = statusNorm === "CONTINUING" || (auroraBlk.governance_note || "").toUpperCase().includes("CONTINUING");
+      const isPass = statusNorm === "PASS";
       const ruleResult =
         auroraBlk.rule_result && typeof auroraBlk.rule_result === "object" ? auroraBlk.rule_result : {};
-
-      const pathwayDisplay = pathwayFromForensic(forensic) || "—";
-      const holdMode = operatorPef.epistemic_hold;
-      const pendingHoldDisplay = holdMode && typeof holdMode === "object" && holdMode.mode != null
-        ? String(holdMode.mode)
-        : (pending.active ? "ambiguity_pending" : "none");
-      const authorizedContinuation = ruleResult.continuation_type
-        ? String(ruleResult.continuation_type)
-        : (pathwayDisplay !== "—" ? pathwayDisplay : "none");
-
-      const domainResolved = firstNonEmptyStr(
-        auroraBlk.domain,
-        ruleResult.domain,
-        auroraBlk.request_domain,
-        forensicFromAurora.domain,
-        forensicFromAurora.request_domain,
-        forensic.domain,
-        forensic.request_domain,
-        data.domain,
-        payload.domain
-      );
-      const domainForIndicator = domainResolved || state.selectedDomain;
-
-      const continuationIndicator = (
-        pending.active || pendingHoldDisplay !== "none" || (authorizedContinuation && authorizedContinuation !== "none")
-      )
-        ? [
-            domainForIndicator,
-            authorizedContinuation !== "none" ? authorizedContinuation : null,
-            pendingHoldDisplay !== "none" ? `hold=${pendingHoldDisplay}` : null,
-          ].filter(Boolean).join(" | ")
-        : "";
-
-      if (!isContinuing) {
-        state.continuationActive = Boolean(ruleResult.continuation_type) || pending.active;
-        state.continuationLabel = continuationIndicator || null;
-      } else if (continuationIndicator) {
-        state.continuationActive = true;
-        state.continuationLabel = continuationIndicator;
-      }
-      updateActiveContinuationBanner(state.continuationActive ? state.continuationLabel : "");
-
-      const isPass = statusNorm === "PASS";
       const authorityClass =
         firstNonEmptyStr(
           auroraBlk.authority_class,
@@ -1955,9 +1871,7 @@
 
     document.getElementById("freetext-new-session-btn").addEventListener("click", () => {
       sessionId = null;
-      state.lastSubmittedSelectionKey = "";
       updateSessionDisplay();
-      updateActiveContinuationBanner("");
     });
 
     runClarificationUiModeChecks();
