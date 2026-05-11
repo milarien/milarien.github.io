@@ -289,6 +289,16 @@
     }
     .k { color: var(--muted); }
     .v { font-weight: 750; overflow-wrap: anywhere; }
+    .gov-intercept {
+      font-weight: 600;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.35;
+      max-height: min(240px, 42vh);
+      overflow: auto;
+    }
     .contain { color: #f0c46a; }
 
     .continuation {
@@ -462,6 +472,8 @@
               <div class="k">Pending hold</div><div class="v" id="gov-pending">inactive</div>
               <div class="k">Blocked output</div><div class="v" id="gov-blocked-output">none</div>
               <div class="k">Has blocked upstream output</div><div class="v" id="gov-has-blocked-upstream">—</div>
+              <div class="k">Released (telemetry)</div><div class="v" id="gov-released-flag">—</div>
+              <div class="k">Intercepted upstream (operator-only)</div><div class="v gov-intercept" id="gov-intercepted-upstream">—</div>
               <div class="k">Original response (released)</div><div class="v" id="gov-original-response">—</div>
               <div class="k">Attempted action</div><div class="v" id="gov-attempted-action">—</div>
             </div>
@@ -1276,6 +1288,8 @@
       document.getElementById("gov-release-path").textContent = "—";
       document.getElementById("gov-pre-llm-blocked").textContent = "—";
       document.getElementById("gov-has-blocked-upstream").textContent = "—";
+      document.getElementById("gov-released-flag").textContent = "—";
+      document.getElementById("gov-intercepted-upstream").textContent = "—";
       document.getElementById("gov-original-response").textContent = "—";
       document.getElementById("gov-attempted-action").textContent = "—";
       document.getElementById("gov-decision-path").textContent = "—";
@@ -1483,6 +1497,10 @@
       state.lastRuntimePayload = data;
       state.pendingClarification = pending.active ? pending : null;
 
+      const interceptedRawOp = auroraBlk.intercepted_upstream_output;
+      const interceptedStrEarly =
+        interceptedRawOp != null ? String(interceptedRawOp).trim() : "";
+
       const statusRaw =
         auroraBlk.governance ||
         data.status ||
@@ -1517,7 +1535,13 @@
       }
       const domain = domainResolved || "unknown";
       const flags = governance.audit_flags || [];
-      const blockedOutputRaw = data.blocked_output || payload.original_response || "";
+      const blockedOutputRaw =
+        firstNonEmptyStr(
+          auroraBlk.intercepted_upstream_output,
+          data.blocked_output,
+          auroraBlk.original_response,
+          payload.original_response
+        ) || "";
       const blockedTrimmed = String(blockedOutputRaw || "").trim();
       let blockedOutputForUi = "";
       if (!isPass && blockedTrimmed) {
@@ -1571,7 +1595,8 @@
       document.getElementById("pill-decision").textContent = text(statusRaw, "unknown").toUpperCase();
       document.getElementById("conversation-state-pill").textContent =
         pending.active ? "Paused for continuation" : "Turn completed";
-      document.getElementById("released-pill").textContent = isPass ? "yes" : "no";
+      document.getElementById("released-pill").textContent =
+        typeof auroraBlk.released === "boolean" ? (auroraBlk.released ? "yes" : "no") : (isPass ? "yes" : "no");
 
       const govStatus = document.getElementById("gov-status");
       govStatus.textContent = text(statusRaw, "unknown").toUpperCase();
@@ -1584,7 +1609,13 @@
       document.getElementById("gov-authority").textContent = text(authorityClass, "unknown");
       document.getElementById("gov-pending").textContent = pending.active ? "active" : "inactive";
       document.getElementById("gov-blocked-output").textContent =
-        isPass ? "none" : blockedOutputForUi ? "quarantined" : "none";
+        isPass
+          ? "none"
+          : blockedOutputForUi
+            ? (interceptedStrEarly ? "withheld — see intercepted upstream (operator-only)" : "quarantined")
+            : interceptedStrEarly
+              ? "(see intercepted upstream row)"
+              : "none";
       document.getElementById("gov-continuation").textContent = text(
         continuationDisplay,
         continuationMode === "freetext"
@@ -1594,23 +1625,48 @@
             : "None"
       );
 
-      const llmCalledVal = auroraBlk.llm_called;
+      const llmCalledVal =
+        auroraBlk.llm_called === true || auroraBlk.llm_called === false
+          ? auroraBlk.llm_called
+          : interceptedStrEarly
+            ? true
+            : undefined;
       const preLlmBlockedVal = auroraBlk.pre_llm_blocked;
       const pathwayDisp =
         pathwayFromForensic(forensic) || pathwayFromForensic(auroraBlk);
       document.getElementById("gov-decision-path").textContent = pathwayDisp || "—";
-      document.getElementById("gov-llm-called").textContent = telemetryScalar(auroraBlk.llm_called);
+      document.getElementById("gov-llm-called").textContent = telemetryScalar(llmCalledVal);
       setAdjudicationLlmPill(llmCalledVal, preLlmBlockedVal);
       document.getElementById("gov-release-path").textContent = telemetryScalar(auroraBlk.release_path);
       document.getElementById("gov-pre-llm-blocked").textContent = telemetryScalar(auroraBlk.pre_llm_blocked);
       document.getElementById("gov-has-blocked-upstream").textContent = telemetryScalar(
         auroraBlk.has_blocked_upstream_output
       );
+      document.getElementById("gov-released-flag").textContent =
+        typeof auroraBlk.released === "boolean"
+          ? (auroraBlk.released ? "yes" : "no")
+          : "—";
+      const redactReason = auroraBlk.intercepted_upstream_redacted_reason;
+      let interceptedDisplay = "—";
+      if (interceptedRawOp != null && String(interceptedRawOp).trim() !== "") {
+        interceptedDisplay = String(interceptedRawOp);
+      } else if (redactReason != null && String(redactReason).trim() !== "") {
+        interceptedDisplay = "[not serialized on this response] " + String(redactReason);
+      } else if (auroraBlk.has_blocked_upstream_output === true) {
+        interceptedDisplay =
+          "(no upstream text in operator payload; use audit / forensic hashes)";
+      }
+      document.getElementById("gov-intercepted-upstream").textContent = interceptedDisplay;
+
       const origSurfaced = firstNonEmptyStr(auroraBlk.original_response, data.original_response);
       document.getElementById("gov-original-response").textContent =
         origSurfaced != null
           ? String(origSurfaced).slice(0, 320) + (String(origSurfaced).length > 320 ? "…" : "")
-          : "—";
+          : interceptedStrEarly
+            ? "(withheld — see intercepted upstream row)"
+            : auroraBlk.has_blocked_upstream_output === true
+              ? "(none in wire — check audit)"
+              : "—";
       document.getElementById("gov-attempted-action").textContent = telemetryScalar(
         firstNonEmptyStr(auroraBlk.attempted_action, forensic.attempted_action)
       );
