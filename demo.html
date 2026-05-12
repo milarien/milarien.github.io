@@ -1420,31 +1420,9 @@
       updateSessionDisplay();
     }
 
-    function isScriptedMedicalLedgerSentence(text) {
-      const s = String(text || "").trim().toLowerCase();
-      return (
-        s.includes("dr chen") &&
-        s.includes("prescribed ") &&
-        s.includes("medication x") &&
-        s.includes("twice daily")
-      );
-    }
-
-    function isScriptedMedicalDosageQuery(text) {
-      const s = String(text || "").trim().toLowerCase();
-      return s.includes("what dosage") && s.includes("receiving");
-    }
-
-    function scriptedMedicalDemoContinuityForPrompt(promptText) {
-      const p = String(promptText || "").trim();
-      if (!p) return false;
-      return isScriptedMedicalLedgerSentence(p) || isScriptedMedicalDosageQuery(p);
-    }
-
     async function runTurn(prompt, options = {}) {
       state.lastTurnStartedAt = Date.now();
-      const opts = typeof options === "string" ? { domainHint: options } : options || {};
-      const domainHint = opts.domainHint != null ? opts.domainHint : opts.domain != null ? opts.domain : null;
+      const opts = typeof options === "string" ? {} : options || {};
       const source = opts.source != null ? opts.source : "scenario";
       let submittedPrompt = prompt;
       if (source !== "clarification") {
@@ -1453,20 +1431,6 @@
       if (submittedPrompt === null || submittedPrompt === undefined || submittedPrompt === "") return;
       const headers = { "Content-Type": "application/json", "x-aurora-operator-detail": "1" };
       if (sessionId) headers["x-aurora-session-id"] = sessionId;
-      if (domainHint) {
-        headers["x-aurora-domain"] = domainHint;
-        headers["x-aurora-domain-hint"] = domainHint;
-      }
-
-      const trustedDomain = typeof domainHint === "string" &&
-        ["general", "medical", "legal", "finance"].includes(domainHint);
-      const aurora = {};
-      if (trustedDomain) {
-        aurora.request_domain = domainHint;
-      }
-      if (scriptedMedicalDemoContinuityForPrompt(submittedPrompt)) {
-        aurora.request_domain = "medical";
-      }
 
       const res = await fetch(serviceBase() + "/v1/chat/completions", {
         method: "POST",
@@ -1475,7 +1439,6 @@
           model: "gpt-4o-mini",
           messages: [{ role: "user", content: submittedPrompt }],
           aurora_session_id: sessionId || undefined,
-          aurora: Object.keys(aurora).length ? aurora : undefined,
         })
       });
       if (!res.ok) {
@@ -1814,7 +1777,6 @@
               try {
                 await runTurn(candidate, {
                   source: "clarification",
-                  domainHint: state.selectedDomain,
                 });
               } catch (err) {
                 document.getElementById("released-text").textContent =
@@ -1901,7 +1863,7 @@
           sessionId = "scenario-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
           updateSessionDisplay();
         }
-        await runTurn(def.prompt, { source: "scenario", domainHint: state.selectedDomain });
+        await runTurn(def.prompt, { source: "scenario" });
       } catch (err) {
         document.getElementById("released-text").textContent =
           "Request failed: " + sanitizePublicMessage(text(err && err.message, "unknown error"));
@@ -1918,7 +1880,6 @@
       try {
         await runTurn(value, {
           source: "clarification",
-          domainHint: state.selectedDomain,
         });
       } catch (err) {
         document.getElementById("released-text").textContent =
@@ -1942,7 +1903,7 @@
         // Do NOT call startNewScenarioSession() here — freetext turns must reuse
         // the current session so PEF state carries across turns. A new session is
         // created only when the user clicks "new session" or runs a preset scenario.
-        await runTurn(value, { source: "freetext", domainHint: state.selectedDomain });
+        await runTurn(value, { source: "freetext" });
         document.getElementById("freetext-input").value = "";
       } catch (err) {
         document.getElementById("released-text").textContent =
