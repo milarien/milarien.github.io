@@ -1420,6 +1420,27 @@
       updateSessionDisplay();
     }
 
+    function isScriptedMedicalLedgerSentence(text) {
+      const s = String(text || "").trim().toLowerCase();
+      return (
+        s.includes("dr chen") &&
+        s.includes("prescribed ") &&
+        s.includes("medication x") &&
+        s.includes("twice daily")
+      );
+    }
+
+    function isScriptedMedicalDosageQuery(text) {
+      const s = String(text || "").trim().toLowerCase();
+      return s.includes("what dosage") && s.includes("receiving");
+    }
+
+    function scriptedMedicalDemoContinuityForPrompt(promptText) {
+      const p = String(promptText || "").trim();
+      if (!p) return false;
+      return isScriptedMedicalLedgerSentence(p) || isScriptedMedicalDosageQuery(p);
+    }
+
     async function runTurn(prompt, options = {}) {
       state.lastTurnStartedAt = Date.now();
       const opts = typeof options === "string" ? { domainHint: options } : options || {};
@@ -1437,14 +1458,24 @@
         headers["x-aurora-domain-hint"] = domainHint;
       }
 
+      const trustedDomain = typeof domainHint === "string" &&
+        ["general", "medical", "legal", "finance"].includes(domainHint);
+      const aurora = {};
+      if (trustedDomain) {
+        aurora.request_domain = domainHint;
+      }
+      if (scriptedMedicalDemoContinuityForPrompt(submittedPrompt)) {
+        aurora.request_domain = "medical";
+      }
+
       const res = await fetch(serviceBase() + "/v1/chat/completions", {
         method: "POST",
         headers,
         body: JSON.stringify({
           model: "gpt-4o-mini",
           messages: [{ role: "user", content: submittedPrompt }],
-          session_id: sessionId,
-          domain: domainHint || undefined,
+          aurora_session_id: sessionId || undefined,
+          aurora: Object.keys(aurora).length ? aurora : undefined,
         })
       });
       if (!res.ok) {
