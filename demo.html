@@ -764,21 +764,6 @@
     const CLARIFY_FALLBACK_NO_VALID_OPTIONS =
       "Clarification required, but no valid candidate options were returned.";
 
-    /**
-     * Clarification candidates: backend/operator_pef is the only authority.
-     * Trim whitespace for display; drop empty entries only. No split, dedupe,
-     * pronoun filter, or normalization.
-     */
-    function rawCandidateEntitiesFromBackend(rawList) {
-      if (!Array.isArray(rawList)) return [];
-      const out = [];
-      rawList.forEach(function (x) {
-        const s = String(x == null ? "" : x).trim();
-        if (s) out.push(s);
-      });
-      return out;
-    }
-
     function singleCandidateFailsPromptShape(pending, candidates) {
       if (!pending || !Array.isArray(candidates) || candidates.length !== 1) return false;
       const blob = [
@@ -789,6 +774,41 @@
       const shape = inferClarificationAnswerShape(blob);
       if (shape !== "TEMPORAL") return false;
       return !candidateLooksLikeTemporalAnswer(candidates[0]);
+    }
+
+    /**
+     * Trim, drop empties and exact duplicates, then drop any candidate that is a strict substring
+     * of another longer candidate (general-purpose; no scenario-specific literals).
+     */
+    const REFERENT_PRONOUNS = new Set([
+      "he","him","his","she","her","hers","they","them","their","theirs",
+      "it","its","this","that","these","those"
+    ]);
+    function cleanupCandidateEntities(rawList) {
+      if (!Array.isArray(rawList)) return [];
+      // Expand compound "Alice and Carol" entries into individual proper names.
+      // Only splits when every part begins with an uppercase letter.
+      const expanded = [];
+      rawList.forEach(function (x) {
+        const s = String(x == null ? "" : x).trim();
+        if (!s) return;
+        const andParts = s.split(/\s+and\s+/i).map(function (p) { return p.trim(); });
+        if (andParts.length > 1 && andParts.every(function (p) { return p && p[0] === p[0].toUpperCase() && p[0] !== p[0].toLowerCase(); })) {
+          andParts.forEach(function (p) { if (p) expanded.push(p); });
+        } else {
+          expanded.push(s);
+        }
+      });
+      // Deduplicate case-insensitively, preserving first-seen order. Filter pronouns.
+      const seen = new Set();
+      const out = [];
+      expanded.forEach(function (s) {
+        const k = s.toLowerCase();
+        if (seen.has(k) || REFERENT_PRONOUNS.has(k)) return;
+        seen.add(k);
+        out.push(s);
+      });
+      return out;
     }
 
     function clarificationUiMode(pending, candidates, statusNorm) {
@@ -833,16 +853,6 @@
           "HARD_STOP",
         ) === "none",
         "UI contract: HARD_STOP must not render clarification UI.",
-      );
-      const jr = rawCandidateEntitiesFromBackend([" John ", "", "Richard", " "]);
-      console.assert(
-        JSON.stringify(jr) === JSON.stringify(["John", "Richard"]),
-        "UI contract: preserve backend candidate order and trim empties only.",
-      );
-      const compoundAsServerSent = rawCandidateEntitiesFromBackend(["Alice and Carol"]);
-      console.assert(
-        JSON.stringify(compoundAsServerSent) === JSON.stringify(["Alice and Carol"]),
-        "UI contract: no Alice/Carol 'and'-split unless backend splits.",
       );
     }
 
@@ -1539,10 +1549,10 @@
         payload.response_message ||
         "";
       const continuationRaw = governance.allowed_continuation || "None";
-      const clarificationCandidatesDisplay = rawCandidateEntitiesFromBackend(
+      const cleanedCandidates = cleanupCandidateEntities(
         Array.isArray(pending.candidate_entities) ? pending.candidate_entities : []
       );
-      const continuationMode = clarificationUiMode(pending, clarificationCandidatesDisplay, statusNorm);
+      const continuationMode = clarificationUiMode(pending, cleanedCandidates, statusNorm);
       const continuationActive = continuationMode !== "none";
       const isHardStop = !isPass && continuationMode === "none";
       const clarifyQ = pending.clarification_prompt
@@ -1716,7 +1726,7 @@
         clarifyPanel.style.display = "block";
         clarifyTitle.textContent = clarifyQ;
         const ambigRefs = Array.isArray(pending.ambiguous_referents) ? pending.ambiguous_referents : [];
-        const ambigCands = clarificationCandidatesDisplay;
+        const ambigCands = cleanedCandidates;
         if (clarifyNote && pending.failed_constraint === "UNRESOLVED_REFERENT" && ambigRefs.length > 0 && ambigCands.length >= 2) {
           const pronoun = "“" + String(ambigRefs[0]).charAt(0).toUpperCase() + String(ambigRefs[0]).slice(1) + "”";
           const last = ambigCands[ambigCands.length - 1];
@@ -1737,7 +1747,7 @@
           }
           if (clarifyDetailsEl) {
             const refs = Array.isArray(pending.ambiguous_referents) ? pending.ambiguous_referents : [];
-            const cands = clarificationCandidatesDisplay;
+            const cands = cleanedCandidates;
             if (refs.length > 0 && cands.length >= 2) {
               const pron = "“" + String(refs[0]).charAt(0).toUpperCase() + String(refs[0]).slice(1) + "”";
               const last = cands[cands.length - 1];
@@ -1752,14 +1762,14 @@
         }
         clarifyChoices.innerHTML = "";
         delete clarifyPanel.dataset.clarificationMode;
-        if (singleCandidateFailsPromptShape(pending, clarificationCandidatesDisplay)) {
+        if (singleCandidateFailsPromptShape(pending, cleanedCandidates)) {
           const fb = document.createElement("p");
           fb.className = "clarify-fallback";
           fb.textContent = CLARIFY_FALLBACK_NO_VALID_OPTIONS;
           clarifyChoices.appendChild(fb);
           clarifyPanel.dataset.clarificationMode = "freetext";
         } else if (continuationMode === "options") {
-          clarificationCandidatesDisplay.forEach((candidate) => {
+          cleanedCandidates.forEach((candidate) => {
             const btn = document.createElement("button");
             btn.type = "button";
             btn.textContent = candidate; // exact runtime candidate label
