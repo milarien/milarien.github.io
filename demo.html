@@ -255,6 +255,28 @@
       margin-top: 12px;
     }
     .clarify h2 { margin: 0 0 8px; font-size: 21px; }
+    .clarify-body-main {
+      margin: 0 0 12px;
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--text);
+      white-space: pre-line;
+    }
+    .clarify-footer-bar {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font: 11px/1.35 ui-monospace, Consolas, monospace;
+      color: var(--muted);
+      word-break: break-all;
+      min-height: 0;
+    }
+    .clarify-footer-bar:empty {
+      display: none;
+      padding: 0;
+      margin: 0;
+      border: none;
+    }
     .choices { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 13px; }
     button {
       border: 1px solid #596879;
@@ -423,6 +445,8 @@
               <div class="label">Continuation panel</div>
               <h2 id="clarify-title">Clarification</h2>
               <div class="note" id="clarify-note">Aurora-Lens has held the turn. It will not release a resolved answer until this binding is supplied.</div>
+              <p class="clarify-body-main" id="clarify-body" aria-live="polite"></p>
+              <div class="clarify-footer-bar" id="clarify-footer" aria-hidden="true"></div>
               <div class="kv" id="clarify-constraint-info" style="margin:8px 0 10px;display:none;">
                 <div class="k">Failed constraint</div><div class="v" id="clarify-failed-constraint">—</div>
                 <div class="k">Reason</div><div class="v" id="clarify-reason">—</div>
@@ -930,7 +954,83 @@
     }
 
     const CLARIFY_FALLBACK_NO_VALID_OPTIONS =
-      "Clarification required, but no valid candidate options were returned.";
+      "Operator state did not yield discrete continuation choices.\nEnter your clarification in the request box, then run the admissibility check.";
+
+    function makePossessive(name) {
+      if (!name) return "";
+      const s = String(name);
+      return s.endsWith("s") ? s + "'" : s + "'s";
+    }
+
+    function referentChoiceLabels(pending) {
+      const candidates = Array.isArray(pending.candidate_entities) ? pending.candidate_entities : [];
+      const preview = String(pending.original_question || pending.original_question_preview || "").toLowerCase();
+      const sisterShape = preview.includes("sister");
+      if (sisterShape) {
+        return candidates.map(function (name) {
+          return makePossessive(String(name)) + " sister";
+        });
+      }
+      return candidates.map(function (name) {
+        return String(name);
+      });
+    }
+
+    function procedureClarificationUiCopy(pending, uiStage) {
+      const fc = String((pending || {}).failed_constraint || "");
+      const kind = String((pending || {}).state_native_ambiguity_kind || "");
+      if (uiStage === "freetext") {
+        return {
+          body:
+            "Continuation is paused until clarification is supplied.\n\n" +
+            "Enter your clarification in the request box, then run the admissibility check, or reset the scenario to start fresh.",
+          footer: fc || "",
+        };
+      }
+      if (kind === "inventory_holder_query_unresolved_item") {
+        return {
+          body:
+            "This request could refer to more than one committed holding.\n" +
+            "Select the intended item to continue.",
+          footer: fc || "",
+        };
+      }
+      if (fc === "UNRESOLVED_REFERENT") {
+        return {
+          body:
+            "This request could refer to more than one party.\n" +
+            "Select the intended referent to continue.",
+          footer: "UNRESOLVED_REFERENT",
+        };
+      }
+      if (fc === "UNRESOLVED_COMPARAND") {
+        return {
+          body:
+            "This request does not yet admit a single resolved comparison.\n" +
+            "Select the intended option to continue.",
+          footer: "UNRESOLVED_COMPARAND",
+        };
+      }
+      if (fc) {
+        return {
+          body:
+            "Continuation is paused until governed clarification completes.\n" +
+            "Select an option to continue.",
+          footer: fc,
+        };
+      }
+      return {
+        body:
+          "Continuation is paused until governed clarification completes.\n" +
+          "Select an option to continue.",
+        footer: "",
+      };
+    }
+
+    function applyClarifyFooter(el, footerText) {
+      const t = String(footerText || "").trim();
+      el.textContent = t;
+    }
 
     function singleCandidateFailsPromptShape(pending, candidates) {
       if (!pending || !Array.isArray(candidates) || candidates.length !== 1) return false;
@@ -944,56 +1044,27 @@
       return !candidateLooksLikeTemporalAnswer(candidates[0]);
     }
 
-    /**
-     * Trim, drop empties and exact duplicates, then drop any candidate that is a strict substring
-     * of another longer candidate (general-purpose; no scenario-specific literals).
-     */
-    const REFERENT_PRONOUNS = new Set([
-      "he","him","his","she","her","hers","they","them","their","theirs",
-      "it","its","this","that","these","those"
-    ]);
-    function cleanupCandidateEntities(rawList) {
+    /** Trim, drop empties, dedupe case-insensitively — match operator payloads (no client-side reordering). */
+    function rawCandidateEntitiesFromBackend(rawList) {
       if (!Array.isArray(rawList)) return [];
-      // Expand compound "Alice and Carol" entries into individual proper names.
-      // Only splits when every part begins with an uppercase letter.
-      const expanded = [];
+      const seen = new Set();
+      const out = [];
       rawList.forEach(function (x) {
         const s = String(x == null ? "" : x).trim();
         if (!s) return;
-        const andParts = s.split(/\s+and\s+/i).map(function (p) { return p.trim(); });
-        if (andParts.length > 1 && andParts.every(function (p) { return p && p[0] === p[0].toUpperCase() && p[0] !== p[0].toLowerCase(); })) {
-          andParts.forEach(function (p) { if (p) expanded.push(p); });
-        } else {
-          expanded.push(s);
-        }
-      });
-      // Deduplicate case-insensitively, preserving first-seen order. Filter pronouns.
-      const seen = new Set();
-      const out = [];
-      expanded.forEach(function (s) {
         const k = s.toLowerCase();
-        if (seen.has(k) || REFERENT_PRONOUNS.has(k)) return;
+        if (seen.has(k)) return;
         seen.add(k);
         out.push(s);
       });
       return out;
     }
 
-    function clarificationUiMode(pending, candidates, statusNorm) {
-      const activeContain = Boolean(
-        pending
-        && pending.active
-        && String(statusNorm || "").toUpperCase() === "CONTAIN"
-      );
-      const supportedConstraint = Boolean(
-        pending
-        && (
-          pending.failed_constraint === "UNRESOLVED_REFERENT"
-          || pending.failed_constraint === "DISJUNCTIVE_BRANCH_COLLAPSE"
-        )
-      );
-      if (!activeContain || !supportedConstraint) return "none";
-      if (Array.isArray(candidates) && candidates.length > 0) return "options";
+    function clarificationUiMode(pending, labels, statusNorm) {
+      const containmentStatus = String(statusNorm || "").toUpperCase() === "CONTAIN";
+      const activeContain = Boolean(pending && pending.active && containmentStatus);
+      if (!activeContain) return "none";
+      if (Array.isArray(labels) && labels.length > 0) return "options";
       return "freetext";
     }
 
@@ -1016,11 +1087,19 @@
       );
       console.assert(
         clarificationUiMode(
+          { active: true, failed_constraint: "AGENCY_RISK_CONTEXT_UNRESOLVED" },
+          [],
+          "CONTAIN",
+        ) === "freetext",
+        "UI contract: generic CONTAIN clarification must remain interactive.",
+      );
+      console.assert(
+        clarificationUiMode(
           { active: true, failed_constraint: "UNRESOLVED_REFERENT" },
           ["Emma", "Anna"],
           "HARD_STOP",
         ) === "none",
-        "UI contract: HARD_STOP must not render clarification UI.",
+        "UI contract: HARD_STOP/BLOCKED must not render clarification UI.",
       );
     }
 
@@ -1480,10 +1559,14 @@
       document.getElementById("clarify-choices").innerHTML = "";
       document.getElementById("clarify-freetext-wrap").style.display = "none";
       document.getElementById("clarify-freetext-input").value = "";
+      const _cb = document.getElementById("clarify-body");
+      if (_cb) _cb.textContent = "";
+      const _cf = document.getElementById("clarify-footer");
+      if (_cf) applyClarifyFooter(_cf, "");
       const _cp = document.getElementById("clarify-panel");
       if (_cp) delete _cp.dataset.clarificationMode;
-      const _cci = document.getElementById("clarify-constraint-info");
-      if (_cci) _cci.style.display = "none";
+      const _note = document.getElementById("clarify-note");
+      if (_note) _note.style.display = "";
       document.getElementById("clarification-supplied").style.display = "none";
       document.getElementById("clarification-result").style.display = "none";
 
@@ -1718,10 +1801,12 @@
         payload.response_message ||
         "";
       const continuationRaw = governance.allowed_continuation || "None";
-      const cleanedCandidates = cleanupCandidateEntities(
+      const rawEntities = rawCandidateEntitiesFromBackend(
         Array.isArray(pending.candidate_entities) ? pending.candidate_entities : []
       );
-      const continuationMode = clarificationUiMode(pending, cleanedCandidates, statusNorm);
+      const pendingForLabels = Object.assign({}, pending, { candidate_entities: rawEntities });
+      const choiceLabels = referentChoiceLabels(pendingForLabels);
+      const continuationMode = clarificationUiMode(pending, choiceLabels, statusNorm);
       const continuationActive = continuationMode !== "none";
       const isHardStop = !isPass && continuationMode === "none";
       const clarifyQ = pending.clarification_prompt
@@ -1889,6 +1974,8 @@
       const clarifyPanel = document.getElementById("clarify-panel");
       const clarifyTitle = document.getElementById("clarify-title");
       const clarifyNote = document.getElementById("clarify-note");
+      const clarifyBodyEl = document.getElementById("clarify-body");
+      const clarifyFooterEl = document.getElementById("clarify-footer");
       const clarifyChoices = document.getElementById("clarify-choices");
       const clarifyConstraintInfo = document.getElementById("clarify-constraint-info");
       const clarifyFailedConstraintEl = document.getElementById("clarify-failed-constraint");
@@ -1896,16 +1983,21 @@
       const clarifyDetailsEl = document.getElementById("clarify-details");
       if (continuationMode !== "none") {
         clarifyPanel.style.display = "block";
-        clarifyTitle.textContent = clarifyQ;
-        const ambigRefs = Array.isArray(pending.ambiguous_referents) ? pending.ambiguous_referents : [];
-        const ambigCands = cleanedCandidates;
-        if (clarifyNote && pending.failed_constraint === "UNRESOLVED_REFERENT" && ambigRefs.length > 0 && ambigCands.length >= 2) {
-          const pronoun = "“" + String(ambigRefs[0]).charAt(0).toUpperCase() + String(ambigRefs[0]).slice(1) + "”";
-          const last = ambigCands[ambigCands.length - 1];
-          const rest = ambigCands.slice(0, -1).join(", ");
-          clarifyNote.textContent = pronoun + " could refer to " + rest + " or " + last + ". Select the correct referent to continue.";
-        } else if (clarifyNote) {
-          clarifyNote.textContent = "Aurora-Lens has held the turn. It will not release a resolved answer until this binding is supplied.";
+        clarifyTitle.textContent = "Clarification required";
+        if (clarifyNote) {
+          clarifyNote.style.display = "none";
+        }
+        if (singleCandidateFailsPromptShape(pending, choiceLabels)) {
+          const proc = procedureClarificationUiCopy(pending, "freetext");
+          if (clarifyBodyEl) {
+            clarifyBodyEl.textContent = proc.body + "\n\n" + CLARIFY_FALLBACK_NO_VALID_OPTIONS;
+          }
+          if (clarifyFooterEl) applyClarifyFooter(clarifyFooterEl, proc.footer);
+        } else {
+          const uiStage = continuationMode === "options" ? "options" : "freetext";
+          const proc = procedureClarificationUiCopy(pending, uiStage);
+          if (clarifyBodyEl) clarifyBodyEl.textContent = proc.body;
+          if (clarifyFooterEl) applyClarifyFooter(clarifyFooterEl, proc.footer);
         }
         if (clarifyConstraintInfo && pending.failed_constraint) {
           clarifyConstraintInfo.style.display = "";
@@ -1919,7 +2011,7 @@
           }
           if (clarifyDetailsEl) {
             const refs = Array.isArray(pending.ambiguous_referents) ? pending.ambiguous_referents : [];
-            const cands = cleanedCandidates;
+            const cands = choiceLabels;
             if (refs.length > 0 && cands.length >= 2) {
               const pron = "“" + String(refs[0]).charAt(0).toUpperCase() + String(refs[0]).slice(1) + "”";
               const last = cands[cands.length - 1];
@@ -1934,17 +2026,13 @@
         }
         clarifyChoices.innerHTML = "";
         delete clarifyPanel.dataset.clarificationMode;
-        if (singleCandidateFailsPromptShape(pending, cleanedCandidates)) {
-          const fb = document.createElement("p");
-          fb.className = "clarify-fallback";
-          fb.textContent = CLARIFY_FALLBACK_NO_VALID_OPTIONS;
-          clarifyChoices.appendChild(fb);
+        if (singleCandidateFailsPromptShape(pending, choiceLabels)) {
           clarifyPanel.dataset.clarificationMode = "freetext";
         } else if (continuationMode === "options") {
-          cleanedCandidates.forEach((candidate) => {
+          choiceLabels.forEach((candidate) => {
             const btn = document.createElement("button");
             btn.type = "button";
-            btn.textContent = candidate; // exact runtime candidate label
+            btn.textContent = candidate;
             btn.addEventListener("click", async () => {
               try {
                 await runTurn(candidate, {
@@ -1970,6 +2058,9 @@
         clarifyChoices.innerHTML = "";
         delete clarifyPanel.dataset.clarificationMode;
         if (clarifyConstraintInfo) clarifyConstraintInfo.style.display = "none";
+        if (clarifyNote) clarifyNote.style.display = "";
+        if (clarifyBodyEl) clarifyBodyEl.textContent = "";
+        if (clarifyFooterEl) applyClarifyFooter(clarifyFooterEl, "");
       }
 
       const freetextWrap = document.getElementById("clarify-freetext-wrap");
