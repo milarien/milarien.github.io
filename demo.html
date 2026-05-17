@@ -1001,14 +1001,18 @@
       const p = pending || {};
       const fc = String(p.failed_constraint || "");
       const kind = String(p.state_native_ambiguity_kind || "");
-      const orig = String(p.original_question || "").toLowerCase();
       const bc = Array.isArray(p.blocked_claims) && p.blocked_claims[0] ? p.blocked_claims[0] : null;
-      const blocLine = formatBlockedClaimLine(bc).toLowerCase();
-      if (
-        fc === "UNRESOLVED_REFERENT"
-        && (orig.includes("sister") || blocLine.includes("sister"))
-      ) {
-        return "Select the possessor whose sister is being referenced.";
+      const subjRaw = bc ? String(bc.subject || "").trim() : "";
+      const sisterPossessive =
+        /\bsister\b/i.test(subjRaw)
+        && (/^(her|his|their|its)\s+/i.test(subjRaw) || /\b\w+'s\s+sister\b/i.test(subjRaw));
+      if (fc === "UNRESOLVED_REFERENT" && sisterPossessive) {
+        return "Select whose sister is being referenced.";
+      }
+      if (fc === "UNRESOLVED_REFERENT" && subjRaw) {
+        const useWho = /^(she|he|they|we|i|you)\b/i.test(subjRaw);
+        const qw = useWho ? "who" : "what";
+        return "Select " + qw + ' "' + subjRaw + '" refers to.';
       }
       if (kind === "inventory_holder_query_unresolved_item") {
         return "Select the intended item to continue.";
@@ -1017,7 +1021,7 @@
         return "Select the intended comparison target to continue.";
       }
       if (fc === "UNRESOLVED_REFERENT") {
-        return "Select the intended referent to continue.";
+        return "Select a referent to continue.";
       }
       const uiStage = continuationMode === "options" ? "options" : "freetext";
       const proc = procedureClarificationUiCopy(p, uiStage);
@@ -1045,10 +1049,26 @@
         };
       }
       if (fc === "UNRESOLVED_REFERENT") {
+        const blockedList = Array.isArray(pending.blocked_claims) ? pending.blocked_claims : [];
+        const firstSubj =
+          blockedList[0] && String(blockedList[0].subject || "").trim()
+            ? String(blockedList[0].subject).trim()
+            : "";
+        const sisterPossessive =
+          /\bsister\b/i.test(firstSubj)
+          && (/^(her|his|their|its)\s+/i.test(firstSubj) || /\b\w+'s\s+sister\b/i.test(firstSubj));
+        let line = "Select a referent to continue.";
+        if (firstSubj && sisterPossessive) {
+          line = "Select whose sister is being referenced.";
+        } else if (firstSubj) {
+          const useWho = /^(she|he|they|we|i|you)\b/i.test(firstSubj);
+          const qw = useWho ? "who" : "what";
+          line = "Select " + qw + ' "' + firstSubj + '" refers to.';
+        }
         return {
           body:
             "This request could refer to more than one party.\n" +
-            "Select the intended referent to continue.",
+            line,
           footer: "UNRESOLVED_REFERENT",
         };
       }
