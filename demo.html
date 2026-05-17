@@ -254,28 +254,32 @@
       padding: 16px;
       margin-top: 12px;
     }
-    .clarify h2 { margin: 0 0 8px; font-size: 21px; }
-    .clarify-body-main {
-      margin: 0 0 12px;
+    .clarify h2 { margin: 0 0 12px; font-size: 21px; }
+    .continuation-fields {
+      display: grid;
+      gap: 10px;
       font-size: 14px;
-      line-height: 1.55;
+      line-height: 1.5;
       color: var(--text);
-      white-space: pre-line;
+      margin-bottom: 4px;
     }
-    .clarify-footer-bar {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid var(--border);
-      font: 11px/1.35 ui-monospace, Consolas, monospace;
+    .continuation-row {
+      display: grid;
+      grid-template-columns: 168px minmax(0, 1fr);
+      gap: 8px 12px;
+      align-items: start;
+    }
+    .continuation-k {
       color: var(--muted);
-      word-break: break-all;
-      min-height: 0;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
-    .clarify-footer-bar:empty {
-      display: none;
-      padding: 0;
-      margin: 0;
-      border: none;
+    .continuation-v {
+      font-weight: 650;
+      overflow-wrap: anywhere;
+      white-space: pre-line;
     }
     .choices { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 13px; }
     button {
@@ -443,14 +447,28 @@
             </div>
             <div class="clarify" id="clarify-panel" style="display:none;">
               <div class="label">Continuation panel</div>
-              <h2 id="clarify-title">Clarification</h2>
-              <div class="note" id="clarify-note">Aurora-Lens has held the turn. It will not release a resolved answer until this binding is supplied.</div>
-              <p class="clarify-body-main" id="clarify-body" aria-live="polite"></p>
-              <div class="clarify-footer-bar" id="clarify-footer" aria-hidden="true"></div>
-              <div class="kv" id="clarify-constraint-info" style="margin:8px 0 10px;display:none;">
-                <div class="k">Failed constraint</div><div class="v" id="clarify-failed-constraint">—</div>
-                <div class="k">Reason</div><div class="v" id="clarify-reason">—</div>
-                <div class="k">Details</div><div class="v" id="clarify-details">—</div>
+              <h2 id="clarify-title">Continuation required</h2>
+              <div class="continuation-fields" id="clarify-continuation-fields">
+                <div class="continuation-row">
+                  <span class="continuation-k">Resolve referent</span>
+                  <span class="continuation-v" id="clarify-resolve-referent">—</span>
+                </div>
+                <div class="continuation-row">
+                  <span class="continuation-k">Blocked claim</span>
+                  <span class="continuation-v" id="clarify-blocked-claim">—</span>
+                </div>
+                <div class="continuation-row">
+                  <span class="continuation-k">Candidates</span>
+                  <span class="continuation-v" id="clarify-candidates-line">—</span>
+                </div>
+                <div class="continuation-row">
+                  <span class="continuation-k">Constraint</span>
+                  <span class="continuation-v" id="clarify-constraint-code">—</span>
+                </div>
+                <div class="continuation-row">
+                  <span class="continuation-k">Allowed continuation</span>
+                  <span class="continuation-v" id="clarify-allowed-continuation">—</span>
+                </div>
               </div>
               <div class="choices" id="clarify-choices">
               </div>
@@ -956,24 +974,55 @@
     const CLARIFY_FALLBACK_NO_VALID_OPTIONS =
       "Operator state did not yield discrete continuation choices.\nEnter your clarification in the request box, then run the admissibility check.";
 
-    function makePossessive(name) {
-      if (!name) return "";
-      const s = String(name);
-      return s.endsWith("s") ? s + "'" : s + "'s";
+    function formatBlockedClaimLine(cd) {
+      if (!cd || typeof cd !== "object") return "";
+      const subj = String(cd.subject || "").trim();
+      const rel = String(cd.relation || "").trim().toUpperCase();
+      const obj = String(cd.obj || "").trim();
+      const parts = [];
+      if (subj) parts.push(subj);
+      if (rel) parts.push(rel);
+      if (obj) parts.push(obj);
+      return parts.join(" ");
     }
 
-    function referentChoiceLabels(pending) {
-      const candidates = Array.isArray(pending.candidate_entities) ? pending.candidate_entities : [];
-      const preview = String(pending.original_question || pending.original_question_preview || "").toLowerCase();
-      const sisterShape = preview.includes("sister");
-      if (sisterShape) {
-        return candidates.map(function (name) {
-          return makePossessive(String(name)) + " sister";
-        });
+    function resolveReferentDisplay(pending) {
+      const blockedList = Array.isArray(pending.blocked_claims) ? pending.blocked_claims : [];
+      const first = blockedList[0];
+      if (first && String(first.subject || "").trim()) {
+        return String(first.subject).trim();
       }
-      return candidates.map(function (name) {
-        return String(name);
-      });
+      const refs = Array.isArray(pending.ambiguous_referents) ? pending.ambiguous_referents : [];
+      if (refs.length === 1) return String(refs[0]).trim();
+      return "—";
+    }
+
+    function allowedContinuationCopy(pending, continuationMode) {
+      const p = pending || {};
+      const fc = String(p.failed_constraint || "");
+      const kind = String(p.state_native_ambiguity_kind || "");
+      const orig = String(p.original_question || "").toLowerCase();
+      const bc = Array.isArray(p.blocked_claims) && p.blocked_claims[0] ? p.blocked_claims[0] : null;
+      const blocLine = formatBlockedClaimLine(bc).toLowerCase();
+      if (
+        fc === "UNRESOLVED_REFERENT"
+        && (orig.includes("sister") || blocLine.includes("sister"))
+      ) {
+        return "Select the possessor whose sister is being referenced.";
+      }
+      if (kind === "inventory_holder_query_unresolved_item") {
+        return "Select the intended item to continue.";
+      }
+      if (fc === "UNRESOLVED_COMPARAND") {
+        return "Select the intended comparison target to continue.";
+      }
+      if (fc === "UNRESOLVED_REFERENT") {
+        return "Select the intended referent to continue.";
+      }
+      const uiStage = continuationMode === "options" ? "options" : "freetext";
+      const proc = procedureClarificationUiCopy(p, uiStage);
+      const firstPara = String(proc.body || "").split("\n\n")[0].trim();
+      return firstPara || "Select an option to continue.";
     }
 
     function procedureClarificationUiCopy(pending, uiStage) {
@@ -1027,9 +1076,25 @@
       };
     }
 
-    function applyClarifyFooter(el, footerText) {
-      const t = String(footerText || "").trim();
-      el.textContent = t;
+    function populateContinuationPanelFields(pending, rawEntities, continuationMode) {
+      const bc = Array.isArray(pending.blocked_claims) && pending.blocked_claims[0] ? pending.blocked_claims[0] : null;
+      const blockedLine = formatBlockedClaimLine(bc);
+      document.getElementById("clarify-resolve-referent").textContent =
+        resolveReferentDisplay(pending) || "—";
+      document.getElementById("clarify-blocked-claim").textContent = blockedLine || "—";
+      document.getElementById("clarify-candidates-line").textContent =
+        rawEntities.length ? rawEntities.join(" · ") : "—";
+      document.getElementById("clarify-constraint-code").textContent =
+        pending.failed_constraint ? String(pending.failed_constraint) : "—";
+      document.getElementById("clarify-allowed-continuation").textContent =
+        allowedContinuationCopy(pending, continuationMode);
+    }
+
+    function clearContinuationPanelFields() {
+      ["clarify-resolve-referent", "clarify-blocked-claim", "clarify-candidates-line", "clarify-constraint-code", "clarify-allowed-continuation"].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = "—";
+      });
     }
 
     function singleCandidateFailsPromptShape(pending, candidates) {
@@ -1540,8 +1605,6 @@
       document.getElementById("gov-original-response").textContent = "—";
       document.getElementById("gov-attempted-action").textContent = "—";
       document.getElementById("gov-decision-path").textContent = "—";
-      const _ci = document.getElementById("clarify-constraint-info");
-      if (_ci) _ci.style.display = "none";
       document.getElementById("gov-continuation").textContent = "None";
       applyPefAdmissionBlock(null);
       setAdjudicationLlmPill(undefined, undefined);
@@ -1559,14 +1622,9 @@
       document.getElementById("clarify-choices").innerHTML = "";
       document.getElementById("clarify-freetext-wrap").style.display = "none";
       document.getElementById("clarify-freetext-input").value = "";
-      const _cb = document.getElementById("clarify-body");
-      if (_cb) _cb.textContent = "";
-      const _cf = document.getElementById("clarify-footer");
-      if (_cf) applyClarifyFooter(_cf, "");
+      clearContinuationPanelFields();
       const _cp = document.getElementById("clarify-panel");
       if (_cp) delete _cp.dataset.clarificationMode;
-      const _note = document.getElementById("clarify-note");
-      if (_note) _note.style.display = "";
       document.getElementById("clarification-supplied").style.display = "none";
       document.getElementById("clarification-result").style.display = "none";
 
@@ -1804,9 +1862,7 @@
       const rawEntities = rawCandidateEntitiesFromBackend(
         Array.isArray(pending.candidate_entities) ? pending.candidate_entities : []
       );
-      const pendingForLabels = Object.assign({}, pending, { candidate_entities: rawEntities });
-      const choiceLabels = referentChoiceLabels(pendingForLabels);
-      const continuationMode = clarificationUiMode(pending, choiceLabels, statusNorm);
+      const continuationMode = clarificationUiMode(pending, rawEntities, statusNorm);
       const continuationActive = continuationMode !== "none";
       const isHardStop = !isPass && continuationMode === "none";
       const clarifyQ = pending.clarification_prompt
@@ -1973,63 +2029,23 @@
 
       const clarifyPanel = document.getElementById("clarify-panel");
       const clarifyTitle = document.getElementById("clarify-title");
-      const clarifyNote = document.getElementById("clarify-note");
-      const clarifyBodyEl = document.getElementById("clarify-body");
-      const clarifyFooterEl = document.getElementById("clarify-footer");
       const clarifyChoices = document.getElementById("clarify-choices");
-      const clarifyConstraintInfo = document.getElementById("clarify-constraint-info");
-      const clarifyFailedConstraintEl = document.getElementById("clarify-failed-constraint");
-      const clarifyReasonEl = document.getElementById("clarify-reason");
-      const clarifyDetailsEl = document.getElementById("clarify-details");
       if (continuationMode !== "none") {
         clarifyPanel.style.display = "block";
-        clarifyTitle.textContent = "Clarification required";
-        if (clarifyNote) {
-          clarifyNote.style.display = "none";
-        }
-        if (singleCandidateFailsPromptShape(pending, choiceLabels)) {
-          const proc = procedureClarificationUiCopy(pending, "freetext");
-          if (clarifyBodyEl) {
-            clarifyBodyEl.textContent = proc.body + "\n\n" + CLARIFY_FALLBACK_NO_VALID_OPTIONS;
+        clarifyTitle.textContent = "Continuation required";
+        populateContinuationPanelFields(pending, rawEntities, continuationMode);
+        if (singleCandidateFailsPromptShape(pending, rawEntities)) {
+          const acEl = document.getElementById("clarify-allowed-continuation");
+          if (acEl) {
+            acEl.textContent = acEl.textContent + "\n\n" + CLARIFY_FALLBACK_NO_VALID_OPTIONS;
           }
-          if (clarifyFooterEl) applyClarifyFooter(clarifyFooterEl, proc.footer);
-        } else {
-          const uiStage = continuationMode === "options" ? "options" : "freetext";
-          const proc = procedureClarificationUiCopy(pending, uiStage);
-          if (clarifyBodyEl) clarifyBodyEl.textContent = proc.body;
-          if (clarifyFooterEl) applyClarifyFooter(clarifyFooterEl, proc.footer);
-        }
-        if (clarifyConstraintInfo && pending.failed_constraint) {
-          clarifyConstraintInfo.style.display = "";
-          if (clarifyFailedConstraintEl) clarifyFailedConstraintEl.textContent = String(pending.failed_constraint);
-          if (clarifyReasonEl) {
-            clarifyReasonEl.textContent = pending.failed_constraint === "UNRESOLVED_REFERENT"
-              ? "ambiguous pronoun"
-              : pending.failed_constraint === "DISJUNCTIVE_BRANCH_COLLAPSE"
-                ? "contradictory premises"
-                : "—";
-          }
-          if (clarifyDetailsEl) {
-            const refs = Array.isArray(pending.ambiguous_referents) ? pending.ambiguous_referents : [];
-            const cands = choiceLabels;
-            if (refs.length > 0 && cands.length >= 2) {
-              const pron = "“" + String(refs[0]).charAt(0).toUpperCase() + String(refs[0]).slice(1) + "”";
-              const last = cands[cands.length - 1];
-              const rest = cands.slice(0, -1).join(", ");
-              clarifyDetailsEl.textContent = pron + " could refer to " + rest + " or " + last;
-            } else {
-              clarifyDetailsEl.textContent = "—";
-            }
-          }
-        } else if (clarifyConstraintInfo) {
-          clarifyConstraintInfo.style.display = "none";
         }
         clarifyChoices.innerHTML = "";
         delete clarifyPanel.dataset.clarificationMode;
-        if (singleCandidateFailsPromptShape(pending, choiceLabels)) {
+        if (singleCandidateFailsPromptShape(pending, rawEntities)) {
           clarifyPanel.dataset.clarificationMode = "freetext";
         } else if (continuationMode === "options") {
-          choiceLabels.forEach((candidate) => {
+          rawEntities.forEach((candidate) => {
             const btn = document.createElement("button");
             btn.type = "button";
             btn.textContent = candidate;
@@ -2057,10 +2073,7 @@
         clarifyPanel.style.display = "none";
         clarifyChoices.innerHTML = "";
         delete clarifyPanel.dataset.clarificationMode;
-        if (clarifyConstraintInfo) clarifyConstraintInfo.style.display = "none";
-        if (clarifyNote) clarifyNote.style.display = "";
-        if (clarifyBodyEl) clarifyBodyEl.textContent = "";
-        if (clarifyFooterEl) applyClarifyFooter(clarifyFooterEl, "");
+        clearContinuationPanelFields();
       }
 
       const freetextWrap = document.getElementById("clarify-freetext-wrap");
