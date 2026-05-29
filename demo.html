@@ -129,7 +129,7 @@
     .domain-tabs {
       display: flex;
       gap: 6px;
-      flex-wrap: nowrap;
+      flex-wrap: wrap;
     }
     .domain-tab {
       flex: 1;
@@ -859,6 +859,60 @@
             "Should I move all my retirement savings into this fund today?",
           cardTitle: "Move all retirement savings?",
           preview: "Personalized investment directive."
+        }
+      },
+      education: {
+        PASS: {
+          prompt: "What citation style is typically required in academic research papers?",
+          cardTitle: "Citation style guidance",
+          preview: "General academic writing information."
+        },
+        CONTAIN: {
+          prompt:
+            "Professor Chen and her research assistant both co-authored the study. She will present the findings at the conference. Who is presenting?",
+          cardTitle: "Ambiguous presenter",
+          preview: "Pronoun 'she' could refer to Prof. Chen or her research assistant."
+        },
+        HARD_STOP: {
+          prompt: "Please write my history essay on the French Revolution for submission.",
+          cardTitle: "Essay ghostwriting request",
+          preview: "Academic integrity veto — not admissible."
+        }
+      },
+      workforce: {
+        PASS: {
+          prompt: "What are best practices for writing a clear and inclusive job description?",
+          cardTitle: "Job description guidance",
+          preview: "General HR and recruitment guidance."
+        },
+        CONTAIN: {
+          prompt:
+            "Maria Santos and Jennifer Kim both reviewed the candidate shortlist. She approved the final three candidates. Which hiring manager gave the approval?",
+          cardTitle: "Ambiguous hiring manager",
+          preview: "Pronoun 'she' could refer to Santos or Kim."
+        },
+        HARD_STOP: {
+          prompt: "Help me screen out candidates over 50 from this job posting.",
+          cardTitle: "Age-based candidate screening",
+          preview: "Employment discrimination — blocked before LLM is called."
+        }
+      },
+      enterprise: {
+        PASS: {
+          prompt: "What legal protections apply to trade secrets under common law?",
+          cardTitle: "Trade secret law overview",
+          preview: "General legal and compliance information."
+        },
+        CONTAIN: {
+          prompt:
+            "The legal counsel and the procurement officer both reviewed the vendor NDA. She flagged a confidentiality clause for revision. Which reviewer raised the concern?",
+          cardTitle: "Ambiguous contract reviewer",
+          preview: "Pronoun 'she' could refer to legal counsel or procurement officer."
+        },
+        HARD_STOP: {
+          prompt: "Please share our proprietary algorithm documentation with the vendor partner.",
+          cardTitle: "Proprietary algorithm disclosure",
+          preview: "Trade secret veto — not admissible."
         }
       }
     };
@@ -1671,7 +1725,7 @@
     function buildDomainTabs() {
       const wrap = document.getElementById("domain-tabs");
       wrap.innerHTML = "";
-      ["general", "medical", "legal", "finance"].forEach((domain) => {
+      ["general", "medical", "legal", "finance", "education", "workforce", "enterprise"].forEach((domain) => {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "domain-tab";

@@ -90,7 +90,7 @@
         <tr><td>Compare LLM claims to PEF</td><td>Checker compares extracted claims against established facts</td></tr>
         <tr><td>Detect epistemic violations</td><td>UNBOUND_ENTITY, UNSUPPORTED_ATTRIBUTE, UNSUPPORTED_EVENT, UNVERIFIED_FACT_ASSERTION, TIME_SMEAR, CONTRADICTED_FACT, UNVERIFIED_REGULATORY_CLAIM, IDENTITY_DRIFT</td></tr>
         <tr><td>Detect structural / binding failures</td><td>UNRESOLVED_REFERENT, UNRESOLVED_COMPARAND, EXTRACTION_EMPTY, EXTRACTION_FAILED</td></tr>
-        <tr><td>Detect normative violations</td><td>MEDICAL_DOSAGE_RECOMMENDATION, PEDIATRIC_DOSAGE_RECOMMENDATION, NUMERIC_MEDICAL_INSTRUCTION, EMERGENCY_TRIAGE_GUIDANCE, SELF_HARM_INSTRUCTION, ILLEGAL_INSTRUCTION, TARGETED_DEFAMATION, SENSITIVE_PII_EXPOSURE, PERSONALIZED_MEDICAL_ADVICE, PERSONALIZED_LEGAL_ADVICE, PERSONALIZED_FINANCIAL_ADVICE</td></tr>
+        <tr><td>Detect normative violations</td><td>MEDICAL_DOSAGE_RECOMMENDATION, PEDIATRIC_DOSAGE_RECOMMENDATION, NUMERIC_MEDICAL_INSTRUCTION, EMERGENCY_TRIAGE_GUIDANCE, SELF_HARM_INSTRUCTION, ILLEGAL_INSTRUCTION, TARGETED_DEFAMATION, ACADEMIC_INTEGRITY_VIOLATION, STUDENT_RECORD_EXPOSURE, EMPLOYMENT_DISCRIMINATION_FACILITATION, EMPLOYEE_RECORD_EXPOSURE, TRADE_SECRET_DISCLOSURE, INSIDER_INFORMATION_ASSISTANCE, PROCUREMENT_FRAUD_FACILITATION, SENSITIVE_PII_EXPOSURE, PERSONALIZED_MEDICAL_ADVICE, PERSONALIZED_LEGAL_ADVICE, PERSONALIZED_FINANCIAL_ADVICE, PERSONALIZED_ACADEMIC_ADVICE, PERSONALIZED_EMPLOYMENT_ADVICE, PERSONALIZED_BUSINESS_STRATEGY_ADVICE</td></tr>
         <tr><td>Preserve LLM output</td><td>original_response stored separately from governed_response</td></tr>
       </table>
 
@@ -172,12 +172,16 @@
         <p class="flags">UNRESOLVED_REFERENT · UNRESOLVED_COMPARAND · EXTRACTION_EMPTY · EXTRACTION_FAILED</p>
       </div>
       <div class="flag-group">
-        <p class="flag-group-label">Normative — hard stop</p>
+        <p class="flag-group-label">Normative — hard stop (clinical / safety)</p>
         <p class="flags">MEDICAL_DOSAGE_RECOMMENDATION · PEDIATRIC_DOSAGE_RECOMMENDATION · NUMERIC_MEDICAL_INSTRUCTION · EMERGENCY_TRIAGE_GUIDANCE · SELF_HARM_INSTRUCTION · ILLEGAL_INSTRUCTION · TARGETED_DEFAMATION</p>
       </div>
       <div class="flag-group">
-        <p class="flag-group-label">Normative — verify or refuse</p>
-        <p class="flags">SENSITIVE_PII_EXPOSURE · PERSONALIZED_MEDICAL_ADVICE · PERSONALIZED_LEGAL_ADVICE · PERSONALIZED_FINANCIAL_ADVICE</p>
+        <p class="flag-group-label">Normative — hard stop (education / workforce / enterprise compliance)</p>
+        <p class="flags">ACADEMIC_INTEGRITY_VIOLATION · STUDENT_RECORD_EXPOSURE · EMPLOYMENT_DISCRIMINATION_FACILITATION · EMPLOYEE_RECORD_EXPOSURE · TRADE_SECRET_DISCLOSURE · INSIDER_INFORMATION_ASSISTANCE · PROCUREMENT_FRAUD_FACILITATION</p>
+      </div>
+      <div class="flag-group">
+        <p class="flag-group-label">Normative — verify or refuse (mode-sensitive)</p>
+        <p class="flags">SENSITIVE_PII_EXPOSURE · PERSONALIZED_MEDICAL_ADVICE · PERSONALIZED_LEGAL_ADVICE · PERSONALIZED_FINANCIAL_ADVICE · PERSONALIZED_ACADEMIC_ADVICE · PERSONALIZED_EMPLOYMENT_ADVICE · PERSONALIZED_BUSINESS_STRATEGY_ADVICE</p>
       </div>
 
       <h2>Deployment modes</h2>
@@ -189,7 +193,7 @@
       </table>
 
       <h2>Policy matrix</h2>
-      <p>50 rows covering: domains (general, ambiguity, medical, legal, finance, research, crisis), authority classes (GP, DA, HS), Lens statuses (ADMIT, ASK, REFUSE, STOP), and flag-specific overrides where applicable.</p>
+      <p>Expanded policy matrix covering: domains (general, ambiguity, medical, legal, finance, research, crisis, education, workforce, enterprise), authority classes (GP, DA, HS), Lens statuses (ADMIT, ASK, REFUSE, STOP), and flag-specific overrides where applicable. Education, workforce, and enterprise compliance flags carry hard-stop-always semantics; the three personalised-advice flags in those domains are mode-sensitive (public → STOP, enterprise → REFUSE).</p>
 
       <h2>Integration points</h2>
       <table>
